@@ -16,8 +16,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Install dependencies
-        run: npm ci --workspaces=false && npm --workspace server ci
+      - name: Install dependencies (root + workspaces)
+        run: npm ci
       - name: Typecheck (server)
         run: npm --workspace server run typecheck
       - name: Lint (server)
