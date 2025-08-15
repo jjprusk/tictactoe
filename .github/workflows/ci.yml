@@ -18,9 +18,9 @@ jobs:
           node-version: '20'
       - name: Install dependencies (root + workspaces)
         run: |
-          npm ci
+          npm ci --ignore-scripts
           # Ensure server workspace has node_modules if npm workspaces were skipped by platform
-          npm --workspace server install --no-audit --no-fund
+          npm --workspace server install --no-audit --no-fund --ignore-scripts
       - name: Typecheck (server)
         run: npm --workspace server run typecheck
       - name: Lint (server)
