@@ -23,6 +23,7 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - Minimal comments; only where logic is non-obvious; explain the “why”
 - Consistent formatting (ESLint/Prettier); TypeScript strict mode
 - Avoid deep nesting; use guard clauses; meaningful error handling
+- Add a file header to all newly created code files containing: "© 2025 Joe Pruskowski"
 
 ## Per‑Milestone Housekeeping
 - Mark completed steps in this plan after tests pass and approval
@@ -47,9 +48,9 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S014: Implement environment loader with schema validation
 - [x] S015: Create CI workflow file `.github/workflows/ci.yml`
 - [x] S016: Add lint and typecheck jobs to CI
-- [ ] S017: Push dummy commit to verify CI runs
-- [ ] S018: Add PR template `.github/pull_request_template.md`
-- [ ] S019: Add `CODEOWNERS` file
+- [x] S017: Push dummy commit to verify CI runs
+- [x] S018: Add PR template `.github/pull_request_template.md`
+- [x] S019: Add `CODEOWNERS` file
 - [ ] S020: Install and configure commitlint and husky (Conventional Commits)
 - [ ] S021: Configure branch protections and required status checks on `main`
 - [ ] S022: Create `server/package.json`
