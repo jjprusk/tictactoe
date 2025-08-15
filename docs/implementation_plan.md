@@ -45,7 +45,7 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S012: Create `.env.example` listing required environment variables
 - [x] S013: Install and configure environment validation (zod)
 - [x] S014: Implement environment loader with schema validation
-- [ ] S015: Create CI workflow file `.github/workflows/ci.yml`
+- [x] S015: Create CI workflow file `.github/workflows/ci.yml`
 - [ ] S016: Add lint and typecheck jobs to CI
 - [ ] S017: Push dummy commit to verify CI runs
 - [ ] S018: Add PR template `.github/pull_request_template.md`
