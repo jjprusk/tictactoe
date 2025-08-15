@@ -34,7 +34,7 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S001: Create repository structure with `server/`, `client/`, and `docs/` directories
 - [x] S002: Add root package.json (or monorepo tooling if chosen)
 - [x] S003: Initialize Git repository
-- [ ] S004: Create `.gitignore` with standard exclusions
+- [x] S004: Create `.gitignore` with standard exclusions
 - [ ] S005: Add `.editorconfig` for consistent formatting
 - [ ] S006: Add LICENSE file (e.g., MIT)
 - [ ] S007: Create `README.md` with overview and setup instructions
