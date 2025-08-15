@@ -9,7 +9,7 @@ A web-based TicTacToe game with a backend-only neural AI that learns from gamepl
 
 ## Getting Started
 1) Prerequisites
-- Node.js v20+
+- Node.js v20+ (we use npm with workspaces)
 - Git
 
 2) Clone

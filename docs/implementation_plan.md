@@ -40,7 +40,7 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S007: Create `README.md` with overview and setup instructions
 - [x] S008: Specify Node.js engines (>=20) in package.json
 - [x] S009: Choose package manager (npm) and commit lockfile
-- [ ] S010: Document dependency pinning policy in `README.md`
+- [x] S010: Document dependency pinning policy in `README.md`
 - [ ] S011: Create `docs/notes.md`
 - [ ] S012: Create `.env.example` listing required environment variables
 - [ ] S013: Install and configure environment validation (zod)
