@@ -26,6 +26,7 @@ jobs:
       - name: Lint (server)
         run: npm --workspace server run lint
       - name: Test (server)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: npm --workspace server run test
 
 

@@ -12,7 +12,10 @@
   "scripts": {
     "start:server": "npm --workspace server run dev",
     "start:client": "npm --workspace client run dev",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test": "npm --workspace server run test",
+    "test:watch": "npm --workspace server run test:watch",
+    "test:cov": "npm --workspace server run test:cov"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
