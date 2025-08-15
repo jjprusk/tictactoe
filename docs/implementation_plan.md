@@ -38,7 +38,7 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S005: Add `.editorconfig` for consistent formatting
 - [x] S006: Add LICENSE file (e.g., MIT)
 - [x] S007: Create `README.md` with overview and setup instructions
-- [ ] S008: Specify Node.js engines (>=20) in package.json
+- [x] S008: Specify Node.js engines (>=20) in package.json
 - [ ] S009: Choose package manager (npm or yarn) and commit lockfile
 - [ ] S010: Document dependency pinning policy in `README.md`
 - [ ] S011: Create `docs/notes.md`
