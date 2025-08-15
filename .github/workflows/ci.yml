@@ -7,7 +7,7 @@ on:
 
 jobs:
   setup:
-    name: CI skeleton
+    name: Lint and Typecheck
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -16,10 +16,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Verify workspaces
-        run: |
-          node -v
-          npm -v
-          echo "CI skeleton in place. Lint/typecheck steps will be added in S016."
+      - name: Install dependencies
+        run: npm ci --workspaces=false && npm --workspace server ci
+      - name: Typecheck (server)
+        run: npm --workspace server run typecheck
+      - name: Lint (server)
+        run: npm --workspace server run lint
 
 
