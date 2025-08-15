@@ -42,7 +42,7 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S009: Choose package manager (npm) and commit lockfile
 - [x] S010: Document dependency pinning policy in `README.md`
 - [x] S011: Create `docs/notes.md`
-- [ ] S012: Create `.env.example` listing required environment variables
+- [x] S012: Create `.env.example` listing required environment variables
 - [ ] S013: Install and configure environment validation (zod)
 - [ ] S014: Implement environment loader with schema validation
 - [ ] S015: Create CI workflow file `.github/workflows/ci.yml`
