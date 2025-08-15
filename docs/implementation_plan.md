@@ -72,7 +72,7 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [ ] S038: Add minimal security headers: strict CORS and Content Security Policy
 - [ ] S039: Implement GET `/healthz` returning `{ status: 'ok' }`
 - [ ] S040: Implement GET `/readyz` performing readiness checks
-- [ ] S041: Write unit tests for `/healthz` and `/readyz`
+- [x] S041: Write unit tests for `/healthz` and `/readyz`
 - [ ] S042: Install Socket.IO server library and attach to HTTP server
 - [ ] S043: Emit a health event on client connect; log connect/disconnect
 - [ ] S044: Install configuration validation (zod/envsafe) for server
