@@ -1,6 +1,8 @@
+// © 2025 Joe Pruskowski
 import express from 'express';
 import http from 'http';
 import cors from 'cors';
+import { Server as SocketIOServer } from 'socket.io';
 import { appConfig } from './config/env';
 
 const app = express();
@@ -17,6 +19,11 @@ app.get('/readyz', (_req, res) => {
 });
 
 const server = http.createServer(app);
+
+// Attach Socket.IO to the HTTP server (no events yet; see S023)
+export const io = new SocketIOServer(server, {
+  cors: { origin: appConfig.CORS_ORIGIN },
+});
 
 server.listen(appConfig.SERVER_PORT, () => {
   // eslint-disable-next-line no-console
