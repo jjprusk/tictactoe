@@ -51,7 +51,7 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S017: Push dummy commit to verify CI runs
 - [x] S018: Add PR template `.github/pull_request_template.md`
 - [x] S019: Add `CODEOWNERS` file
-- [ ] S020: Install and configure commitlint and husky (Conventional Commits)
+- [x] S020: Install and configure commitlint and husky (Conventional Commits)
 - [ ] S021: Configure branch protections and required status checks on `main`
 - [ ] S022: Create `server/package.json`
 - [ ] S023: Install Express and types in server

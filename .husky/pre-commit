@@ -1,0 +1,3 @@
+#!/bin/sh
+# skip until tests exist
+exit 0
