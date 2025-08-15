@@ -1,0 +1,14 @@
+{
+  "name": "tictactoe",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "start:server": "npm --workspace server run dev",
+    "start:client": "npm --workspace client run dev"
+  }
+}
+
