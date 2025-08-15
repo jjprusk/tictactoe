@@ -43,7 +43,7 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S010: Document dependency pinning policy in `README.md`
 - [x] S011: Create `docs/notes.md`
 - [x] S012: Create `.env.example` listing required environment variables
-- [ ] S013: Install and configure environment validation (zod)
+- [x] S013: Install and configure environment validation (zod)
 - [ ] S014: Implement environment loader with schema validation
 - [ ] S015: Create CI workflow file `.github/workflows/ci.yml`
 - [ ] S016: Add lint and typecheck jobs to CI

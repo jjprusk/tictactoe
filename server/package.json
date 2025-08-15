@@ -1,6 +1,9 @@
 {
   "name": "server",
   "private": true,
-  "version": "0.1.0"
+  "version": "0.1.0",
+  "dependencies": {
+    "dotenv": "^17.2.1",
+    "zod": "^4.0.17"
+  }
 }
-
