@@ -25,5 +25,7 @@ jobs:
         run: npm --workspace server run typecheck
       - name: Lint (server)
         run: npm --workspace server run lint
+      - name: Test (server)
+        run: npm --workspace server run test
 
 
