@@ -28,12 +28,12 @@ jobs:
           rm -rf node_modules **/node_modules
           npm install --workspaces --package-lock-only --ignore-scripts
 
-      - name: Validate install and tests
+      - name: Validate install and tests (use npm install to include platform optionals)
         env:
           HUSKY: 0
           NODE_ENV: test
         run: |
-          npm ci --workspaces --ignore-scripts
+          npm install --workspaces --ignore-scripts
           npm -w server run test
 
       - name: Create PR
