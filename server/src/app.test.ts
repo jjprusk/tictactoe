@@ -17,6 +17,13 @@ describe('health/readiness endpoints', () => {
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ ready: true });
   });
+
+  it('POST /echo echoes parsed JSON body', async () => {
+    const payload = { a: 1, b: 'x' };
+    const res = await request(app).post('/echo').send(payload).set('Content-Type', 'application/json');
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ body: payload });
+  });
 });
 
 

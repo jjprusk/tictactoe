@@ -19,4 +19,9 @@ app.get('/readyz', (_req, res) => {
   res.json({ ready: mongoReady });
 });
 
+// Simple JSON echo to validate express.json() middleware
+app.post('/echo', (req, res) => {
+  res.json({ body: req.body });
+});
+
 
