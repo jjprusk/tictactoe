@@ -1,5 +1,5 @@
 // © 2025 Joe Pruskowski
-import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { io as Client, Socket } from 'socket.io-client';
 import { buildHttpServer, buildIoServer } from './bootstrap';
 import { attachSocketHandlers } from './socket_handlers';
