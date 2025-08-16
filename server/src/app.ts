@@ -1,6 +1,8 @@
 // © 2025 Joe Pruskowski
 import express from 'express';
 import cors from 'cors';
+import pinoHttp from 'pino-http';
+import { logger } from './logger';
 import { appConfig } from './config/env';
 import { getMongoClient } from './db/mongo';
 
@@ -8,6 +10,11 @@ export const app = express();
 
 app.use(express.json());
 app.use(cors({ origin: appConfig.CORS_ORIGIN }));
+app.use(pinoHttp({ logger }));
+
+app.get('/', (_req, res) => {
+  res.json({ message: 'Hello, TicTacToe' });
+});
 
 app.get('/healthz', (_req, res) => {
   res.json({ status: 'ok' });

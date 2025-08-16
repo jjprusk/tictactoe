@@ -35,6 +35,17 @@ describe('server bootstrap', () => {
 			expect(typeof srv.address()).toBe('object');
 			await new Promise<void>((resolve) => srv.close(() => resolve()));
 		});
+
+		it('attaches socket handlers via server_factory', async () => {
+			process.env.SERVER_PORT = '0';
+			vi.resetModules();
+			const factory = await import('./server_factory');
+			const spy = vi.spyOn(factory, 'createServers');
+			await import('./index');
+			expect(spy).toHaveBeenCalledTimes(1);
+			spy.mockRestore();
+		});
+
 	});
 });
 

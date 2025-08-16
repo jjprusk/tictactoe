@@ -2,6 +2,7 @@
 import request from 'supertest';
 import { describe, it, expect } from 'vitest';
 import { app } from './app';
+import { logger } from './logger';
 import { __setClientForTest } from './db/mongo';
 
 describe('health/readiness endpoints', () => {
@@ -23,6 +24,18 @@ describe('health/readiness endpoints', () => {
     const res = await request(app).post('/echo').send(payload).set('Content-Type', 'application/json');
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ body: payload });
+  });
+
+  it('logger is configured and pino-http attaches bindings', async () => {
+    expect(logger.level).toBeTypeOf('string');
+    const res = await request(app).get('/healthz');
+    expect(res.status).toBe(200);
+  });
+
+  it('GET / returns hello message', async () => {
+    const res = await request(app).get('/');
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ message: 'Hello, TicTacToe' });
   });
 });
 

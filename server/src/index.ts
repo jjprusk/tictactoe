@@ -1,21 +1,21 @@
 // © 2025 Joe Pruskowski
 import http from 'http';
-import { Server as SocketIOServer } from 'socket.io';
 import { loadConfig } from './config/env';
 import { buildMongoClient, connectWithRetry } from './db/mongo';
 import { app } from './app';
-import { attachSocketHandlers } from './socket_handlers';
+import { createServers } from './server_factory';
 
 export const httpServer = http.createServer(app);
 
 // Attach Socket.IO to the HTTP server (no events yet; see S023)
-let io: SocketIOServer;
+let io;
 try {
   const appConfig = loadConfig();
-  io = new SocketIOServer(httpServer, {
-    cors: { origin: appConfig.CORS_ORIGIN },
-  });
-  attachSocketHandlers(io);
+  // Build Socket.IO via factory to ease testing
+  const built = createServers();
+  // close the temporary http created by factory and reuse our app-bound server
+  built.httpServer.close();
+  io = built.io;
 
   // Kick off Mongo connection with retry, but do not block server listening
   const mongoClient = buildMongoClient(appConfig.MONGO_URI);
