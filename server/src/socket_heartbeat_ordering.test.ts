@@ -40,7 +40,7 @@ describe('heartbeats and ordering/races', () => {
     expect(jo.role).toBe('observer');
 
     // Simulate stale client: hard-close underlying transport, let server heartbeat detect it
-    // @ts-expect-error - engine internals for test only
+    // @ts-ignore - engine internals for test only
     p1.io.engine.transport.close();
 
     // Wait longer than pingTimeout for cleanup
