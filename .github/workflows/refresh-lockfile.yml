@@ -24,7 +24,6 @@ jobs:
       - name: Regenerate lockfile (Linux graph)
         env:
           HUSKY: 0
-          NPM_CONFIG_OPTIONAL: false
         run: |
           rm -rf node_modules **/node_modules
           npm install --workspaces --package-lock-only --ignore-scripts
@@ -33,7 +32,6 @@ jobs:
         env:
           HUSKY: 0
           NODE_ENV: test
-          NPM_CONFIG_OPTIONAL: false
         run: |
           npm ci --workspaces --ignore-scripts
           npm -w server run test
