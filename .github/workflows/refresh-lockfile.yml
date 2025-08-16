@@ -1,0 +1,44 @@
+name: Refresh lockfile (Linux)
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Pin npm
+        run: npm i -g npm@11.3.0 && npm --version
+
+      - name: Regenerate lockfile (Linux graph)
+        run: |
+          rm -rf node_modules **/node_modules
+          npm install --workspaces --package-lock-only
+
+      - name: Validate install and tests
+        env:
+          HUSKY: 0
+          NODE_ENV: test
+        run: |
+          npm ci --workspaces
+          npm -w server run test
+
+      - name: Create PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore(lockfile): regenerate on Linux with npm 11.3.0"
+          title: "Regenerate package-lock.json on Linux"
+          body: "Lockfile refreshed on Ubuntu with npm 11.3.0 to keep CI in sync."
+          branch: chore/refresh-lockfile-linux
+

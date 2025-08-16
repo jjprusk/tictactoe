@@ -12,6 +12,7 @@ jobs:
     env:
       HUSKY: 0
       NODE_ENV: test
+      NPM_CONFIG_OPTIONAL: false
     steps:
       - name: Checkout
         uses: actions/checkout@v4
