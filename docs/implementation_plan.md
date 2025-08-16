@@ -211,6 +211,7 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [ ] S176: Configure bounded queues and load shedding policy
 - [ ] S177: Implement graceful shutdown with in-flight state persistence
 - [ ] S178: Introduce chaos tests (kill server, drop sockets) and verify recovery
+- [ ] S178a: Integration: restart during active room with backoff/port-wait; packet delay/loss injection (on-demand CI)
 - [ ] S179: Add ARIA labels/roles to the board and controls
 - [ ] S180: Implement theme provider with light/dark modes
 - [ ] S181: Add sound/haptics toggles
