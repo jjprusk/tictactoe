@@ -87,3 +87,25 @@ jobs:
             echo "PR already exists; continuing."
           fi
 
+      - name: Merge PR via API (squash)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          NUMBER=$(jq -r '.number // empty' pr_response.json 2>/dev/null || echo "")
+          if [ -z "$NUMBER" ]; then
+            echo "No PR number found (likely already exists). Attempting to find by branch name."
+            BRANCH="chore/refresh-lockfile-linux-${{ github.run_id }}-${{ github.run_attempt }}"
+            NUMBER=$(curl -sS -H "Authorization: Bearer ${GITHUB_TOKEN}" -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${{ github.repository }}/pulls?head=${{ github.repository_owner }}:$BRANCH&state=open" | jq -r '.[0].number // empty')
+          fi
+          if [ -z "$NUMBER" ]; then
+            echo "No open PR found to merge; exiting."
+            exit 0
+          fi
+          curl -sS -X PUT \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/${{ github.repository }}/pulls/$NUMBER/merge \
+            -d '{"merge_method":"squash","commit_title":"chore(lockfile): regenerate on Linux with npm 11.3.0"}' | tee merge_response.json
+
