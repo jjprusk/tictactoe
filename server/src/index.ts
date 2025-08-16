@@ -8,14 +8,12 @@ import { createServers } from './server_factory';
 export const httpServer = http.createServer(app);
 
 // Attach Socket.IO to the HTTP server (no events yet; see S023)
-let io;
 try {
   const appConfig = loadConfig();
   // Build Socket.IO via factory to ease testing
   const built = createServers();
   // close the temporary http created by factory and reuse our app-bound server
   built.httpServer.close();
-  io = built.io;
 
   // Kick off Mongo connection with retry, but do not block server listening
   const mongoClient = buildMongoClient(appConfig.MONGO_URI);

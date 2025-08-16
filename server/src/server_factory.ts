@@ -1,7 +1,6 @@
 // © 2025 Joe Pruskowski
 import type http from 'http';
 import { buildHttpServer, buildIoServer } from './bootstrap';
-import { app } from './app';
 import type { Server as SocketIOServer } from 'socket.io';
 import { attachSocketHandlers } from './socket_handlers';
 
