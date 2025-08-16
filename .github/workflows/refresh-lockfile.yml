@@ -22,9 +22,12 @@ jobs:
         run: npm i -g npm@11.3.0 && npm --version
 
       - name: Regenerate lockfile (Linux graph)
+        env:
+          HUSKY: 0
+          NPM_CONFIG_OPTIONAL: false
         run: |
           rm -rf node_modules **/node_modules
-          npm install --workspaces --package-lock-only
+          npm install --workspaces --package-lock-only --ignore-scripts
 
       - name: Validate install and tests
         env:
