@@ -1,5 +1,4 @@
 // © 2025 Joe Pruskowski
-/// <reference types="@types/supertest" />
 import request from 'supertest';
 import { describe, it, expect } from 'vitest';
 import { app } from './app';
