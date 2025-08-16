@@ -15,11 +15,13 @@
     "prepare": "husky",
     "test": "npm --workspace server run test",
     "test:watch": "npm --workspace server run test:watch",
-    "test:cov": "npm --workspace server run test:cov"
+    "test:cov": "npm --workspace server run test:cov",
+    "load:socket": "artillery run server/load/socketio.yml"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
+    "artillery": "^2.0.10",
     "husky": "^9.1.7"
   }
 }
