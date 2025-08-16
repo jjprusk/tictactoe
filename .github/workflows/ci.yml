@@ -3,6 +3,10 @@ name: CI
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - 'package.json'
+      - 'server/package.json'
+      - 'client/package.json'
   pull_request:
 
 jobs:
@@ -24,8 +28,12 @@ jobs:
         run: |
           npm i -g npm@11.3.0
           npm --version
-      - name: Install dependencies (root + all workspaces) allowing optionals
-        run: npm ci --workspaces
+      - name: Clean slate install (no scripts)
+        run: |
+          rm -rf node_modules **/node_modules package-lock.json
+          npm install --workspaces --ignore-scripts
+      - name: Validate with frozen lockfile (ci)
+        run: npm ci --workspaces --ignore-scripts
       - name: Typecheck (server)
         run: npm --workspace server run typecheck
       - name: Lint (server)
