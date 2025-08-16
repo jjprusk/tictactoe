@@ -61,9 +61,9 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S026: Load and validate env in server startup; fail fast on invalid
 - [x] S027: Install MongoDB driver and implement connection with retry
 - [x] S028: Add MongoDB ping check to `/readyz`
-- [ ] S029: Write unit tests for MongoDB connection handling
-- [ ] S030: Create `server/package.json`
-- [ ] S031: Install Express and types in server
+- [x] S029: Write unit tests for MongoDB connection handling
+- [x] S030: Create `server/package.json`
+- [x] S031: Install Express and types in server
 - [ ] S032: Create `server/src/index.ts`
 - [ ] S033: Initialize Express app with JSON middleware
 - [ ] S034: Add basic GET `/` route returning a hello message

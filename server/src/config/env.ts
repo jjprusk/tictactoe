@@ -6,7 +6,8 @@ loadDotenv();
 
 const EnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  SERVER_PORT: z.coerce.number().int().min(1).max(65535).default(3001),
+  // Allow 0 to request an ephemeral port in tests; production should use >0
+  SERVER_PORT: z.coerce.number().int().min(0).max(65535).default(3001),
 
   MONGO_URI: z
     .string()
