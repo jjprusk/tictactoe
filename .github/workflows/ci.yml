@@ -12,7 +12,7 @@ jobs:
     env:
       HUSKY: 0
       NODE_ENV: test
-      NPM_CONFIG_OPTIONAL: false
+      NPM_CONFIG_OPTIONAL: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,7 +24,7 @@ jobs:
         run: |
           npm i -g npm@11.3.0
           npm --version
-      - name: Install dependencies (root + all workspaces)
+      - name: Install dependencies (root + all workspaces) allowing optionals
         run: npm ci --workspaces
       - name: Typecheck (server)
         run: npm --workspace server run typecheck
