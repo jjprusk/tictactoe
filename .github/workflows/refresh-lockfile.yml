@@ -5,6 +5,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   refresh:
@@ -12,6 +13,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -41,8 +45,13 @@ jobs:
       - name: Create PR
         uses: peter-evans/create-pull-request@v6
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore(lockfile): regenerate on Linux with npm 11.3.0"
           title: "Regenerate package-lock.json on Linux"
           body: "Lockfile refreshed on Ubuntu with npm 11.3.0 to keep CI in sync."
+          add-paths: |
+            package-lock.json
           branch: chore/refresh-lockfile-linux
+          branch-suffix: timestamp
+          delete-branch: true
 

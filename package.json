@@ -11,9 +11,9 @@
     "server"
   ],
   "overrides": {
-    "rollup": "npm:@rollup/wasm-node@^4.21.0",
+    "rollup": "@rollup/wasm-node@^4.21.0",
     "vite": {
-      "rollup": "npm:@rollup/wasm-node@^4.21.0"
+      "rollup": "@rollup/wasm-node@^4.21.0"
     }
   },
   "scripts": {
