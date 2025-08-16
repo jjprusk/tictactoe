@@ -55,13 +55,13 @@ A minimal, high-impact plan to complete Socket.IO testing in small, reviewable s
   - Success: connect error <1%, ack p95 <300ms
 
 ## Deliverables per PR (suggested)
-- PR1: Acks/Timeouts + Reconnect/Resume tests
-- PR2: Rooms/Limits + Leave semantics tests
-- PR3: CORS/Auth + Transport fallback tests
-- PR4: Heartbeats + Ordering/Races tests
-- PR5: Backpressure limiter + tests
-- PR6: Chaos (restart/packet loss) integration tests (CI-skipped, on-demand)
-- PR7: Artillery script + optional on-demand workflow
+- [x] PR1: Acks/Timeouts + Reconnect/Resume tests
+- [x] PR2: Rooms/Limits + Leave semantics tests
+- [x] PR3: CORS/Auth + Transport fallback tests
+- [x] PR4: Heartbeats + Ordering/Races tests
+- [x] PR5: Backpressure limiter + tests
+- [ ] PR6: Chaos (restart/packet loss) integration tests (CI-skipped, on-demand)
+- [x] PR7: Artillery script + optional on-demand workflow
 
 ## CI Strategy
 - Unit/integration suite on each push/PR: typecheck, lint, test

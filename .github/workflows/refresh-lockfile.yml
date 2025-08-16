@@ -28,11 +28,15 @@ jobs:
           rm -rf node_modules **/node_modules
           npm install --workspaces --package-lock-only --ignore-scripts
 
-      - name: Validate install and tests (use npm install to include platform optionals)
+      - name: Validate install and tests (work around npm optional deps bug by reinstalling)
         env:
           HUSKY: 0
           NODE_ENV: test
+          NPM_CONFIG_OPTIONAL: true
         run: |
+          rm -rf node_modules **/node_modules
+          npm install --workspaces --ignore-scripts
+          # Workaround for npm/cli#4828: run install a second time so optional platform bins are linked
           npm install --workspaces --ignore-scripts
           npm -w server run test
 

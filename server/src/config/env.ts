@@ -10,7 +10,7 @@ const EnvSchema = z.object({
 
   MONGO_URI: z
     .string()
-    .min(1)
+    .default('mongodb://localhost:27017/tictactoe')
     .refine(
       (v) => v.startsWith('mongodb://') || v.startsWith('mongodb+srv://'),
       'MONGO_URI must start with mongodb:// or mongodb+srv://'
@@ -18,7 +18,7 @@ const EnvSchema = z.object({
 
   REDIS_URL: z
     .string()
-    .min(1)
+    .default('redis://localhost:6379')
     .refine((v) => v.startsWith('redis://') || v.startsWith('rediss://'), 'REDIS_URL must start with redis:// or rediss://'),
 
   LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal', 'silent']).default('info'),
