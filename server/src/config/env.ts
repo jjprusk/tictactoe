@@ -31,6 +31,11 @@ const EnvSchema = z.object({
   OTEL_EXPORTER_OTLP_ENDPOINT: z.string().url().optional(),
   PROMETHEUS_ENABLE: z.coerce.boolean().default(false),
   EMA_DEFAULT_N: z.coerce.number().int().positive().default(3),
+
+  // Mongo retry config
+  MONGO_MAX_RETRIES: z.coerce.number().int().min(0).default(5),
+  MONGO_RETRY_INITIAL_MS: z.coerce.number().int().min(10).default(200),
+  MONGO_RETRY_MAX_MS: z.coerce.number().int().min(50).default(2000),
 });
 
 export type AppConfig = z.infer<typeof EnvSchema>;

@@ -2,6 +2,7 @@
 import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import { loadConfig } from './config/env';
+import { buildMongoClient, connectWithRetry } from './db/mongo';
 import { app } from './app';
 import { attachSocketHandlers } from './socket_handlers';
 
@@ -15,6 +16,17 @@ try {
     cors: { origin: appConfig.CORS_ORIGIN },
   });
   attachSocketHandlers(io);
+
+  // Kick off Mongo connection with retry, but do not block server listening
+  const mongoClient = buildMongoClient(appConfig.MONGO_URI);
+  void connectWithRetry(mongoClient, {
+    maxRetries: appConfig.MONGO_MAX_RETRIES,
+    initialDelayMs: appConfig.MONGO_RETRY_INITIAL_MS,
+    maxDelayMs: appConfig.MONGO_RETRY_MAX_MS,
+  }).catch((err) => {
+    // eslint-disable-next-line no-console
+    console.error('[mongo] failed to connect after retries:', (err as Error).message);
+  });
 
   httpServer.listen(appConfig.SERVER_PORT, () => {
     // eslint-disable-next-line no-console
