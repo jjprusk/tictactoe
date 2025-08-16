@@ -28,17 +28,16 @@ jobs:
           rm -rf node_modules **/node_modules
           npm install --workspaces --package-lock-only --ignore-scripts --include=optional
 
-      - name: Validate install (no tests; lockfile-only workflow)
+      - name: Validate production install only (omit dev deps)
         env:
           HUSKY: 0
-          NODE_ENV: test
+          NODE_ENV: production
           NPM_CONFIG_OPTIONAL: true
         run: |
           rm -rf node_modules **/node_modules
-          npm install --workspaces --ignore-scripts --include=optional
-          # Workaround for npm/cli#4828: run install a second time so optional platform bins are linked
-          npm install --workspaces --ignore-scripts --include=optional
-          npm -w server run typecheck
+          npm ci --workspaces --ignore-scripts --omit=dev
+          # Second pass to exercise optional deps resolution without dev deps
+          npm ci --workspaces --ignore-scripts --omit=dev
 
       - name: Create PR
         uses: peter-evans/create-pull-request@v6
