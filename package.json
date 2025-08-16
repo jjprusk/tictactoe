@@ -10,6 +10,12 @@
     "client",
     "server"
   ],
+  "overrides": {
+    "rollup": "npm:@rollup/wasm-node@^4.21.0",
+    "vite": {
+      "rollup": "npm:@rollup/wasm-node@^4.21.0"
+    }
+  },
   "scripts": {
     "start:server": "npm --workspace server run dev",
     "start:client": "npm --workspace client run dev",

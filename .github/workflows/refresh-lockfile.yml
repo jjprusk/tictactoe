@@ -21,14 +21,22 @@ jobs:
       - name: Pin npm
         run: npm i -g npm@11.3.0 && npm --version
 
-      - name: Regenerate lockfile (Linux graph)
+      - name: Regenerate lockfile (full linux resolve)
         env:
           HUSKY: 0
         run: |
           rm -rf node_modules **/node_modules
-          npm install --workspaces --package-lock-only --ignore-scripts --include=optional
+          # Do a real install to compute a Linux-native lockfile with optionals included
+          npm install --workspaces --ignore-scripts
+          git status --porcelain
 
-      # Intentionally no install/validation here to avoid platform optional dep flakiness
+      - name: Validate lockfile with clean CI install (no tests)
+        env:
+          HUSKY: 0
+          NPM_CONFIG_OPTIONAL: true
+        run: |
+          rm -rf node_modules **/node_modules
+          npm ci --workspaces --ignore-scripts
 
       - name: Create PR
         uses: peter-evans/create-pull-request@v6
