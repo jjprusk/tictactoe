@@ -38,6 +38,8 @@ jobs:
         run: npm --workspace server run typecheck
       - name: Lint (server)
         run: npm --workspace server run lint
+      - name: Ensure rollup present for vitest resolution
+        run: npm --workspace server i -D rollup@^4.21.0 --no-audit --no-fund --ignore-scripts
       - name: Test (server)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: npm --workspace server run test
