@@ -55,7 +55,7 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S020: Install and configure commitlint and husky (Conventional Commits)
 - [x] S021: Configure branch protections and required status checks on `main`
 - [x] S022: Install Socket.IO server library and attach to HTTP server
-- [ ] S023: Emit a health event on client connect; log connect/disconnect
+- [x] S023: Emit a health event on client connect; log connect/disconnect
 - [ ] S024: Install configuration validation (zod/envsafe) for server
 - [ ] S025: Define config schema for ports and database URIs
 - [ ] S026: Load and validate env in server startup; fail fast on invalid

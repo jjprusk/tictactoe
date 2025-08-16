@@ -34,5 +34,7 @@
     "typescript": "^5.4.0",
     "vitest": "^3.2.4",
     "@rollup/wasm-node": "^4.21.0"
+    ,
+    "@types/supertest": "^2.0.16"
   }
 }
