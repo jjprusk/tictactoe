@@ -56,8 +56,8 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S021: Configure branch protections and required status checks on `main`
 - [x] S022: Install Socket.IO server library and attach to HTTP server
 - [x] S023: Emit a health event on client connect; log connect/disconnect
-- [ ] S024: Install configuration validation (zod/envsafe) for server
-- [ ] S025: Define config schema for ports and database URIs
+- [x] S024: Install configuration validation (zod/envsafe) for server
+- [x] S025: Define config schema for ports and database URIs
 - [ ] S026: Load and validate env in server startup; fail fast on invalid
 - [ ] S027: Install MongoDB driver and implement connection with retry
 - [ ] S028: Add MongoDB ping check to `/readyz`

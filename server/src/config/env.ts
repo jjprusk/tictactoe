@@ -6,7 +6,7 @@ loadDotenv();
 
 const EnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  SERVER_PORT: z.coerce.number().int().positive().default(3001),
+  SERVER_PORT: z.coerce.number().int().min(1).max(65535).default(3001),
 
   MONGO_URI: z
     .string()
