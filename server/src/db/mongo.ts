@@ -51,4 +51,9 @@ export async function closeMongoClient(): Promise<void> {
 	}
 }
 
+// Test helper to control cached client in unit tests
+export function __setClientForTest(client: MongoClient | null): void {
+	cachedClient = client;
+}
+
 

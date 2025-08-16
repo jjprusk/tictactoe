@@ -2,6 +2,7 @@
 import express from 'express';
 import cors from 'cors';
 import { appConfig } from './config/env';
+import { getMongoClient } from './db/mongo';
 
 export const app = express();
 
@@ -14,7 +15,8 @@ app.get('/healthz', (_req, res) => {
 
 app.get('/readyz', (_req, res) => {
   // Minimal readiness until DB/Redis wiring is added
-  res.json({ ready: true });
+  const mongoReady = getMongoClient() !== null;
+  res.json({ ready: mongoReady });
 });
 
 

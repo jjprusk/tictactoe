@@ -60,7 +60,7 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S025: Define config schema for ports and database URIs
 - [x] S026: Load and validate env in server startup; fail fast on invalid
 - [x] S027: Install MongoDB driver and implement connection with retry
-- [ ] S028: Add MongoDB ping check to `/readyz`
+- [x] S028: Add MongoDB ping check to `/readyz`
 - [ ] S029: Write unit tests for MongoDB connection handling
 - [ ] S030: Create `server/package.json`
 - [ ] S031: Install Express and types in server
