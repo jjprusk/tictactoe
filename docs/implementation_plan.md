@@ -7,6 +7,7 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - Backend-only AI; client is UI + real-time sync
 - Tests first for core logic; maintain ≥90% coverage
 - Observability, security, and reliability baked-in from the start
+- Enforce minimum test coverage targets: lines/statements ≥70%, functions ≥70%, branches ≥60%
 
 ## Alignment with `docs/project_rules.md`
 - Implement unified logger/debugger early (M1) and expand capabilities soon after (M8)
