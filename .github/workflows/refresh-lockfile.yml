@@ -42,16 +42,42 @@ jobs:
           rm -rf node_modules **/node_modules
           npm ci --workspaces --ignore-scripts
 
-      - name: Create PR
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore(lockfile): regenerate on Linux with npm 11.3.0"
-          title: "Regenerate package-lock.json on Linux"
-          body: "Lockfile refreshed on Ubuntu with npm 11.3.0 to keep CI in sync."
-          add-paths: |
-            package-lock.json
-          branch: chore/refresh-lockfile-linux
-          branch-suffix: timestamp
-          delete-branch: true
+      - name: Create branch, commit, and push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          BRANCH="chore/refresh-lockfile-linux-${{ github.run_id }}-${{ github.run_attempt }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add package-lock.json
+          if git diff --cached --quiet; then
+            echo "No changes to package-lock.json; exiting successfully."
+            exit 0
+          fi
+          git commit -m "chore(lockfile): regenerate on Linux with npm 11.3.0"
+          git push --set-upstream origin "$BRANCH"
+
+      - name: Open PR via API
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          BRANCH="chore/refresh-lockfile-linux-${{ github.run_id }}-${{ github.run_attempt }}"
+          DATA=$(jq -n --arg title "Regenerate package-lock.json on Linux" \
+                    --arg head "$BRANCH" \
+                    --arg base "main" \
+                    --arg body "Lockfile refreshed on Ubuntu with npm 11.3.0 to keep CI in sync." \
+                    '{title:$title, head:$head, base:$base, body:$body}')
+          curl -sS -X POST \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/${{ github.repository }}/pulls \
+            -d "$DATA" | tee pr_response.json
+          # If PR already exists, the API returns 422; treat as success
+          STATUS=$(jq -r '.message // empty' pr_response.json)
+          if [ "$STATUS" = "Validation Failed" ]; then
+            echo "PR already exists; continuing."
+          fi
 
