@@ -9,6 +9,9 @@ jobs:
   setup:
     name: Lint and Typecheck
     runs-on: ubuntu-latest
+    env:
+      HUSKY: 0
+      NODE_ENV: test
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -16,11 +19,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Install dependencies (root + workspaces)
-        run: |
-          npm ci --ignore-scripts
-          # Ensure server workspace has node_modules if npm workspaces were skipped by platform
-          npm --workspace server install --no-audit --no-fund --ignore-scripts
+      - name: Install dependencies (root + all workspaces)
+        run: npm ci --workspaces --ignore-scripts
       - name: Typecheck (server)
         run: npm --workspace server run typecheck
       - name: Lint (server)
