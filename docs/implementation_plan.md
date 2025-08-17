@@ -67,24 +67,24 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S032: Create `server/src/index.ts`
 - [x] S033: Initialize Express app with JSON middleware
 - [x] S034: Add basic GET `/` route returning a hello message
-- [ ] S035: Install and configure logger (pino or winston)
-- [ ] S036: Add request correlation IDs via middleware
-- [ ] S037: Output structured logs to console and file
-- [ ] S038: Add minimal security headers: strict CORS and Content Security Policy
-- [ ] S039: Implement GET `/healthz` returning `{ status: 'ok' }`
-- [ ] S040: Implement GET `/readyz` performing readiness checks
+- [x] S035: Install and configure logger (pino or winston)
+- [x] S036: Add request correlation IDs via middleware
+- [x] S037: Output structured logs to console and file
+- [x] S038: Add minimal security headers: strict CORS and Content Security Policy
+- [x] S039: Implement GET `/healthz` returning `{ status: 'ok' }`
+- [x] S040: Implement GET `/readyz` performing readiness checks
 - [x] S041: Write unit tests for `/healthz` and `/readyz`
-- [ ] S042: Install Socket.IO server library and attach to HTTP server
-- [ ] S043: Emit a health event on client connect; log connect/disconnect
-- [ ] S044: Install configuration validation (zod/envsafe) for server
-- [ ] S045: Define config schema for ports and database URIs
-- [ ] S046: Load and validate env in server startup; fail fast on invalid
-- [ ] S047: Install MongoDB driver and implement connection with retry
-- [ ] S048: Add MongoDB ping check to `/readyz`
-- [ ] S049: Write unit tests for MongoDB connection handling
-- [ ] S050: Install Redis client (ioredis or redis)
-- [ ] S051: Implement Redis connection and ping check
-- [ ] S052: Write unit tests for Redis operations
+- [x] S042: Install Socket.IO server library and attach to HTTP server
+- [x] S043: Emit a health event on client connect; log connect/disconnect
+- [x] S044: Install configuration validation (zod/envsafe) for server
+- [x] S045: Define config schema for ports and database URIs
+- [x] S046: Load and validate env in server startup; fail fast on invalid
+- [x] S047: Install MongoDB driver and implement connection with retry
+- [x] S048: Add MongoDB ping check to `/readyz`
+- [x] S049: Write unit tests for MongoDB connection handling
+- [x] S050: Install Redis client (ioredis or redis)
+- [x] S051: Implement Redis connection and ping check
+- [x] S052: Write unit tests for Redis operations
 - [ ] S053: Instrument Prometheus metrics (HTTP durations, socket reconnects)
 - [ ] S054: Add move latency histogram metric on server
 - [ ] S055: Initialize OpenTelemetry tracing (basic spans on move lifecycle)

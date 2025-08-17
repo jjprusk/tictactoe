@@ -1,17 +1,40 @@
 // © 2025 Joe Pruskowski
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import pinoHttp from 'pino-http';
 import { logger } from './logger';
 import { z } from 'zod';
 import { appConfig } from './config/env';
 import { getMongoClient } from './db/mongo';
+import { getRedisClient } from './db/redis';
 import { randomUUID } from 'crypto';
 
 export const app = express();
 
 app.use(express.json());
 app.use(cors({ origin: appConfig.CORS_ORIGIN }));
+app.use(
+  helmet({
+    frameguard: { action: 'deny' },
+    referrerPolicy: { policy: 'no-referrer' },
+    xssFilter: true,
+    noSniff: true,
+    contentSecurityPolicy: {
+      useDefaults: true,
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", 'https:', "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+        connectSrc: ["'self'", appConfig.CORS_ORIGIN],
+        objectSrc: ["'none'"],
+        baseUri: ["'self'"],
+        frameAncestors: ["'none'"],
+      },
+    },
+  })
+);
 app.use(
   pinoHttp({
     logger,
@@ -34,9 +57,9 @@ app.get('/healthz', (_req, res) => {
 });
 
 app.get('/readyz', (_req, res) => {
-  // Minimal readiness until DB/Redis wiring is added
   const mongoReady = getMongoClient() !== null;
-  res.json({ ready: mongoReady });
+  const redisReady = getRedisClient() !== null;
+  res.json({ ready: mongoReady && redisReady, mongo: mongoReady, redis: redisReady });
 });
 
 // Simple JSON echo to validate express.json() middleware

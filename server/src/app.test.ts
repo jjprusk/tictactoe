@@ -4,6 +4,7 @@ import { describe, it, expect } from 'vitest';
 import { app } from './app';
 import { logger } from './logger';
 import { __setClientForTest } from './db/mongo';
+import { __setRedisClientForTest } from './db/redis';
 
 describe('health/readiness endpoints', () => {
   it('GET /healthz returns ok', async () => {
@@ -12,11 +13,12 @@ describe('health/readiness endpoints', () => {
     expect(res.body).toEqual({ status: 'ok' });
   });
 
-  it('GET /readyz returns ready true', async () => {
+  it('GET /readyz returns ready true when mongo and redis ready', async () => {
     __setClientForTest({} as any);
+    __setRedisClientForTest({} as any);
     const res = await request(app).get('/readyz');
     expect(res.status).toBe(200);
-    expect(res.body).toEqual({ ready: true });
+    expect(res.body).toEqual({ ready: true, mongo: true, redis: true });
   });
 
   it('POST /echo echoes parsed JSON body', async () => {
@@ -51,6 +53,9 @@ describe('health/readiness endpoints', () => {
     const res = await request(app).get('/');
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ message: 'Hello, TicTacToe' });
+    // helmet minimal headers present
+    expect(res.headers['x-content-type-options']).toBe('nosniff');
+    expect(res.headers['x-frame-options']).toBe('DENY');
   });
 
   it('POST /logs accepts client log payload', async () => {

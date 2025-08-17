@@ -1,5 +1,12 @@
 ---
-description:
+description: "Require all frontend logging to use the sendLog helper; forbid console.* in committed code"
 globs:
+  - "client/**/*.{ts,tsx,js,jsx}"
 alwaysApply: false
 ---
+
+Rule: Frontend logging must use `sendLog`
+
+- All browser-side logging in `client/**` must go through `sendLog(level, feature, payload?)` from `client/src/utils/clientLogger.ts`.
+- Do not use `console.*` in committed code. For temporary debugging, refactor to `sendLog` before commit.
+- This routes logs to the server `/logs` endpoint and writes to the repo root `LOG` file via Pino.

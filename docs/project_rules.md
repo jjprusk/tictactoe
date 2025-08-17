@@ -11,3 +11,14 @@
 9. Create and place all documentation (i.e., .md files) in the "docs" subdirectory.
 10. Create and update "checklist.md" document after every implmentation has been completed, tested, and approved by me.
 </project rules>
+ 
+## Frontend Logging Policy
+
+- All frontend/browser logging MUST use the `sendLog` helper from `client/src/utils/clientLogger.ts`.
+- Do not call `console.log`, `console.warn`, or `console.error` directly in application code. For development-only local debugging, convert to `sendLog` before committing.
+- Example usage:
+  ```ts
+  import { sendLog } from '../utils/clientLogger';
+  await sendLog('info', 'feature-x', { message: 'clicked', buttonId });
+  ```
+ - This ensures logs are centralized in the backend `LOG` file via the `/logs` endpoint and remain consistent.
