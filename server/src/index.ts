@@ -1,5 +1,6 @@
 // © 2025 Joe Pruskowski
 import http from 'http';
+import { logger } from './logger';
 import { loadConfig } from './config/env';
 import { buildMongoClient, connectWithRetry } from './db/mongo';
 import { app } from './app';
@@ -27,10 +28,9 @@ try {
   });
 
   httpServer.listen(appConfig.SERVER_PORT, () => {
-    // eslint-disable-next-line no-console
     const addr = httpServer.address();
     const port = typeof addr === 'object' && addr ? addr.port : appConfig.SERVER_PORT;
-    console.log(`Server listening on http://localhost:${port}`);
+    logger.info({ port }, 'server started');
   });
 } catch (err) {
   // eslint-disable-next-line no-console

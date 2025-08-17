@@ -64,9 +64,9 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S029: Write unit tests for MongoDB connection handling
 - [x] S030: Create `server/package.json`
 - [x] S031: Install Express and types in server
-- [ ] S032: Create `server/src/index.ts`
-- [ ] S033: Initialize Express app with JSON middleware
-- [ ] S034: Add basic GET `/` route returning a hello message
+- [x] S032: Create `server/src/index.ts`
+- [x] S033: Initialize Express app with JSON middleware
+- [x] S034: Add basic GET `/` route returning a hello message
 - [ ] S035: Install and configure logger (pino or winston)
 - [ ] S036: Add request correlation IDs via middleware
 - [ ] S037: Output structured logs to console and file

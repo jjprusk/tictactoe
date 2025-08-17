@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "pino": "^9.3.2",
+    "pino-pretty": "^11.2.2",
     "pino-http": "^10.3.0",
     "mongodb": "^6.9.0",
     "cors": "^2.8.5",

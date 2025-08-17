@@ -37,6 +37,12 @@ describe('health/readiness endpoints', () => {
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ message: 'Hello, TicTacToe' });
   });
+
+  it('POST /logs accepts client log payload', async () => {
+    const payload = { level: 'info', message: 'client event', context: { feature: 'test' } };
+    const res = await request(app).post('/logs').send(payload).set('Content-Type', 'application/json');
+    expect(res.status).toBe(204);
+  });
 });
 
 
