@@ -6,12 +6,24 @@ import { logger } from './logger';
 import { z } from 'zod';
 import { appConfig } from './config/env';
 import { getMongoClient } from './db/mongo';
+import { randomUUID } from 'crypto';
 
 export const app = express();
 
 app.use(express.json());
 app.use(cors({ origin: appConfig.CORS_ORIGIN }));
-app.use(pinoHttp({ logger }));
+app.use(
+  pinoHttp({
+    logger,
+    genReqId: (req, res) => {
+      const headerId = req.headers['x-request-id'];
+      const candidate = typeof headerId === 'string' ? headerId : Array.isArray(headerId) ? headerId[0] : undefined;
+      const id = candidate && candidate.trim().length > 0 ? candidate.trim() : randomUUID();
+      res.setHeader('x-request-id', id);
+      return id;
+    },
+  })
+);
 
 app.get('/', (_req, res) => {
   res.json({ message: 'Hello, TicTacToe' });

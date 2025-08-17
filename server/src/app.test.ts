@@ -32,6 +32,21 @@ describe('health/readiness endpoints', () => {
     expect(res.status).toBe(200);
   });
 
+  it('sets x-request-id when not provided', async () => {
+    const res = await request(app).get('/healthz');
+    expect(res.status).toBe(200);
+    const id = res.headers['x-request-id'];
+    expect(typeof id).toBe('string');
+    expect((id as string).length).toBeGreaterThan(0);
+  });
+
+  it('echoes provided x-request-id and returns same header', async () => {
+    const provided = 'req-abc-123';
+    const res = await request(app).get('/healthz').set('x-request-id', provided);
+    expect(res.status).toBe(200);
+    expect(res.headers['x-request-id']).toBe(provided);
+  });
+
   it('GET / returns hello message', async () => {
     const res = await request(app).get('/');
     expect(res.status).toBe(200);
