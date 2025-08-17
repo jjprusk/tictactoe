@@ -7,7 +7,13 @@ const rootLogPath = resolve(__dirname, '..', '..', 'LOG');
 // Only enable file transport when explicitly requested, and never in tests
 const enableFileTransport = process.env.LOG_TO_FILE === '1' && process.env.NODE_ENV !== 'test';
 
-export const loggerTransportTargets: any = enableFileTransport
+type TransportTarget = {
+  target: string;
+  level?: string;
+  options?: Record<string, unknown>;
+};
+
+export const loggerTransportTargets: ReadonlyArray<TransportTarget> | undefined = enableFileTransport
   ? [
       {
         target: 'pino-pretty',
@@ -21,7 +27,7 @@ export const loggerTransportTargets: any = enableFileTransport
     ]
   : undefined;
 
-const transport = loggerTransportTargets ? pino.transport({ targets: loggerTransportTargets as any }) : undefined;
+const transport = loggerTransportTargets ? pino.transport({ targets: loggerTransportTargets }) : undefined;
 
 export const logger = pino(
   {

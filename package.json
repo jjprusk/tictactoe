@@ -19,6 +19,7 @@
     "start:server": "npm --workspace server run dev",
     "start:client": "npm --workspace client run dev",
     "prepare": "husky",
+    "preflight": "npm --workspace server run typecheck && npm --workspace server run lint && npm --workspace server run test",
     "test": "npm --workspace server run test",
     "test:watch": "npm --workspace server run test:watch",
     "test:cov": "npm --workspace server run test:cov",

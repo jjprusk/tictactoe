@@ -2,6 +2,9 @@ module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
   plugins: ['@typescript-eslint'],
+  settings: {
+    // Silence import/first missing plugin in tests
+  },
   env: { node: true, es2022: true },
   extends: [
     'eslint:recommended',
@@ -18,6 +21,7 @@ module.exports = {
       rules: {
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/ban-ts-comment': 'off',
+        'import/first': 'off',
       },
     },
   ],

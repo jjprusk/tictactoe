@@ -36,7 +36,7 @@ app.post('/echo', (req, res) => {
 const clientLogSchema = z.object({
   level: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).default('info'),
   message: z.string().min(1),
-  context: z.record(z.string(), z.any()).optional(),
+  context: z.record(z.string(), z.unknown()).optional(),
 });
 
 app.post('/logs', (req, res) => {
@@ -46,7 +46,27 @@ app.post('/logs', (req, res) => {
     return;
   }
   const { level, message, context } = parsed.data;
-  (logger as any)[level](context ?? {}, message);
+  const ctx: Record<string, unknown> = context ?? {};
+  switch (level) {
+    case 'trace':
+      logger.trace(ctx, message);
+      break;
+    case 'debug':
+      logger.debug(ctx, message);
+      break;
+    case 'info':
+      logger.info(ctx, message);
+      break;
+    case 'warn':
+      logger.warn(ctx, message);
+      break;
+    case 'error':
+      logger.error(ctx, message);
+      break;
+    case 'fatal':
+      logger.fatal(ctx, message);
+      break;
+  }
   res.status(204).end();
 });
 

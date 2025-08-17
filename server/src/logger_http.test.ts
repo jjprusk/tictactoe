@@ -19,7 +19,6 @@ vi.mock('./logger', () => {
 });
 
 // Now import the app (middleware will bind to our mock logger)
-// eslint-disable-next-line import/first
 import { app } from './app';
 import { logger as mockLogger } from './logger';
 
