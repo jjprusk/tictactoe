@@ -29,4 +29,16 @@ export function isPlayer(value: unknown): value is Player {
   return value === 'X' || value === 'O';
 }
 
+/**
+ * Core game state for a single TicTacToe match.
+ * - board: 3x3 grid as flat array (length 9)
+ * - currentPlayer: whose turn it is
+ * - moves: history of zero-based positions (0..8) in order played
+ */
+export interface GameState {
+  board: Board;
+  currentPlayer: Player;
+  moves: number[];
+}
+
 
