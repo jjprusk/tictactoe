@@ -1,6 +1,8 @@
 // © 2025 Joe Pruskowski
 import type { Server as IOServer, Socket } from 'socket.io';
 import { z } from 'zod';
+import { incSocketConnections, incSocketDisconnections, observeMoveLatencySeconds } from './metrics';
+import { getTracer } from './tracing';
 
 type Role = 'player' | 'observer';
 
@@ -44,6 +46,7 @@ export function attachSocketHandlers(io: IOServer) {
 	}
 
 	io.on('connection', (socket: Socket) => {
+		incSocketConnections();
 		log('connected', socket.id);
 		socket.emit('server:health', { ok: true });
 
@@ -96,6 +99,9 @@ export function attachSocketHandlers(io: IOServer) {
 		});
 
 		socket.on('move:make', (rawPayload: unknown, ack?: Ack) => {
+			const tracer = getTracer();
+			const span = tracer.startSpan('socket.move_make');
+			const start = process.hrtime.bigint();
 			// Backpressure: optional test-mode rate limit per socket
 			if (rateLimit > 0) {
 				const now = Date.now();
@@ -111,16 +117,31 @@ export function attachSocketHandlers(io: IOServer) {
 			const parsed = moveSchema.extend({ delayMs: z.number().int().nonnegative().optional() }).safeParse(rawPayload);
 			if (!parsed.success) {
 				ack?.({ ok: false, error: 'invalid-payload' });
+				const end = process.hrtime.bigint();
+				observeMoveLatencySeconds('error', Number(end - start) / 1e9);
+				span.setAttribute('error', true);
+				span.setAttribute('error.kind', 'invalid-payload');
+				span.end();
 				return;
 			}
 			const { roomId, nonce, delayMs } = parsed.data as { roomId: string; nonce: string; delayMs?: number };
 			const state = getRoomState(roomId);
 			if (state.nonces.has(nonce)) {
 				ack?.({ ok: false, error: 'duplicate' });
+				const end = process.hrtime.bigint();
+				observeMoveLatencySeconds('error', Number(end - start) / 1e9);
+				span.setAttribute('error', true);
+				span.setAttribute('error.kind', 'duplicate');
+				span.end();
 				return;
 			}
 			state.nonces.add(nonce);
-			const doAck = () => ack?.({ ok: true });
+			const doAck = () => {
+				ack?.({ ok: true });
+				const end = process.hrtime.bigint();
+				observeMoveLatencySeconds('ok', Number(end - start) / 1e9);
+				span.end();
+			};
 			if (isTest && typeof delayMs === 'number' && delayMs > 0) {
 				setTimeout(doAck, delayMs);
 			} else {
@@ -134,6 +155,7 @@ export function attachSocketHandlers(io: IOServer) {
 				state.playerIds.delete(socket.id);
 			}
 			log('disconnected', socket.id);
+			incSocketDisconnections();
 		});
 	});
 }

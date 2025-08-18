@@ -85,9 +85,9 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S050: Install Redis client (ioredis or redis)
 - [x] S051: Implement Redis connection and ping check
 - [x] S052: Write unit tests for Redis operations
-- [ ] S053: Instrument Prometheus metrics (HTTP durations, socket reconnects)
-- [ ] S054: Add move latency histogram metric on server
-- [ ] S055: Initialize OpenTelemetry tracing (basic spans on move lifecycle)
+- [x] S053: Instrument Prometheus metrics (HTTP durations, socket reconnects)
+- [x] S054: Add move latency histogram metric on server
+- [x] S055: Initialize OpenTelemetry tracing (basic spans on move lifecycle)
 - [ ] S056: Create `scripts/start-server.sh` with port cleanup and start
 - [ ] S057: Add SIGTERM handler for graceful server shutdown
 - [ ] S058: Test server start/stop scripts locally

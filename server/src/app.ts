@@ -9,6 +9,7 @@ import { appConfig } from './config/env';
 import { getMongoClient } from './db/mongo';
 import { getRedisClient } from './db/redis';
 import { randomUUID } from 'crypto';
+import { getMetricsText, recordHttpMetricsMiddleware } from './metrics';
 
 export const app = express();
 
@@ -35,6 +36,7 @@ app.use(
     },
   })
 );
+app.use(recordHttpMetricsMiddleware());
 app.use(
   pinoHttp({
     logger,
@@ -50,6 +52,12 @@ app.use(
 
 app.get('/', (_req, res) => {
   res.json({ message: 'Hello, TicTacToe' });
+});
+
+app.get('/metrics', async (_req, res) => {
+  const body = await getMetricsText();
+  res.setHeader('Content-Type', 'text/plain; version=0.0.4');
+  res.send(body);
 });
 
 app.get('/healthz', (_req, res) => {

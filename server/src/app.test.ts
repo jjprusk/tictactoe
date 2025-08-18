@@ -34,6 +34,8 @@ describe('health/readiness endpoints', () => {
     expect(res.status).toBe(200);
   });
 
+  // Metrics tests moved to app_metrics.test.ts to control env gating
+
   it('sets x-request-id when not provided', async () => {
     const res = await request(app).get('/healthz');
     expect(res.status).toBe(200);

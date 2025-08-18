@@ -5,11 +5,13 @@ import { loadConfig } from './config/env';
 import { buildMongoClient, connectWithRetry } from './db/mongo';
 import { app } from './app';
 import { createServers } from './server_factory';
+import { initTracing } from './tracing';
 
 export const httpServer = http.createServer(app);
 
 // Attach Socket.IO to the HTTP server (no events yet; see S023)
 try {
+  initTracing();
   const appConfig = loadConfig();
   // Build Socket.IO via factory to ease testing
   const built = createServers();
