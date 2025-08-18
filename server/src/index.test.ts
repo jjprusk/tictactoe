@@ -72,6 +72,55 @@ describe('server bootstrap', () => {
 			initSpy.mockRestore();
 		});
 
+		it('logs server started with port on listen', async () => {
+			process.env.SERVER_PORT = '0';
+			vi.resetModules();
+			vi.mock('./logger', () => {
+				const logger: any = { info: vi.fn(), child: vi.fn(() => logger) };
+				return { logger };
+			});
+			await import('./index');
+			const { logger } = await import('./logger');
+			expect(logger.info).toHaveBeenCalledWith({ port: 0 }, 'server started');
+		});
+
+		it('logs console error on mongo connectWithRetry rejection', async () => {
+			process.env.SERVER_PORT = '0';
+			vi.resetModules();
+			vi.mock('./db/mongo', () => ({
+				buildMongoClient: vi.fn(() => ({})),
+				connectWithRetry: vi.fn(() => Promise.reject(new Error('oops'))),
+			}));
+			const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+			await import('./index');
+			await new Promise((r) => setTimeout(r, 0));
+			expect(errSpy).toHaveBeenCalled();
+			errSpy.mockRestore();
+		});
+
+		it('handles duplicate SIGTERM signals without crashing', async () => {
+			process.env.SERVER_PORT = '0';
+			vi.resetModules();
+			vi.mock('./logger', () => {
+				const logger: any = { info: vi.fn(), child: vi.fn(() => logger) };
+				return { logger };
+			});
+			await import('./index');
+			const exitSpy = vi.spyOn(process, 'exit').mockImplementation(((code?: string | number | null | undefined) => {
+				throw new Error(`exit ${code}`);
+			}) as never);
+			try { process.emit('SIGTERM'); } catch (_e) { void 0; }
+			try { process.emit('SIGTERM'); } catch (_e) { void 0; }
+			const { logger } = await import('./logger');
+			expect(logger.info).toHaveBeenCalledWith('SIGTERM received, initiating graceful shutdown');
+			// called at least twice
+			expect((logger.info as any).mock.calls.filter((c: any[]) => c[0] === 'SIGTERM received, initiating graceful shutdown').length).toBeGreaterThanOrEqual(2);
+			// close should be invoked for each signal (may be more due to prior listeners)
+			const closeCalls = (HOISTED.fakeServer.close as any).mock.calls.length;
+			expect(closeCalls).toBeGreaterThanOrEqual(2);
+			expect(exitSpy).toHaveBeenCalled();
+		});
+
 		it('handles SIGTERM gracefully (closes server then exits 0)', async () => {
 			process.env.SERVER_PORT = '0';
 			vi.resetModules();
