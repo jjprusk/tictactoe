@@ -92,9 +92,9 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S056: Create `scripts/start-server.sh` with port cleanup and start
 - [x] S057: Add SIGTERM handler for graceful server shutdown
 - [x] S058: Test server start/stop scripts locally
-- [ ] S059: Define `Board` type (3x3) and `Cell` for engine
-- [ ] S060: Define `Player` type ('X' | 'O') and helpers
-- [ ] S061: Implement `GameState` (board, currentPlayer, moves)
+- [x] S059: Define `Board` type (3x3) and `Cell` for engine
+- [x] S060: Define `Player` type ('X' | 'O') and helpers
+- [x] S061: Implement `GameState` (board, currentPlayer, moves)
 - [ ] S062: Implement `getLegalMoves(board)`
 - [ ] S063: Implement `applyMove(board, move, player)` (immutable)
 - [ ] S064: Implement `nextPlayer(current)` turn alternation
