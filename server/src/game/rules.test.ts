@@ -1,7 +1,7 @@
 // © 2025 Joe Pruskowski
 import { describe, it, expect } from 'vitest';
 import { createEmptyBoard } from './state';
-import { getLegalMoves, applyMove } from './rules';
+import { getLegalMoves, applyMove, nextPlayer } from './rules';
 
 describe('game/rules#getLegalMoves', () => {
   it('returns all positions for an empty board', () => {
@@ -44,6 +44,13 @@ describe('game/rules#applyMove', () => {
     const b = createEmptyBoard();
     expect(() => applyMove(b, -1, 'X')).toThrowError(/out-of-bounds/);
     expect(() => applyMove(b, 9, 'X')).toThrowError(/out-of-bounds/);
+  });
+});
+
+describe('game/rules#nextPlayer', () => {
+  it('alternates from X to O and back', () => {
+    expect(nextPlayer('X')).toBe('O');
+    expect(nextPlayer('O')).toBe('X');
   });
 });
 

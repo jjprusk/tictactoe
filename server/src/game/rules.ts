@@ -33,4 +33,11 @@ export function applyMove(board: Board, move: number, player: Player): Board {
   return next as ReadonlyArray<Cell>;
 }
 
+/**
+ * Alternates turns between 'X' and 'O'.
+ */
+export function nextPlayer(current: Player): Player {
+  return current === 'X' ? 'O' : 'X';
+}
+
 
