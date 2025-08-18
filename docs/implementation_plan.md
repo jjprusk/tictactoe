@@ -87,9 +87,9 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S052: Write unit tests for Redis operations
 - [x] S053: Instrument Prometheus metrics (HTTP durations, socket reconnects)
 - [x] S054: Add move latency histogram metric on server
-- [x] S055: Initialize OpenTelemetry tracing (basic spans on move lifecycle)
+- [x] S055: Initialize OpenTelemetry tracing (basic spans on move lifecycle)r
 - [ ] S056: Create `scripts/start-server.sh` with port cleanup and start
-- [ ] S057: Add SIGTERM handler for graceful server shutdown
+- [x] S057: Add SIGTERM handler for graceful server shutdown
 - [ ] S058: Test server start/stop scripts locally
 - [ ] S059: Define Board type (3x3) for game engine
 - [ ] S060: Define Player enum (X, O, None)

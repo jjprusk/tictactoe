@@ -72,6 +72,23 @@ describe('server bootstrap', () => {
 			initSpy.mockRestore();
 		});
 
+		it('handles SIGTERM gracefully (closes server then exits 0)', async () => {
+			process.env.SERVER_PORT = '0';
+			vi.resetModules();
+			const mod = await import('./index');
+			const exitSpy = vi.spyOn(process, 'exit').mockImplementation(((code?: string | number | null | undefined) => {
+				throw new Error(`exit ${code}`);
+			}) as never);
+			// ensure close will call its callback (already implemented in hoisted fake)
+			try {
+				process.emit('SIGTERM');
+			} catch {
+				// ignore thrown by mocked process.exit
+			}
+			expect((mod.httpServer.close as any).mock.calls.length > 0).toBe(true);
+			expect(exitSpy).toHaveBeenCalledWith(0);
+		});
+
 	});
 
 	// Additional bootstrap behavior tests omitted to avoid brittle side-effects
