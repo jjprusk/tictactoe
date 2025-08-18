@@ -44,8 +44,15 @@ try {
   }
 }
 
-process.on('SIGTERM', () => {
-  httpServer.close(() => process.exit(0));
-});
+function gracefulShutdown(signal: string) {
+  logger.info(`${signal} received, initiating graceful shutdown`);
+  httpServer.close(() => {
+    logger.info('HTTP server closed; exiting with code 0');
+    process.exit(0);
+  });
+}
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 

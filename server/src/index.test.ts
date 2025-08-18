@@ -75,6 +75,14 @@ describe('server bootstrap', () => {
 		it('handles SIGTERM gracefully (closes server then exits 0)', async () => {
 			process.env.SERVER_PORT = '0';
 			vi.resetModules();
+			// Mock logger to capture messages
+			vi.mock('./logger', () => {
+				const logger: any = {
+					info: vi.fn(),
+					child: vi.fn(() => logger),
+				};
+				return { logger };
+			});
 			const mod = await import('./index');
 			const exitSpy = vi.spyOn(process, 'exit').mockImplementation(((code?: string | number | null | undefined) => {
 				throw new Error(`exit ${code}`);
@@ -85,6 +93,30 @@ describe('server bootstrap', () => {
 			} catch {
 				// ignore thrown by mocked process.exit
 			}
+			const { logger } = await import('./logger');
+			expect(logger.info).toHaveBeenCalledWith('SIGTERM received, initiating graceful shutdown');
+			expect(logger.info).toHaveBeenCalledWith('HTTP server closed; exiting with code 0');
+			expect((mod.httpServer.close as any).mock.calls.length > 0).toBe(true);
+			expect(exitSpy).toHaveBeenCalledWith(0);
+		});
+
+		it('handles SIGINT gracefully (closes server then exits 0)', async () => {
+			process.env.SERVER_PORT = '0';
+			vi.resetModules();
+			vi.mock('./logger', () => {
+				const logger: any = { info: vi.fn(), child: vi.fn(() => logger) };
+				return { logger };
+			});
+			const mod = await import('./index');
+			const exitSpy = vi.spyOn(process, 'exit').mockImplementation(((code?: string | number | null | undefined) => {
+				throw new Error(`exit ${code}`);
+			}) as never);
+			try {
+				process.emit('SIGINT');
+			} catch (_e) { void 0; }
+			const { logger } = await import('./logger');
+			expect(logger.info).toHaveBeenCalledWith('SIGINT received, initiating graceful shutdown');
+			expect(logger.info).toHaveBeenCalledWith('HTTP server closed; exiting with code 0');
 			expect((mod.httpServer.close as any).mock.calls.length > 0).toBe(true);
 			expect(exitSpy).toHaveBeenCalledWith(0);
 		});
