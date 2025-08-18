@@ -37,6 +37,10 @@ A web-based TicTacToe game where a human player competes against a state-of-the-
 
 ## Guiding Principles
 - Allow a fully working gameplay model to be implemented and validated prior to AI implementation, enabling end-to-end testing, observability, and UX polish before integrating the AI. Keep both a "Random" strategy and the "AI" strategy available at runtime with a toggle to switch between them for ongoing debugging and evaluation.
+ - UI: Mobile-first design
+ - UI: Easy to use (low cognitive load; clear affordances)
+ - UI: Self-explanatory (minimal instructions required)
+ - UI: Beautiful and aesthetically pleasing design
 
 ## Non-Goals
 - No hard-coded strategic rules beyond basic mechanics (valid moves, turn order, win/draw).

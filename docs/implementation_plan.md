@@ -9,6 +9,10 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - Observability, security, and reliability baked-in from the start
 - Enforce minimum test coverage targets: lines/statements ≥70%, functions ≥70%, branches ≥60%
 - Allow a fully working gameplay model to be implemented and validated prior to AI implementation. Maintain both a Random strategy and an AI strategy with a runtime toggle to switch between them for debugging and evaluation.
+ - UI: Mobile-first design
+ - UI: Easy to use (low cognitive load; clear affordances)
+ - UI: Self-explanatory (minimal instructions required)
+ - UI: Beautiful and aesthetically pleasing design
 
 ## Alignment with `docs/project_rules.md`
 - Implement unified logger/debugger early (M1) and expand capabilities soon after (M8)
@@ -95,17 +99,17 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S059: Define `Board` type (3x3) and `Cell` for engine
 - [x] S060: Define `Player` type ('X' | 'O') and helpers
 - [x] S061: Implement `GameState` (board, currentPlayer, moves)
-- [ ] S062: Implement `getLegalMoves(board)`
-- [ ] S063: Implement `applyMove(board, move, player)` (immutable)
-- [ ] S064: Implement `nextPlayer(current)` turn alternation
-- [ ] S065: Implement `checkWin(board)` for rows/cols/diagonals
-- [ ] S066: Implement `checkDraw(board)`
-- [ ] S067: Implement `isTerminal(board)` and integrate win/draw checks
-- [ ] S068: Implement JSON-safe state serialization
-- [ ] S069: Define event types `MoveMade` and `GameOver`
-- [ ] S070: Write unit tests for legal/illegal moves and immutability
-- [ ] S071: Write unit tests for all win patterns and draws
-- [ ] S072: Add property-based tests for engine invariants
+- [x] S062: Implement `getLegalMoves(board)`
+- [x] S063: Implement `applyMove(board, move, player)` (immutable)
+- [x] S064: Implement `nextPlayer(current)` turn alternation
+- [x] S065: Implement `checkWin(board)` for rows/cols/diagonals
+- [x] S066: Implement `checkDraw(board)`
+- [x] S067: Implement `isTerminal(board)` and integrate win/draw checks
+- [x] S068: Implement JSON-safe state serialization
+- [x] S069: Define event types `MoveMade` and `GameOver`
+- [x] S070: Write unit tests for legal/illegal moves and immutability
+- [x] S071: Write unit tests for all win patterns and draws
+- [x] S072: Add property-based tests for engine invariants
 - [ ] S073: Create client app with Vite (React + TypeScript) in `client/`
 - [ ] S074: Configure `vite.config.ts` with aliases and base settings
 - [ ] S075: Remove template boilerplate from `App.tsx`
