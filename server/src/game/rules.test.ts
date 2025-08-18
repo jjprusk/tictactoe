@@ -1,7 +1,7 @@
 // © 2025 Joe Pruskowski
 import { describe, it, expect } from 'vitest';
 import { createEmptyBoard } from './state';
-import { getLegalMoves, applyMove, nextPlayer, checkWin } from './rules';
+import { getLegalMoves, applyMove, nextPlayer, checkWin, checkDraw } from './rules';
 
 describe('game/rules#getLegalMoves', () => {
   it('returns all positions for an empty board', () => {
@@ -76,6 +76,28 @@ describe('game/rules#checkWin', () => {
   it('returns null when no winner', () => {
     const b = createEmptyBoard();
     expect(checkWin(b)).toBeNull();
+  });
+});
+
+describe('game/rules#checkDraw', () => {
+  it('returns false if there is a winner', () => {
+    const b = createEmptyBoard().slice();
+    (b as any)[0] = 'X'; (b as any)[1] = 'X'; (b as any)[2] = 'X';
+    expect(checkDraw(b as any)).toBe(false);
+  });
+
+  it('returns true when board is full and no winner', () => {
+    // X O X
+    // X O O
+    // O X X
+    const b = ['X','O','X','X','O','O','O','X','X'] as any;
+    expect(checkWin(b)).toBeNull();
+    expect(checkDraw(b)).toBe(true);
+  });
+
+  it('returns false when empty cells remain', () => {
+    const b = createEmptyBoard();
+    expect(checkDraw(b)).toBe(false);
   });
 });
 

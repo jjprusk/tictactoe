@@ -68,4 +68,15 @@ export function checkWin(board: Board): Player | null {
   return null;
 }
 
+/**
+ * Returns true when the board is full and there is no winner.
+ */
+export function checkDraw(board: Board): boolean {
+  if (checkWin(board) !== null) return false;
+  for (let i = 0; i < board.length; i += 1) {
+    if (board[i] === null) return false;
+  }
+  return true;
+}
+
 
