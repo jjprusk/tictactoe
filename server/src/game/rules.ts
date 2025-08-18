@@ -40,4 +40,32 @@ export function nextPlayer(current: Player): Player {
   return current === 'X' ? 'O' : 'X';
 }
 
+/**
+ * Checks for a winner on the board across rows, columns, and diagonals.
+ * Returns the winning Player or null if no winner.
+ */
+export function checkWin(board: Board): Player | null {
+  const lines: [number, number, number][] = [
+    // rows
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    // cols
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    // diags
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
+
+  for (const [a, b, c] of lines) {
+    const v = board[a];
+    if (v !== null && v === board[b] && v === board[c]) {
+      return v;
+    }
+  }
+  return null;
+}
+
 

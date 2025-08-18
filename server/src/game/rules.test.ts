@@ -1,7 +1,7 @@
 // © 2025 Joe Pruskowski
 import { describe, it, expect } from 'vitest';
 import { createEmptyBoard } from './state';
-import { getLegalMoves, applyMove, nextPlayer } from './rules';
+import { getLegalMoves, applyMove, nextPlayer, checkWin } from './rules';
 
 describe('game/rules#getLegalMoves', () => {
   it('returns all positions for an empty board', () => {
@@ -51,6 +51,31 @@ describe('game/rules#nextPlayer', () => {
   it('alternates from X to O and back', () => {
     expect(nextPlayer('X')).toBe('O');
     expect(nextPlayer('O')).toBe('X');
+  });
+});
+
+describe('game/rules#checkWin', () => {
+  it('detects row wins', () => {
+    const b = createEmptyBoard().slice();
+    (b as any)[0] = 'X'; (b as any)[1] = 'X'; (b as any)[2] = 'X';
+    expect(checkWin(b as any)).toBe('X');
+  });
+
+  it('detects column wins', () => {
+    const b = createEmptyBoard().slice();
+    (b as any)[0] = 'O'; (b as any)[3] = 'O'; (b as any)[6] = 'O';
+    expect(checkWin(b as any)).toBe('O');
+  });
+
+  it('detects diagonal wins', () => {
+    const b = createEmptyBoard().slice();
+    (b as any)[2] = 'X'; (b as any)[4] = 'X'; (b as any)[6] = 'X';
+    expect(checkWin(b as any)).toBe('X');
+  });
+
+  it('returns null when no winner', () => {
+    const b = createEmptyBoard();
+    expect(checkWin(b)).toBeNull();
   });
 });
 
