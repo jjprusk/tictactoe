@@ -25,6 +25,15 @@ export const OptionsPanel: React.FC<OptionsPanelProps> = ({ onStrategyChange }) 
         <option value="random">Random</option>
         <option value="ai">AI</option>
       </select>
+      <button
+        type="button"
+        onClick={async () => {
+          const { sendLog } = await import('./utils/clientLogger');
+          void sendLog({ level: 'info', message: 'client:button-log', context: { from: 'OptionsPanel' } }).catch(() => void 0);
+        }}
+      >
+        Send Test Log
+      </button>
     </div>
   );
 };
