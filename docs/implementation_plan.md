@@ -92,18 +92,18 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S056: Create `scripts/start-server.sh` with port cleanup and start
 - [x] S057: Add SIGTERM handler for graceful server shutdown
 - [x] S058: Test server start/stop scripts locally
-- [ ] S059: Define Board type (3x3) for game engine
-- [ ] S060: Define Player enum (X, O, None)
-- [ ] S061: Implement `GameState` interface (board, currentPlayer, moves)
-- [ ] S062: Implement `isValidMove(state, position)`
-- [ ] S063: Implement `applyMove(state, position, player)`
-- [ ] S064: Implement turn alternation logic
-- [ ] S065: Implement `checkWin(board, player)` for rows/cols/diagonals
-- [ ] S066: Implement `checkDraw(board)` logic
-- [ ] S067: Integrate post-move win/draw checks
+- [ ] S059: Define `Board` type (3x3) and `Cell` for engine
+- [ ] S060: Define `Player` type ('X' | 'O') and helpers
+- [ ] S061: Implement `GameState` (board, currentPlayer, moves)
+- [ ] S062: Implement `getLegalMoves(board)`
+- [ ] S063: Implement `applyMove(board, move, player)` (immutable)
+- [ ] S064: Implement `nextPlayer(current)` turn alternation
+- [ ] S065: Implement `checkWin(board)` for rows/cols/diagonals
+- [ ] S066: Implement `checkDraw(board)`
+- [ ] S067: Implement `isTerminal(board)` and integrate win/draw checks
 - [ ] S068: Implement JSON-safe state serialization
 - [ ] S069: Define event types `MoveMade` and `GameOver`
-- [ ] S070: Write unit tests for valid/invalid moves
+- [ ] S070: Write unit tests for legal/illegal moves and immutability
 - [ ] S071: Write unit tests for all win patterns and draws
 - [ ] S072: Add property-based tests for engine invariants
 - [ ] S073: Create client app with Vite (React + TypeScript) in `client/`
@@ -111,13 +111,13 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [ ] S075: Remove template boilerplate from `App.tsx`
 - [ ] S076: Install Redux Toolkit and React Redux in client
 - [ ] S077: Create `store.ts` and root reducer
-- [ ] S078: Add `session` slice with initial state
+- [ ] S078: Add `session` slice with initial state including `strategy`
 - [ ] S079: Wrap app with Redux Provider in `index.tsx`
 - [ ] S080: Install Socket.IO client library
 - [ ] S081: Create client socket service (connect/disconnect handlers)
 - [ ] S082: Add connection status indicator component
-- [ ] S083: Dispatch Redux actions on socket events
-- [ ] S084: Implement responsive layout (header, game area, panel)
+- [ ] S083: Dispatch Redux actions on socket events (state, errors)
+- [ ] S084: Implement responsive layout (header, game area, options panel)
 - [ ] S085: Create header with title/logo
 - [ ] S086: Add placeholders for game board and insights panel
 - [ ] S087: Create `scripts/start-client.sh` with port cleanup and start
@@ -135,44 +135,44 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [ ] S099: Implement standardized error payloads
 - [ ] S100: Configure client reconnect with exponential backoff
 - [ ] S101: On reconnect, rejoin room using a session token
-- [ ] S102: Implement optimistic UI for moves and server reconciliation
+- [ ] S102: Implement optimistic UI for moves and reconcile with server
 - [ ] S103: Build `Board.tsx` 3x3 grid component
 - [ ] S104: Add touch and click handlers for squares
 - [ ] S105: Add keyboard navigation with appropriate ARIA roles
 - [ ] S106: Implement current player indicator component
 - [ ] S107: Highlight last move via CSS
-- [ ] S108: Implement result banner (win/draw/loss)
+- [ ] S108: Implement result banner (win/draw/draw)
 - [ ] S109: Add reset button that emits reset event
 - [ ] S110: Make spectator view read-only and label spectators
 - [ ] S111: Implement lobby page fetching active games
 - [ ] S112: Implement join button emitting `join_game`
-- [ ] S113: Define `AIRequest` (gameState, player) and `AIResponse` (position)
-- [ ] S114: Implement `getValidMoves(state)` function
-- [ ] S115: Implement random-move AI agent
-- [ ] S116: Integrate AI into match flow as a virtual player
-- [ ] S117: Measure and log AI inference latency
-- [ ] S118: Implement config flag to choose first player
-- [ ] S119: Alternate first move across games based on count
-- [ ] S120: Implement offline mode: detect disconnects and switch to local random AI
-- [ ] S121: Show offline banner and disable server emits while offline
-- [ ] S122: On reconnect, maintain session; do not replay offline games to server
-- [ ] S123: Define MongoDB schemas for games, moves, sessions, models, logs
-- [ ] S124: Add compound indexes for `gameId`, `sessionId`, timestamps
-- [ ] S125: Add migration tooling (migrate-mongo) and initial baseline migration
-- [ ] S126: Implement `saveGameStart(game)` persistence
-- [ ] S127: Implement `saveMove(move)` persistence
-- [ ] S128: Implement `saveGameOutcome(gameId, result)` persistence
-- [ ] S129: Implement Redis key patterns for live game state
-- [ ] S130: Implement Redis set/get with TTL for caches
-- [ ] S131: Implement retention job to delete old logs
-- [ ] S132: Add configuration for retention TTL days
-- [ ] S133: Configure server logger transport to MongoDB and sampling
-- [ ] S134: Implement client log wrapper and pre-filtering
-- [ ] S135: Send batched client logs to server endpoint
-- [ ] S136: Implement admin endpoint to change log level (with auth)
-- [ ] S137: Propagate new log level to connected clients
-- [ ] S138: Implement log export endpoint (CSV/JSON)
-- [ ] S139: Query logs from MongoDB and stream export
+- [ ] S113: Define `AIRequest` (gameState, player) and `AIResponse` (position) for future AI
+- [ ] S114: Implement random-move strategy `pickRandomMove(board, player, rng?)`
+- [ ] S115: Introduce `Strategy = 'random' | 'ai'` and `makeMove(board, player, strategy)` orchestrator (tracing + metrics)
+- [ ] S116: Integrate random strategy into match flow (human vs random end-to-end)
+- [ ] S117: Measure and log decision latency per strategy (Prometheus histogram)
+- [ ] S118: Implement config flag/env default `AI_STRATEGY` with per-game override
+- [ ] S119: Alternate first move across games; add config to choose first player
+- [ ] S120: Implement client Options Panel toggle (Random/AI) persisted to localStorage; send in `create_game`
+- [ ] S121: Implement offline mode: detect disconnects and switch to local random strategy
+- [ ] S122: Show offline banner and disable server emits while offline
+- [ ] S123: On reconnect, maintain session; do not replay offline games to server
+- [ ] S124: Define MongoDB schemas for games, moves, sessions, models, logs
+- [ ] S125: Add compound indexes for `gameId`, `sessionId`, timestamps
+- [ ] S126: Add migration tooling (migrate-mongo) and initial baseline migration
+- [ ] S127: Implement `saveGameStart(game)` persistence
+- [ ] S128: Implement `saveMove(move)` persistence
+- [ ] S129: Implement `saveGameOutcome(gameId, result)` persistence
+- [ ] S130: Implement Redis key patterns for live game state
+- [ ] S131: Implement Redis set/get with TTL for caches
+- [ ] S132: Implement retention job to delete old logs
+- [ ] S133: Add configuration for retention TTL days
+- [ ] S134: Configure server logger transport to MongoDB and sampling
+- [ ] S135: Implement client log wrapper and pre-filtering
+- [ ] S136: Send batched client logs to server endpoint
+- [ ] S137: Implement admin endpoint to change log level (with auth)
+- [ ] S138: Propagate new log level to connected clients
+- [ ] S139: Implement log export endpoint (CSV/JSON) and streaming query
 - [ ] S140: Create Python AI microservice under `server/ai_service`
 - [ ] S141: Initialize FastAPI app with `/infer` and `/train` endpoints
 - [ ] S142: Define Pydantic schemas aligned with Node types
@@ -181,8 +181,8 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [ ] S145: Connect Python service to Redis; choose RQ or Celery for training jobs
 - [ ] S146: Implement training worker with quotas and kill switch
 - [ ] S147: Implement model registry/versioning with metadata and storage
-- [ ] S148: In Node, implement inference client calling Python over HTTP with timeout
-- [ ] S149: Add circuit breaker and fallback to random agent on failure
+- [ ] S148: Implement Node inference client calling Python over HTTP with timeout
+- [ ] S149: Add circuit breaker and graceful fallback to random on failure (with warn logs)
 - [ ] S150: Support seeded deterministic evaluation mode via query/headers
 - [ ] S151: Expose move latency metric including Python inference time
 - [ ] S152: Add tracing propagation between Node and Python services
