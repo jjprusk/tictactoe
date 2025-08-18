@@ -8,6 +8,7 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - Tests first for core logic; maintain ≥90% coverage
 - Observability, security, and reliability baked-in from the start
 - Enforce minimum test coverage targets: lines/statements ≥70%, functions ≥70%, branches ≥60%
+- Allow a fully working gameplay model to be implemented and validated prior to AI implementation. Maintain both a Random strategy and an AI strategy with a runtime toggle to switch between them for debugging and evaluation.
 
 ## Alignment with `docs/project_rules.md`
 - Implement unified logger/debugger early (M1) and expand capabilities soon after (M8)

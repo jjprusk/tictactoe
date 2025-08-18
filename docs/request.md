@@ -4,6 +4,7 @@ Last Updated: 2025-08-14
 
 ## Table of Contents
 - [Project Description](#project-description)
+- [Guiding Principles](#guiding-principles)
 - [Non-Goals](#non-goals)
 - [Glossary](#glossary)
 - [Target Audience](#target-audience)
@@ -33,6 +34,9 @@ Last Updated: 2025-08-14
 
 ## Project Description
 A web-based TicTacToe game where a human player competes against a state-of-the-art neural network AI that learns and improves through gameplay. All AI computation occurs on the backend, with the client serving as a UI layer. The system supports multiple simultaneous games with scalability for up to 100 concurrent connections. The AI uses only neural networks with no symbolic rules and only knows the rules from the start (i.e., it learns all strategy from gameplay).
+
+## Guiding Principles
+- Allow a fully working gameplay model to be implemented and validated prior to AI implementation, enabling end-to-end testing, observability, and UX polish before integrating the AI. Keep both a "Random" strategy and the "AI" strategy available at runtime with a toggle to switch between them for ongoing debugging and evaluation.
 
 ## Non-Goals
 - No hard-coded strategic rules beyond basic mechanics (valid moves, turn order, win/draw).

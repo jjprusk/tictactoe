@@ -43,3 +43,18 @@ export async function sendLog(
 }
 
 
+export type StrategyOption = 'random' | 'ai';
+
+const STRATEGY_KEY = 'ttt_strategy';
+
+export function getStoredStrategy(): StrategyOption {
+  const s = typeof window !== 'undefined' ? window.localStorage.getItem(STRATEGY_KEY) : null;
+  return s === 'ai' || s === 'random' ? s : 'random';
+}
+
+export function setStoredStrategy(strategy: StrategyOption): void {
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(STRATEGY_KEY, strategy);
+  }
+}
+
