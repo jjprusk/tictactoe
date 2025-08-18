@@ -1,7 +1,7 @@
 // © 2025 Joe Pruskowski
 import { describe, it, expect } from 'vitest';
 import { createEmptyBoard } from './state';
-import { getLegalMoves, applyMove, nextPlayer, checkWin, checkDraw } from './rules';
+import { getLegalMoves, applyMove, nextPlayer, checkWin, checkDraw, isTerminal } from './rules';
 
 describe('game/rules#getLegalMoves', () => {
   it('returns all positions for an empty board', () => {
@@ -98,6 +98,21 @@ describe('game/rules#checkDraw', () => {
   it('returns false when empty cells remain', () => {
     const b = createEmptyBoard();
     expect(checkDraw(b)).toBe(false);
+  });
+});
+
+describe('game/rules#isTerminal', () => {
+  it('is true for a win', () => {
+    const b = ['X','X','X', null, null, null, null, null, null] as any;
+    expect(isTerminal(b)).toBe(true);
+  });
+  it('is true for a draw', () => {
+    const b = ['X','O','X','X','O','O','O','X','X'] as any;
+    expect(isTerminal(b)).toBe(true);
+  });
+  it('is false otherwise', () => {
+    const b = createEmptyBoard();
+    expect(isTerminal(b)).toBe(false);
   });
 });
 

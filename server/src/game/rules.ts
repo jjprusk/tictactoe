@@ -79,4 +79,11 @@ export function checkDraw(board: Board): boolean {
   return true;
 }
 
+/**
+ * Returns true if the game is over either by a win or a draw.
+ */
+export function isTerminal(board: Board): boolean {
+  return checkWin(board) !== null || checkDraw(board);
+}
+
 
