@@ -17,6 +17,12 @@ export default defineConfig(({ mode }) => ({
   server: {
     port: 5173,
     open: false,
+    proxy: {
+      '/logs': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+    },
   },
   build: {
     target: 'es2020',
