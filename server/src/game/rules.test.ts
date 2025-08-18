@@ -45,6 +45,31 @@ describe('game/rules#applyMove', () => {
     expect(() => applyMove(b, -1, 'X')).toThrowError(/out-of-bounds/);
     expect(() => applyMove(b, 9, 'X')).toThrowError(/out-of-bounds/);
   });
+
+  it('throws on non-integer indices (NaN/Infinity/floats)', () => {
+    const b = createEmptyBoard();
+    expect(() => applyMove(b, Number.NaN as unknown as number, 'X')).toThrow(/out-of-bounds/);
+    expect(() => applyMove(b, Number.POSITIVE_INFINITY as unknown as number, 'X')).toThrow(/out-of-bounds/);
+    expect(() => applyMove(b, 2.5 as unknown as number, 'X')).toThrow(/out-of-bounds/);
+    // string coerced via any should be rejected
+    expect(() => applyMove(b as any, '4' as any, 'X')).toThrow();
+  });
+
+  it('only changes the targeted position; others remain unchanged', () => {
+    for (let pos = 0; pos < 9; pos += 1) {
+      const b = createEmptyBoard();
+      const next = applyMove(b, pos, 'X');
+      for (let i = 0; i < 9; i += 1) {
+        if (i === pos) {
+          expect(next[i]).toBe('X');
+        } else {
+          expect(next[i]).toBe(null);
+        }
+      }
+      // original remains all nulls
+      expect(b.every((c) => c === null)).toBe(true);
+    }
+  });
 });
 
 describe('game/rules#nextPlayer', () => {
@@ -113,6 +138,22 @@ describe('game/rules#isTerminal', () => {
   it('is false otherwise', () => {
     const b = createEmptyBoard();
     expect(isTerminal(b)).toBe(false);
+  });
+});
+
+describe('game/rules#getLegalMoves (comprehensive)', () => {
+  it('returns empty array for a full board', () => {
+    const full = ['X','O','X','X','O','O','O','X','X'] as any;
+    expect(getLegalMoves(full)).toEqual([]);
+  });
+
+  it('returns remaining positions after several moves', () => {
+    const b = createEmptyBoard().slice();
+    (b as any)[0] = 'X';
+    (b as any)[3] = 'O';
+    (b as any)[8] = 'X';
+    (b as any)[1] = 'O';
+    expect(getLegalMoves(b as any)).toEqual([2,4,5,6,7]);
   });
 });
 
