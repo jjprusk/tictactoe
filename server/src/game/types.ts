@@ -18,4 +18,15 @@ export const BOARD_DIMENSION = 3 as const;
 /** Total number of cells on the board. */
 export const BOARD_CELLS = BOARD_DIMENSION * BOARD_DIMENSION;
  
+/** Players who can make moves. */
+export type Player = 'X' | 'O';
+
+/** Constant list of valid players. */
+export const PLAYERS = ['X', 'O'] as const;
+
+/** Runtime type guard for Player. */
+export function isPlayer(value: unknown): value is Player {
+  return value === 'X' || value === 'O';
+}
+
 
