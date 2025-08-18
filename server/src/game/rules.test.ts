@@ -102,6 +102,24 @@ describe('game/rules#checkWin', () => {
     const b = createEmptyBoard();
     expect(checkWin(b)).toBeNull();
   });
+
+  it('detects all 8 winning lines for X and O', () => {
+    const lines: [number, number, number][] = [
+      [0,1,2], [3,4,5], [6,7,8], // rows
+      [0,3,6], [1,4,7], [2,5,8], // cols
+      [0,4,8], [2,4,6],          // diagonals
+    ];
+
+    for (const player of ['X','O'] as const) {
+      for (const [a,b,c] of lines) {
+        const board = Array(9).fill(null) as any;
+        board[a] = player; board[b] = player; board[c] = player;
+        expect(checkWin(board)).toBe(player);
+        // A winning board is not a draw
+        expect(checkDraw(board)).toBe(false);
+      }
+    }
+  });
 });
 
 describe('game/rules#checkDraw', () => {
@@ -118,6 +136,19 @@ describe('game/rules#checkDraw', () => {
     const b = ['X','O','X','X','O','O','O','X','X'] as any;
     expect(checkWin(b)).toBeNull();
     expect(checkDraw(b)).toBe(true);
+  });
+
+  it('returns true for multiple distinct full no-winner boards', () => {
+    const examples: any[] = [
+      ['O','X','O','O','X','X','X','O','O'],
+      ['X','O','X','O','X','O','O','X','O'],
+      ['O','X','X','X','O','O','O','O','X'],
+    ];
+    for (const b of examples) {
+      expect(checkWin(b)).toBeNull();
+      expect(checkDraw(b)).toBe(true);
+      expect(isTerminal(b)).toBe(true);
+    }
   });
 
   it('returns false when empty cells remain', () => {
