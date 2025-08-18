@@ -110,20 +110,25 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S070: Write unit tests for legal/illegal moves and immutability
 - [x] S071: Write unit tests for all win patterns and draws
 - [x] S072: Add property-based tests for engine invariants
-- [ ] S073: Create client app with Vite (React + TypeScript) in `client/`
+- [ ] S073: Create client app with Vite (React + TypeScript) in `client/` (optimize for mobile-first dev loop)
 - [ ] S074: Configure `vite.config.ts` with aliases and base settings
+- [ ] S074a: Install and configure Tailwind CSS (PostCSS + autoprefixer); set mobile-first breakpoints
+- [ ] S074b: Establish design tokens (CSS variables) for colors, typography scale, spacing, radius, shadows; document in `docs/request.md`
 - [ ] S075: Remove template boilerplate from `App.tsx`
 - [ ] S076: Install Redux Toolkit and React Redux in client
 - [ ] S077: Create `store.ts` and root reducer
 - [ ] S078: Add `session` slice with initial state including `strategy`
 - [ ] S079: Wrap app with Redux Provider in `index.tsx`
+- [ ] S079a: Introduce baseline theme provider (light/dark) with tokens wired to Tailwind; persist user choice
 - [ ] S080: Install Socket.IO client library
 - [ ] S081: Create client socket service (connect/disconnect handlers)
 - [ ] S082: Add connection status indicator component
 - [ ] S083: Dispatch Redux actions on socket events (state, errors)
-- [ ] S084: Implement responsive layout (header, game area, options panel)
+- [ ] S084: Implement responsive layout (header, game area, options panel) with mobile-first stacks; collapse insights on small screens
+- [ ] S084a: Add tasteful motion/animation for page transitions and result banner (Framer Motion), respecting reduced-motion
 - [ ] S085: Create header with title/logo
 - [ ] S086: Add placeholders for game board and insights panel
+- [ ] S086a: Add microcopy and inline hints so flows are self-explanatory (no manual required)
 - [ ] S087: Create `scripts/start-client.sh` with port cleanup and start
 - [ ] S088: Test client start script locally
 - [ ] S089: Define Socket.IO event contracts (`create_game`, `join_game`, `leave_game`, `make_move`, `game_state`, `error`)
@@ -140,12 +145,13 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [ ] S100: Configure client reconnect with exponential backoff
 - [ ] S101: On reconnect, rejoin room using a session token
 - [ ] S102: Implement optimistic UI for moves and reconcile with server
-- [ ] S103: Build `Board.tsx` 3x3 grid component
-- [ ] S104: Add touch and click handlers for squares
+- [ ] S103: Build `Board.tsx` 3x3 grid component (mobile-first sizing; responsive grid; min 44px touch targets)
+- [ ] S104: Add touch and click handlers for squares (debounced; large hit areas)
+- [ ] S104a: Ensure visible focus outlines and full keyboard navigation (tab/arrow keys, Enter/Space)
 - [ ] S105: Add keyboard navigation with appropriate ARIA roles
 - [ ] S106: Implement current player indicator component
 - [ ] S107: Highlight last move via CSS
-- [ ] S108: Implement result banner (win/draw/draw)
+- [ ] S108: Implement result banner (win/draw/draw) with accessible semantics and clear microcopy
 - [ ] S109: Add reset button that emits reset event
 - [ ] S110: Make spectator view read-only and label spectators
 - [ ] S111: Implement lobby page fetching active games
@@ -157,7 +163,7 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [ ] S117: Measure and log decision latency per strategy (Prometheus histogram)
 - [ ] S118: Implement config flag/env default `AI_STRATEGY` with per-game override
 - [ ] S119: Alternate first move across games; add config to choose first player
-- [ ] S120: Implement client Options Panel toggle (Random/AI) persisted to localStorage; send in `create_game`
+- [ ] S120: Implement client Options Panel toggle (Random/AI) persisted to localStorage; accessible form controls; send in `create_game`
 - [ ] S121: Implement offline mode: detect disconnects and switch to local random strategy
 - [ ] S122: Show offline banner and disable server emits while offline
 - [ ] S123: On reconnect, maintain session; do not replay offline games to server
@@ -218,7 +224,7 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [ ] S178: Introduce chaos tests (kill server, drop sockets) and verify recovery
 - [ ] S178a: Integration: restart during active room with backoff/port-wait; packet delay/loss injection (on-demand CI)
 - [ ] S179: Add ARIA labels/roles to the board and controls
-- [ ] S180: Implement theme provider with light/dark modes
+- [ ] S180: Expand theme provider with rich theming (refined palette, typography, spacing); polish aesthetics
 - [ ] S181: Add sound/haptics toggles
 - [ ] S182: Implement tutorial/onboarding modal
 - [ ] S183: Implement undo/redo stack for casual mode
