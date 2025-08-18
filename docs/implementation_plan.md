@@ -112,155 +112,155 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S072: Add property-based tests for engine invariants
 - [ ] S073: Create client app with Vite (React + TypeScript) in `client/` (optimize for mobile-first dev loop)
 - [ ] S074: Configure `vite.config.ts` with aliases and base settings
-- [ ] S074a: Install and configure Tailwind CSS (PostCSS + autoprefixer); set mobile-first breakpoints
-- [ ] S074b: Establish design tokens (CSS variables) for colors, typography scale, spacing, radius, shadows; document in `docs/request.md`
-- [ ] S075: Remove template boilerplate from `App.tsx`
-- [ ] S076: Install Redux Toolkit and React Redux in client
-- [ ] S077: Create `store.ts` and root reducer
-- [ ] S078: Add `session` slice with initial state including `strategy`
-- [ ] S079: Wrap app with Redux Provider in `index.tsx`
-- [ ] S079a: Introduce baseline theme provider (light/dark) with tokens wired to Tailwind; persist user choice
-- [ ] S080: Install Socket.IO client library
-- [ ] S081: Create client socket service (connect/disconnect handlers)
-- [ ] S082: Add connection status indicator component
-- [ ] S083: Dispatch Redux actions on socket events (state, errors)
-- [ ] S084: Implement responsive layout (header, game area, options panel) with mobile-first stacks; collapse insights on small screens
-- [ ] S084a: Add tasteful motion/animation for page transitions and result banner (Framer Motion), respecting reduced-motion
-- [ ] S085: Create header with title/logo
-- [ ] S086: Add placeholders for game board and insights panel
-- [ ] S086a: Add microcopy and inline hints so flows are self-explanatory (no manual required)
-- [ ] S087: Create `scripts/start-client.sh` with port cleanup and start
-- [ ] S088: Test client start script locally
-- [ ] S089: Define Socket.IO event contracts (`create_game`, `join_game`, `leave_game`, `make_move`, `game_state`, `error`)
-- [ ] S090: Implement server event handlers with type-safe payloads
-- [ ] S091: Implement client emitters with type-safe payloads
-- [ ] S092: Add schema validation for received events
-- [ ] S093: Implement room creation with generated `roomId` and host role
-- [ ] S094: Implement role assignment on join (player/observer)
-- [ ] S095: Track room membership and roles on server
-- [ ] S096: Generate client-side nonce per move
-- [ ] S097: Deduplicate moves on server by nonce per game
-- [ ] S098: Use Socket.IO acknowledgements with timeouts
-- [ ] S099: Implement standardized error payloads
-- [ ] S100: Configure client reconnect with exponential backoff
-- [ ] S101: On reconnect, rejoin room using a session token
-- [ ] S102: Implement optimistic UI for moves and reconcile with server
-- [ ] S103: Build `Board.tsx` 3x3 grid component (mobile-first sizing; responsive grid; min 44px touch targets)
-- [ ] S104: Add touch and click handlers for squares (debounced; large hit areas)
-- [ ] S104a: Ensure visible focus outlines and full keyboard navigation (tab/arrow keys, Enter/Space)
-- [ ] S105: Add keyboard navigation with appropriate ARIA roles
-- [ ] S106: Implement current player indicator component
-- [ ] S107: Highlight last move via CSS
-- [ ] S108: Implement result banner (win/draw/draw) with accessible semantics and clear microcopy
-- [ ] S109: Add reset button that emits reset event
-- [ ] S110: Make spectator view read-only and label spectators
-- [ ] S111: Implement lobby page fetching active games
-- [ ] S112: Implement join button emitting `join_game`
-- [ ] S113: Define `AIRequest` (gameState, player) and `AIResponse` (position) for future AI
-- [ ] S114: Implement random-move strategy `pickRandomMove(board, player, rng?)`
-- [ ] S115: Introduce `Strategy = 'random' | 'ai'` and `makeMove(board, player, strategy)` orchestrator (tracing + metrics)
-- [ ] S116: Integrate random strategy into match flow (human vs random end-to-end)
-- [ ] S117: Measure and log decision latency per strategy (Prometheus histogram)
-- [ ] S118: Implement config flag/env default `AI_STRATEGY` with per-game override
-- [ ] S119: Alternate first move across games; add config to choose first player
-- [ ] S120: Implement client Options Panel toggle (Random/AI) persisted to localStorage; accessible form controls; send in `create_game`
-- [ ] S121: Implement offline mode: detect disconnects and switch to local random strategy
-- [ ] S122: Show offline banner and disable server emits while offline
-- [ ] S123: On reconnect, maintain session; do not replay offline games to server
-- [ ] S124: Define MongoDB schemas for games, moves, sessions, models, logs
-- [ ] S125: Add compound indexes for `gameId`, `sessionId`, timestamps
-- [ ] S126: Add migration tooling (migrate-mongo) and initial baseline migration
-- [ ] S127: Implement `saveGameStart(game)` persistence
-- [ ] S128: Implement `saveMove(move)` persistence
-- [ ] S129: Implement `saveGameOutcome(gameId, result)` persistence
-- [ ] S130: Implement Redis key patterns for live game state
-- [ ] S131: Implement Redis set/get with TTL for caches
-- [ ] S132: Implement retention job to delete old logs
-- [ ] S133: Add configuration for retention TTL days
-- [ ] S134: Configure server logger transport to MongoDB and sampling
-- [ ] S135: Implement client log wrapper and pre-filtering
-- [ ] S136: Send batched client logs to server endpoint
-- [ ] S137: Implement admin endpoint to change log level (with auth)
-- [ ] S138: Propagate new log level to connected clients
-- [ ] S139: Implement log export endpoint (CSV/JSON) and streaming query
-- [ ] S140: Create Python AI microservice under `server/ai_service`
-- [ ] S141: Initialize FastAPI app with `/infer` and `/train` endpoints
-- [ ] S142: Define Pydantic schemas aligned with Node types
-- [ ] S143: Add `requirements.txt` and uvicorn entrypoint
-- [ ] S144: Add Dockerfile for Python service
-- [ ] S145: Connect Python service to Redis; choose RQ or Celery for training jobs
-- [ ] S146: Implement training worker with quotas and kill switch
-- [ ] S147: Implement model registry/versioning with metadata and storage
-- [ ] S148: Implement Node inference client calling Python over HTTP with timeout
-- [ ] S149: Add circuit breaker and graceful fallback to random on failure (with warn logs)
-- [ ] S150: Support seeded deterministic evaluation mode via query/headers
-- [ ] S151: Expose move latency metric including Python inference time
-- [ ] S152: Add tracing propagation between Node and Python services
-- [ ] S153: Implement `calculateEMA(games, N, alpha)` function
-- [ ] S154: Use SMA fallback when games < N and annotate
-- [ ] S155: Exclude acquiesced sessions from aggregates
-- [ ] S156: Apply smoothing thresholds and anomaly clamps
-- [ ] S157: Implement `/stats/ema` endpoint with parameters
-- [ ] S158: Aggregate EMA, win/draw rates, and latency from DB
-- [ ] S159: Build frontend charts consuming stats API
-- [ ] S160: Add preset buttons for selectable N values
-- [ ] S161: Persist selected N in local storage and restore on load
-- [ ] S162: Implement milestone banners based on EMA thresholds
-- [ ] S163: Build collapsible insights panel showing thinking time
-- [ ] S164: Enforce spectating capacity and emit rejection on overflow
-- [ ] S165: Implement private game toggle and lobby filtering
-- [ ] S166: Add E2E tests for observer sync and non-interference
-- [ ] S167: Enforce HTTPS/WSS for server
-- [ ] S168: Implement optional JWT auth and rate limiting
-- [ ] S169: Implement abuse detection (spam rooms, rapid reconnects)
-- [ ] S170: Load secrets from environment/SSM and rotate keys policy
-- [ ] S171: Add input schema validation for all payloads and CSRF for REST
-- [ ] S172: Generate SBOM (Syft) in CI and scan images (Trivy)
-- [ ] S173: Add secret scanning (Gitleaks) and dependency audits to CI
-- [ ] S174: Configure client reconnect/backoff and session resume
-- [ ] S175: Wrap emits with retry on transient errors
-- [ ] S176: Configure bounded queues and load shedding policy
-- [ ] S177: Implement graceful shutdown with in-flight state persistence
-- [ ] S178: Introduce chaos tests (kill server, drop sockets) and verify recovery
-- [ ] S178a: Integration: restart during active room with backoff/port-wait; packet delay/loss injection (on-demand CI)
-- [ ] S179: Add ARIA labels/roles to the board and controls
-- [ ] S180: Expand theme provider with rich theming (refined palette, typography, spacing); polish aesthetics
-- [ ] S181: Add sound/haptics toggles
-- [ ] S182: Implement tutorial/onboarding modal
-- [ ] S183: Implement undo/redo stack for casual mode
-- [ ] S184: Add contract tests for event schemas and acknowledgements
-- [ ] S185: Add cross-browser/device tests (incl. throttled networks)
-- [ ] S186: Add E2E tests for H2H, HvAI, spectating, and error paths
-- [ ] S187: Add performance/load tests with thresholds (Artillery)
-- [ ] S188: Implement unified start script for server, client, or both (bg)
-- [ ] S189: Implement single stop script with PID tracking and port cleanup (3001/5173)
-- [ ] S190: Ensure scripts kill stray Node/Vite processes before restart
-- [ ] S191: Add PM2 ecosystem file for background processes
-- [ ] S192: Wire health/readiness probes into PM2 configuration
-- [ ] S193: Expand CI workflow with typecheck/tests/E2E/security jobs
-- [ ] S194: Create Dockerfiles for server and client
-- [ ] S195: Configure image publishing to registry
-- [ ] S196: Add IaC (Terraform) for staging/prod (ECS/EKS, Redis, Mongo)
-- [ ] S197: Deploy staging environment using CI/CD
-- [ ] S198: Configure blue/green or canary deployment and rollback
-- [ ] S199: Implement cron retention jobs for logs and sessions
-- [ ] S200: Implement nightly Mongo/Redis backups and restore runbook
-- [ ] S201: Implement anonymized research export and erasure flow
-- [ ] S202: Implement difficulty modes (Beginner/Learning/Advanced)
-- [ ] S203: Add per-mode target loss ratio configuration
-- [ ] S204: Implement model reset to zero-knowledge per mode
-- [ ] S205: Implement self-play job in Python service with iteration cap and quotas
-- [ ] S206: Add monitoring for overfitting/drift and scheduled evaluations
-- [ ] S207: Document API events and error catalog in `docs/`
-- [ ] S208: Write ops runbooks (restart, rollback, incident, DR)
-- [ ] S209: Add CONTRIBUTING.md and architecture diagram
-- [ ] S210: Housekeeping: update `docs/checklist.md` and `docs/notes.md`
+- [ ] S075: Install and configure Tailwind CSS (PostCSS + autoprefixer); set mobile-first breakpoints
+- [ ] S076: Establish design tokens (CSS variables) for colors, typography scale, spacing, radius, shadows; document in `docs/request.md`
+- [ ] S077: Remove template boilerplate from `App.tsx`
+- [ ] S078: Install Redux Toolkit and React Redux in client
+- [ ] S079: Create `store.ts` and root reducer
+- [ ] S080: Add `session` slice with initial state including `strategy`
+- [ ] S081: Wrap app with Redux Provider in `index.tsx`
+- [ ] S082: Introduce baseline theme provider (light/dark) with tokens wired to Tailwind; persist user choice
+- [ ] S083: Install Socket.IO client library
+- [ ] S084: Create client socket service (connect/disconnect handlers)
+- [ ] S085: Add connection status indicator component
+- [ ] S086: Dispatch Redux actions on socket events (state, errors)
+- [ ] S087: Implement responsive layout (header, game area, options panel) with mobile-first stacks; collapse insights on small screens
+- [ ] S088: Add tasteful motion/animation for page transitions and result banner (Framer Motion), respecting reduced-motion
+- [ ] S089: Create header with title/logo
+- [ ] S090: Add placeholders for game board and insights panel
+- [ ] S091: Add microcopy and inline hints so flows are self-explanatory (no manual required)
+- [ ] S092: Create `scripts/start-client.sh` with port cleanup and start
+- [ ] S093: Test client start script locally
+- [ ] S094: Define Socket.IO event contracts (`create_game`, `join_game`, `leave_game`, `make_move`, `game_state`, `error`)
+- [ ] S095: Implement server event handlers with type-safe payloads
+- [ ] S096: Implement client emitters with type-safe payloads
+- [ ] S097: Add schema validation for received events
+- [ ] S098: Implement room creation with generated `roomId` and host role
+- [ ] S099: Implement role assignment on join (player/observer)
+- [ ] S100: Track room membership and roles on server
+- [ ] S101: Generate client-side nonce per move
+- [ ] S102: Deduplicate moves on server by nonce per game
+- [ ] S103: Use Socket.IO acknowledgements with timeouts
+- [ ] S104: Implement standardized error payloads
+- [ ] S105: Configure client reconnect with exponential backoff
+- [ ] S106: On reconnect, rejoin room using a session token
+- [ ] S107: Implement optimistic UI for moves and reconcile with server
+- [ ] S108: Build `Board.tsx` 3x3 grid component (mobile-first sizing; responsive grid; min 44px touch targets)
+- [ ] S109: Add touch and click handlers for squares (debounced; large hit areas)
+- [ ] S110: Ensure visible focus outlines and full keyboard navigation (tab/arrow keys, Enter/Space)
+- [ ] S111: Add keyboard navigation with appropriate ARIA roles
+- [ ] S112: Implement current player indicator component
+- [ ] S113: Highlight last move via CSS
+- [ ] S114: Implement result banner (win/draw/draw) with accessible semantics and clear microcopy
+- [ ] S115: Add reset button that emits reset event
+- [ ] S116: Make spectator view read-only and label spectators
+- [ ] S117: Implement lobby page fetching active games
+- [ ] S118: Implement join button emitting `join_game`
+- [ ] S119: Define `AIRequest` (gameState, player) and `AIResponse` (position) for future AI
+- [ ] S120: Implement random-move strategy `pickRandomMove(board, player, rng?)`
+- [ ] S121: Introduce `Strategy = 'random' | 'ai'` and `makeMove(board, player, strategy)` orchestrator (tracing + metrics)
+- [ ] S122: Integrate random strategy into match flow (human vs random end-to-end)
+- [ ] S123: Measure and log decision latency per strategy (Prometheus histogram)
+- [ ] S124: Implement config flag/env default `AI_STRATEGY` with per-game override
+- [ ] S125: Alternate first move across games; add config to choose first player
+- [ ] S126: Implement client Options Panel toggle (Random/AI) persisted to localStorage; accessible form controls; send in `create_game`
+- [ ] S127: Implement offline mode: detect disconnects and switch to local random strategy
+- [ ] S128: Show offline banner and disable server emits while offline
+- [ ] S129: On reconnect, maintain session; do not replay offline games to server
+- [ ] S130: Define MongoDB schemas for games, moves, sessions, models, logs
+- [ ] S131: Add compound indexes for `gameId`, `sessionId`, timestamps
+- [ ] S132: Add migration tooling (migrate-mongo) and initial baseline migration
+- [ ] S133: Implement `saveGameStart(game)` persistence
+- [ ] S134: Implement `saveMove(move)` persistence
+- [ ] S135: Implement `saveGameOutcome(gameId, result)` persistence
+- [ ] S136: Implement Redis key patterns for live game state
+- [ ] S137: Implement Redis set/get with TTL for caches
+- [ ] S138: Implement retention job to delete old logs
+- [ ] S139: Add configuration for retention TTL days
+- [ ] S140: Configure server logger transport to MongoDB and sampling
+- [ ] S141: Implement client log wrapper and pre-filtering
+- [ ] S142: Send batched client logs to server endpoint
+- [ ] S143: Implement admin endpoint to change log level (with auth)
+- [ ] S144: Propagate new log level to connected clients
+- [ ] S145: Implement log export endpoint (CSV/JSON) and streaming query
+- [ ] S146: Create Python AI microservice under `server/ai_service`
+- [ ] S147: Initialize FastAPI app with `/infer` and `/train` endpoints
+- [ ] S148: Define Pydantic schemas aligned with Node types
+- [ ] S149: Add `requirements.txt` and uvicorn entrypoint
+- [ ] S150: Add Dockerfile for Python service
+- [ ] S151: Connect Python service to Redis; choose RQ or Celery for training jobs
+- [ ] S152: Implement training worker with quotas and kill switch
+- [ ] S153: Implement model registry/versioning with metadata and storage
+- [ ] S154: Implement Node inference client calling Python over HTTP with timeout
+- [ ] S155: Add circuit breaker and graceful fallback to random on failure (with warn logs)
+- [ ] S156: Support seeded deterministic evaluation mode via query/headers
+- [ ] S157: Expose move latency metric including Python inference time
+- [ ] S158: Add tracing propagation between Node and Python services
+- [ ] S159: Implement `calculateEMA(games, N, alpha)` function
+- [ ] S160: Use SMA fallback when games < N and annotate
+- [ ] S161: Exclude acquiesced sessions from aggregates
+- [ ] S162: Apply smoothing thresholds and anomaly clamps
+- [ ] S163: Implement `/stats/ema` endpoint with parameters
+- [ ] S164: Aggregate EMA, win/draw rates, and latency from DB
+- [ ] S165: Build frontend charts consuming stats API
+- [ ] S166: Add preset buttons for selectable N values
+- [ ] S167: Persist selected N in local storage and restore on load
+- [ ] S168: Implement milestone banners based on EMA thresholds
+- [ ] S169: Build collapsible insights panel showing thinking time
+- [ ] S170: Enforce spectating capacity and emit rejection on overflow
+- [ ] S171: Implement private game toggle and lobby filtering
+- [ ] S172: Add E2E tests for observer sync and non-interference
+- [ ] S173: Enforce HTTPS/WSS for server
+- [ ] S174: Implement optional JWT auth and rate limiting
+- [ ] S175: Implement abuse detection (spam rooms, rapid reconnects)
+- [ ] S176: Load secrets from environment/SSM and rotate keys policy
+- [ ] S177: Add input schema validation for all payloads and CSRF for REST
+- [ ] S178: Generate SBOM (Syft) in CI and scan images (Trivy)
+- [ ] S179: Add secret scanning (Gitleaks) and dependency audits to CI
+- [ ] S180: Configure client reconnect/backoff and session resume
+- [ ] S181: Wrap emits with retry on transient errors
+- [ ] S182: Configure bounded queues and load shedding policy
+- [ ] S183: Implement graceful shutdown with in-flight state persistence
+- [ ] S184: Introduce chaos tests (kill server, drop sockets) and verify recovery
+- [ ] S185: Integration: restart during active room with backoff/port-wait; packet delay/loss injection (on-demand CI)
+- [ ] S186: Add ARIA labels/roles to the board and controls
+- [ ] S187: Expand theme provider with light/dark modes (rich theming; refined palette/typography/spacing); polish aesthetics
+- [ ] S188: Add sound/haptics toggles
+- [ ] S189: Implement tutorial/onboarding modal
+- [ ] S190: Implement undo/redo stack for casual mode
+- [ ] S191: Add contract tests for event schemas and acknowledgements
+- [ ] S192: Add cross-browser/device tests (incl. throttled networks)
+- [ ] S193: Add E2E tests for H2H, HvAI, spectating, and error paths
+- [ ] S194: Add performance/load tests with thresholds (Artillery)
+- [ ] S195: Implement unified start script for server, client, or both (bg)
+- [ ] S196: Implement single stop script with PID tracking and port cleanup (3001/5173)
+- [ ] S197: Ensure scripts kill stray Node/Vite processes before restart
+- [ ] S198: Add PM2 ecosystem file for background processes
+- [ ] S199: Wire health/readiness probes into PM2 configuration
+- [ ] S200: Expand CI workflow with typecheck/tests/E2E/security jobs
+- [ ] S201: Create Dockerfiles for server and client
+- [ ] S202: Configure image publishing to registry
+- [ ] S203: Add IaC (Terraform) for staging/prod (ECS/EKS, Redis, Mongo)
+- [ ] S204: Deploy staging environment using CI/CD
+- [ ] S205: Configure blue/green or canary deployment and rollback
+- [ ] S206: Implement cron retention jobs for logs and sessions
+- [ ] S207: Implement nightly Mongo/Redis backups and restore runbook
+- [ ] S208: Implement anonymized research export and erasure flow
+- [ ] S209: Implement difficulty modes (Beginner/Learning/Advanced)
+- [ ] S210: Add per-mode target loss ratio configuration
+- [ ] S211: Implement model reset to zero-knowledge per mode
+- [ ] S212: Implement self-play job in Python service with iteration cap and quotas
+- [ ] S213: Add monitoring for overfitting/drift and scheduled evaluations
+- [ ] S214: Document API events and error catalog in `docs/`
+- [ ] S215: Write ops runbooks (restart, rollback, incident, DR)
+- [ ] S216: Add CONTRIBUTING.md and architecture diagram
+- [ ] S217: Housekeeping: update `docs/checklist.md` and `docs/notes.md`
 
 ## Release Readiness Checklist
-- [ ] S211: SLOs met (latency/availability)
-- [ ] S212: Load test ≥100 concurrent connections stable
-- [ ] S213: Security review passed; privacy notice present
-- [ ] S214: A11y checks passed; core UX complete
-- [ ] S215: All tests green; CI/CD proven; backups verified
+- [ ] S218: SLOs met (latency/availability)
+- [ ] S219: Load test ≥100 concurrent connections stable
+- [ ] S220: Security review passed; privacy notice present
+- [ ] S221: A11y checks passed; core UX complete
+- [ ] S222: All tests green; CI/CD proven; backups verified
 
 
