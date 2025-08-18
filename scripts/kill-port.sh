@@ -14,7 +14,8 @@ echo "[kill-port] Checking for listeners on :$PORT"
 ATTEMPTS=0
 MAX_ATTEMPTS=10
 while true; do
-  PIDS=$(lsof -ti tcp:"$PORT" || true)
+  # Only kill LISTENing processes, not clients connected to the port
+  PIDS=$(lsof -ti tcp:"$PORT" -sTCP:LISTEN || true)
   if [[ -z "$PIDS" ]]; then
     echo "[kill-port] No processes found on :$PORT"
     break
@@ -24,14 +25,14 @@ while true; do
   kill $PIDS || true
   sleep 0.3
 
-  LEFT=$(lsof -ti tcp:"$PORT" || true)
+  LEFT=$(lsof -ti tcp:"$PORT" -sTCP:LISTEN || true)
   if [[ -n "$LEFT" ]]; then
     echo "[kill-port] Forcing kill -9 on: $LEFT"
     kill -9 $LEFT || true
     sleep 0.2
   fi
 
-  if ! lsof -ti tcp:"$PORT" >/dev/null 2>&1; then
+  if ! lsof -ti tcp:"$PORT" -sTCP:LISTEN >/dev/null 2>&1; then
     echo "[kill-port] Port :$PORT is now free"
     break
   fi
