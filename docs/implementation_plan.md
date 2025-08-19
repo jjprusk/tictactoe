@@ -110,11 +110,11 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S070: Write unit tests for legal/illegal moves and immutability
 - [x] S071: Write unit tests for all win patterns and draws
 - [x] S072: Add property-based tests for engine invariants
-- [ ] S073: Create client app with Vite (React + TypeScript) in `client/` (optimize for mobile-first dev loop)
-- [ ] S074: Configure `vite.config.ts` with aliases and base settings
-- [ ] S075: Install and configure Tailwind CSS (PostCSS + autoprefixer); set mobile-first breakpoints
-- [ ] S076: Establish design tokens (CSS variables) for colors, typography scale, spacing, radius, shadows; document in `docs/request.md`
-- [ ] S077: Remove template boilerplate from `App.tsx`
+- [x] S073: Create client app with Vite (React + TypeScript) in `client/` (optimize for mobile-first dev loop)
+- [x] S074: Configure `vite.config.ts` with aliases and base settings
+- [x] S075: Install and configure Tailwind CSS (PostCSS + autoprefixer); set mobile-first breakpoints
+- [x] S076: Establish design tokens (CSS variables) for colors, typography scale, spacing, radius, shadows; document in `docs/request.md`
+- [x] S077: Remove template boilerplate from `App.tsx`
 - [ ] S078: Install Redux Toolkit and React Redux in client
 - [ ] S079: Create `store.ts` and root reducer
 - [ ] S080: Add `session` slice with initial state including `strategy`
