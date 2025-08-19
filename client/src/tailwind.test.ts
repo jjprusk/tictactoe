@@ -22,7 +22,7 @@ describe('tailwind configuration', () => {
 
   it('postcss includes tailwind and autoprefixer', async () => {
     const require = createRequire(import.meta.url);
-    const postcssConfigPath = path.resolve(process.cwd(), '..', 'postcss.config.js');
+    const postcssConfigPath = path.resolve(process.cwd(), 'postcss.config.cjs');
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const pc = require(postcssConfigPath);
     expect(pc.plugins).toBeTruthy();

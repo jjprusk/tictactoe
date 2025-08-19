@@ -115,10 +115,10 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S075: Install and configure Tailwind CSS (PostCSS + autoprefixer); set mobile-first breakpoints
 - [x] S076: Establish design tokens (CSS variables) for colors, typography scale, spacing, radius, shadows; document in `docs/request.md`
 - [x] S077: Remove template boilerplate from `App.tsx`
-- [ ] S078: Install Redux Toolkit and React Redux in client
-- [ ] S079: Create `store.ts` and root reducer
-- [ ] S080: Add `session` slice with initial state including `strategy`
-- [ ] S081: Wrap app with Redux Provider in `index.tsx`
+- [x] S078: Install Redux Toolkit and React Redux in client
+- [x] S079: Create `store.ts` and root reducer
+- [x] S080: Add `session` slice with initial state including `strategy`
+- [x] S081: Wrap app with Redux Provider in `index.tsx`
 - [ ] S082: Introduce baseline theme provider (light/dark) with tokens wired to Tailwind; persist user choice
 - [ ] S083: Install Socket.IO client library
 - [ ] S084: Create client socket service (connect/disconnect handlers)
@@ -127,7 +127,7 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [ ] S087: Implement responsive layout (header, game area, options panel) with mobile-first stacks; collapse insights on small screens
 - [ ] S088: Add tasteful motion/animation for page transitions and result banner (Framer Motion), respecting reduced-motion
 - [ ] S089: Create header with title/logo
-- [ ] S090: Add placeholders for game board and insights panel
+- [x] S090: Add placeholders for game board and insights panel
 - [ ] S091: Add microcopy and inline hints so flows are self-explanatory (no manual required)
 - [ ] S092: Create `scripts/start-client.sh` with port cleanup and start
 - [ ] S093: Test client start script locally
