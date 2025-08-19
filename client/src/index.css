@@ -1,0 +1,12 @@
+/* © 2025 Joe Pruskowski */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CSS variables for theme hooks if needed later */
+:root {
+  --tile-min: 64px;
+  --grid-gap: 12px;
+}
+
+
