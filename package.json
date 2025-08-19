@@ -19,17 +19,21 @@
     "start:server": "npm --workspace server run dev",
     "start:client": "npm --workspace client run dev",
     "prepare": "husky",
-    "preflight": "npm --workspace server run typecheck && npm --workspace server run lint && npm --workspace server run test",
-    "test": "npm --workspace server run test",
+    "preflight": "npm --workspace server run typecheck && npm --workspace server run lint && npm --workspace server run test && npm --workspace client run test",
+    "test": "npm run test:server && npm run test:client",
+    "test:server": "npm --workspace server run test",
+    "test:client": "npm --workspace client run test",
     "test:watch": "npm --workspace server run test:watch",
-    "test:cov": "npm --workspace server run test:cov",
-    "load:socket": "artillery run server/load/socketio.yml"
+    "test:cov": "npm --workspace server run test:cov && npm --workspace client run test:cov",
+    "load:socket": "artillery run server/load/socketio.yml",
+    "e2e": "playwright test"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
-    "rollup": "^4.21.0",
+    "@playwright/test": "^1.54.2",
     "artillery": "^2.0.10",
-    "husky": "^9.1.7"
+    "husky": "^9.1.7",
+    "rollup": "^4.21.0"
   }
 }
