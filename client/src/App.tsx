@@ -2,6 +2,9 @@
 import React, { useEffect } from 'react';
 import OptionsPanel from './OptionsPanel';
 import { sendLog } from './utils/clientLogger';
+import ConnectionStatus from './components/ConnectionStatus';
+import { MotionConfig, motion, useReducedMotion } from 'framer-motion';
+import Logo from './components/Logo';
 
 export default function App() {
   useEffect(() => {
@@ -9,24 +12,53 @@ export default function App() {
   }, []);
 
   return (
-    <div className="p-4 flex flex-col gap-4">
-      <h1 className="text-2xl font-semibold text-primary-700 dark:text-primary-300">TicTacToe</h1>
-      <OptionsPanel />
-      <main className="grid grid-cols-1 gap-4">
-        <section
+    <MotionConfig reducedMotion="user">
+    <div className="p-4 flex flex-col gap-4 max-w-5xl mx-auto">
+      <header className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Logo size={28} />
+          <h1 className="text-2xl font-semibold text-primary-700 dark:text-primary-300">TicTacToe</h1>
+        </div>
+        <div className="hidden sm:block">
+          <ConnectionStatus />
+        </div>
+      </header>
+      <div className="flex items-center gap-4 sm:justify-between flex-wrap">
+        <OptionsPanel />
+        <div className="sm:hidden">
+          <ConnectionStatus />
+        </div>
+      </div>
+      <p className="text-sm text-slate-600 dark:text-slate-300">
+        Choose a strategy and then tap or click a square to play. The opponent will respond automatically. 
+        You can switch strategies at any time from the options.
+      </p>
+      <main className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <motion.section
           aria-label="Game Board"
-          className="min-h-[200px] border border-slate-200 dark:border-slate-700 rounded-md p-3"
+          className="md:col-span-2 min-h-[260px] border border-slate-200 dark:border-slate-700 rounded-md p-3"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
         >
           {/* Board placeholder (S086 will replace) */}
-        </section>
-        <section
+          <div className="text-sm text-slate-500">
+            Tip: Use Tab/Arrow keys to navigate and Enter/Space to play.
+          </div>
+        </motion.section>
+        <motion.section
           aria-label="Insights Panel"
-          className="min-h-[120px] border border-slate-200 dark:border-slate-700 rounded-md p-3"
+          className="hidden sm:block md:col-span-1 min-h-[140px] border border-slate-200 dark:border-slate-700 rounded-md p-3"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: 'easeOut', delay: 0.05 }}
         >
           {/* Insights placeholder (S086 will replace) */}
-        </section>
+          <div className="text-sm text-slate-500">Insights will appear here during play.</div>
+        </motion.section>
       </main>
     </div>
+    </MotionConfig>
   );
 }
 

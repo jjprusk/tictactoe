@@ -7,6 +7,7 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - Backend-only AI; client is UI + real-time sync
 - Tests first for core logic; maintain ≥90% coverage
 - Observability, security, and reliability baked-in from the start
+- Comprehensive end-to-end testing: introduce smoke E2E early, then expand to cover realtime flows, gameplay, and error paths as features land; run E2E in CI with clear, deterministic setup/teardown.
 - Enforce minimum test coverage targets: lines/statements ≥70%, functions ≥70%, branches ≥60%
 - Allow a fully working gameplay model to be implemented and validated prior to AI implementation. Maintain both a Random strategy and an AI strategy with a runtime toggle to switch between them for debugging and evaluation.
  - UI: Mobile-first design
@@ -119,20 +120,22 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S079: Create `store.ts` and root reducer
 - [x] S080: Add `session` slice with initial state including `strategy`
 - [x] S081: Wrap app with Redux Provider in `index.tsx`
-- [ ] S082: Introduce baseline theme provider (light/dark) with tokens wired to Tailwind; persist user choice
-- [ ] S083: Install Socket.IO client library
-- [ ] S084: Create client socket service (connect/disconnect handlers)
-- [ ] S085: Add connection status indicator component
-- [ ] S086: Dispatch Redux actions on socket events (state, errors)
-- [ ] S087: Implement responsive layout (header, game area, options panel) with mobile-first stacks; collapse insights on small screens
-- [ ] S088: Add tasteful motion/animation for page transitions and result banner (Framer Motion), respecting reduced-motion
-- [ ] S089: Create header with title/logo
+- [x] S082: Introduce baseline theme provider (light/dark) with tokens wired to Tailwind; persist user choice
+- [x] S082a: Add Playwright smoke E2E (build + preview): verify header renders, Tailwind styles apply, theme persistence, and /logs POST via dev proxy
+- [x] S083: Install Socket.IO client library
+- [x] S084: Create client socket service (connect/disconnect handlers)
+- [x] S085: Add connection status indicator component
+- [x] S086: Dispatch Redux actions on socket events (state, errors)
+- [x] S086a: E2E realtime connect: verify connect/disconnect UI, status indicator, and auto‑reconnect behavior
+- [x] S087: Implement responsive layout (header, game area, options panel) with mobile-first stacks; collapse insights on small screens
+- [x] S088: Add tasteful motion/animation for page transitions and result banner (Framer Motion), respecting reduced-motion
+- [x] S089: Create header with title/logo
 - [x] S090: Add placeholders for game board and insights panel
-- [ ] S091: Add microcopy and inline hints so flows are self-explanatory (no manual required)
-- [ ] S092: Create `scripts/start-client.sh` with port cleanup and start
-- [ ] S093: Test client start script locally
-- [ ] S094: Define Socket.IO event contracts (`create_game`, `join_game`, `leave_game`, `make_move`, `game_state`, `error`)
-- [ ] S095: Implement server event handlers with type-safe payloads
+- [x] S091: Add microcopy and inline hints so flows are self-explanatory (no manual required)
+- [x] S092: Create `scripts/start-client.sh` with port cleanup and start
+- [x] S093: Test client start script locally
+- [x] S094: Define Socket.IO event contracts (`create_game`, `join_game`, `leave_game`, `make_move`, `game_state`, `error`)
+- [x] S095: Implement server event handlers with type-safe payloads
 - [ ] S096: Implement client emitters with type-safe payloads
 - [ ] S097: Add schema validation for received events
 - [ ] S098: Implement room creation with generated `roomId` and host role
@@ -144,6 +147,7 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [ ] S104: Implement standardized error payloads
 - [ ] S105: Configure client reconnect with exponential backoff
 - [ ] S106: On reconnect, rejoin room using a session token
+- [ ] S106a: E2E contracts/flows: create/join/leave with acks and timeouts; standardized error payloads; reconnect with session token
 - [ ] S107: Implement optimistic UI for moves and reconcile with server
 - [ ] S108: Build `Board.tsx` 3x3 grid component (mobile-first sizing; responsive grid; min 44px touch targets)
 - [ ] S109: Add touch and click handlers for squares (debounced; large hit areas)
@@ -164,6 +168,7 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [ ] S124: Implement config flag/env default `AI_STRATEGY` with per-game override
 - [ ] S125: Alternate first move across games; add config to choose first player
 - [ ] S126: Implement client Options Panel toggle (Random/AI) persisted to localStorage; accessible form controls; send in `create_game`
+- [ ] S126a: E2E gameplay (HvRandom): alternating first turns, making moves, and result banner behavior
 - [ ] S127: Implement offline mode: detect disconnects and switch to local random strategy
 - [ ] S128: Show offline banner and disable server emits while offline
 - [ ] S129: On reconnect, maintain session; do not replay offline games to server

@@ -1,8 +1,10 @@
 import { config as loadDotenv } from 'dotenv';
 import { z } from 'zod';
 
-// Load variables from .env into process.env (if present)
-loadDotenv();
+// Load variables from .env into process.env (if present). Suppress during tests to avoid noisy output.
+if (process.env.NODE_ENV !== 'test') {
+  loadDotenv();
+}
 
 const EnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),

@@ -5,13 +5,28 @@ import App from './App';
 import './index.css';
 import { Provider } from 'react-redux';
 import { store } from './store';
+import { ThemeProvider } from './theme/ThemeProvider';
+import { bindSocketToStore } from './socket/socketBindings';
+import { socketService } from './socket/socketService';
 
 const container = document.getElementById('root');
 if (container) {
   const root = createRoot(container);
+  // Bind socket status to Redux and initiate connection (will show disconnected until server available)
+  bindSocketToStore();
+  const overrideUrl = (() => {
+    try {
+      return window.localStorage.getItem('ttt_socket_url') || undefined;
+    } catch {
+      return undefined;
+    }
+  })();
+  socketService.connect({ url: overrideUrl });
   root.render(
     <Provider store={store}>
-      <App />
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
     </Provider>
   );
 }

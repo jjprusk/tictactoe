@@ -27,6 +27,7 @@ describe('server bootstrap', () => {
 
 	describe('env validation at startup', () => {
 		const originalEnv = { ...process.env } as NodeJS.ProcessEnv;
+		let consoleErrorSpy: ReturnType<typeof vi.spyOn> | undefined;
 		beforeEach(() => {
 			process.env = { ...originalEnv } as NodeJS.ProcessEnv;
 			vi.resetModules();
@@ -34,9 +35,12 @@ describe('server bootstrap', () => {
 			vi.mock('http', () => ({ default: { createServer: vi.fn(() => HOISTED.fakeServer) } }));
 			// Stub pino-http to noop
 			vi.mock('pino-http', () => ({ default: () => (_req: unknown, _res: unknown, next: () => void) => next() }));
+			// Silence console.error noise from expected failure scenarios in this suite
+			consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 		});
 		afterEach(() => {
 			process.env = originalEnv;
+			consoleErrorSpy?.mockRestore();
 		});
 
 		it('throws in test if config invalid (e.g., bad port)', async () => {

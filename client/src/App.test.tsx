@@ -2,7 +2,7 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { createRoot } from 'react-dom/client';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 
 vi.mock('./utils/clientLogger', () => ({
   sendLog: vi.fn(async () => undefined),

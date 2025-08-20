@@ -272,6 +272,31 @@ describe('tailwind configuration', () => {
     expect(css).toMatch(/\.min-h-\\\[123px\\\]/);
     expect(css).toMatch(/min-height:\s*123px/);
   });
+
+  it('client/tailwind.config.cjs has client-scoped content globs and compiles utilities', async () => {
+    const require = createRequire(import.meta.url);
+    const clientCfgPath = path.resolve(process.cwd(), 'tailwind.config.cjs');
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const clientCfg = require(clientCfgPath);
+
+    expect(Array.isArray(clientCfg.content)).toBe(true);
+    const contents = clientCfg.content as string[];
+    expect(contents.some((s: string) => s.includes('./index.html'))).toBe(true);
+    expect(contents.some((s: string) => s.includes('./src/'))).toBe(true);
+    expect(clientCfg.theme?.extend?.colors?.primary?.[500]).toBe('#3b82f6');
+
+    const cfg = {
+      ...clientCfg,
+      content: [
+        { raw: '<div class="text-2xl bg-primary-500"></div>' },
+      ],
+    };
+    const input = '@tailwind utilities;';
+    const result = await postcss([tailwindcss(cfg)]).process(input, { from: undefined });
+    const css = result.css;
+    expect(css).toMatch(/\.text-2xl/);
+    expect(css).toMatch(/\.bg-primary-500/);
+  });
 });
 
 

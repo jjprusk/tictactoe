@@ -15,6 +15,15 @@ export const app = express();
 
 app.use(express.json());
 app.use(cors({ origin: appConfig.CORS_ORIGIN }));
+// Ensure every response has an x-request-id header and attach it to req for downstream tools
+app.use((req, res, next) => {
+  const headerId = req.headers['x-request-id'];
+  const candidate = typeof headerId === 'string' ? headerId : Array.isArray(headerId) ? headerId[0] : undefined;
+  const id = candidate && candidate.trim().length > 0 ? candidate.trim() : randomUUID();
+  res.setHeader('x-request-id', id);
+  (req as unknown as { id?: string }).id = id;
+  next();
+});
 app.use(
   helmet({
     frameguard: { action: 'deny' },
@@ -40,13 +49,6 @@ app.use(recordHttpMetricsMiddleware());
 app.use(
   pinoHttp({
     logger,
-    genReqId: (req, res) => {
-      const headerId = req.headers['x-request-id'];
-      const candidate = typeof headerId === 'string' ? headerId : Array.isArray(headerId) ? headerId[0] : undefined;
-      const id = candidate && candidate.trim().length > 0 ? candidate.trim() : randomUUID();
-      res.setHeader('x-request-id', id);
-      return id;
-    },
   })
 );
 
