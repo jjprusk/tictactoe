@@ -5,6 +5,7 @@ import { sendLog } from './utils/clientLogger';
 import ConnectionStatus from './components/ConnectionStatus';
 import { MotionConfig, motion, useReducedMotion } from 'framer-motion';
 import Logo from './components/Logo';
+import Board from './components/Board';
 
 export default function App() {
   useEffect(() => {
@@ -17,7 +18,7 @@ export default function App() {
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Logo size={28} />
-          <h1 className="text-2xl font-semibold text-primary-700 dark:text-primary-300">TicTacToe</h1>
+          <h1 data-testid="app-title" className="text-2xl font-semibold text-primary-700 dark:text-primary-300">TicTacToe</h1>
         </div>
         <div className="hidden sm:block">
           <ConnectionStatus />
@@ -41,10 +42,7 @@ export default function App() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25, ease: 'easeOut' }}
         >
-          {/* Board placeholder (S086 will replace) */}
-          <div className="text-sm text-slate-500">
-            Tip: Use Tab/Arrow keys to navigate and Enter/Space to play.
-          </div>
+          <Board />
         </motion.section>
         <motion.section
           aria-label="Insights Panel"

@@ -68,6 +68,7 @@ A web-based TicTacToe game where a human player competes against a state-of-the-
 - Clear win/loss/draw detection
 - Game history tracking
 - Spectating: Allow users to observe ongoing games in real-time without participating (available by default for all games)
+- Human-friendly Room IDs: Newly created games use readable, globally recognizable mountain names (e.g., `everest`, `k2`, `mont-blanc`, `kilimanjaro`). Server ensures uniqueness by retrying or appending a short alphabetic suffix if needed.
 - Offline Mode: Fallback to local random-move AI when disconnected
 - Human vs Human: Optional local or online matches via rooms; AI may spectate/learn if enabled
 - Tutorial Mode: Guided onboarding explaining rules, turns, and AI behavior

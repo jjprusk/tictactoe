@@ -23,6 +23,11 @@ vi.mock('socket.io-client', () => {
     get connected() {
       return connected;
     },
+    // helper for tests to simulate inbound client events
+    emitLocal: (event: string) => {
+      const arr = handlers.get(event) ?? [];
+      arr.forEach((h) => h());
+    },
   } as any;
 
   const io = vi.fn(() => {
@@ -81,6 +86,8 @@ describe('socketService', () => {
     expect(seen[0]).toBe('disconnected');
 
     // connect with options and without url uses window.origin
+    // Ensure test origin is stable
+    Object.defineProperty(window, 'location', { value: new URL('http://localhost:3000'), writable: false });
     const origin = window.location.origin;
     const s1 = socketService.connect({ reconnectionAttempts: 5 });
     const s2 = socketService.connect();
@@ -90,9 +97,13 @@ describe('socketService', () => {
     const ioMock = mod.io as unknown as ReturnType<typeof vi.fn> & { mock: any };
     expect(ioMock.mock.calls.length).toBe(1);
     const [calledUrl, calledOpts] = ioMock.mock.calls[0];
-    expect(calledUrl).toBe(origin);
+    const envUrl = (import.meta as any)?.env?.VITE_SERVER_URL as string | undefined;
+    const expectedUrl = envUrl ?? origin;
+    expect(calledUrl).toBe(expectedUrl);
     expect(calledOpts.reconnection).toBe(true);
     expect(calledOpts.reconnectionAttempts).toBe(5);
+    expect(calledOpts.reconnectionDelay).toBe(500);
+    expect(calledOpts.reconnectionDelayMax).toBe(2000);
     expect(Array.isArray(calledOpts.transports)).toBe(true);
 
     // Wait until mocked connect fires
@@ -110,6 +121,78 @@ describe('socketService', () => {
 
     unsub();
     await socketService.disconnect();
+  });
+
+  it('maps reconnect events to status updates', async () => {
+    const { socketService } = await import('./socketService');
+    const mod = (await import('socket.io-client')) as any;
+    (mod.io as any).mockClear?.();
+
+    const seen: string[] = [];
+    const unsub = socketService.subscribeStatus((s) => seen.push(s));
+    socketService.connect({ url: 'http://localhost:3001' });
+    await new Promise((r) => setTimeout(r, 0));
+
+    const fakeSocket = (mod.io as any).mock.results[0].value;
+    fakeSocket.emitLocal('reconnect_attempt');
+    expect(socketService.getStatus()).toBe('connecting');
+    fakeSocket.emitLocal('reconnect');
+    expect(socketService.getStatus()).toBe('connected');
+    fakeSocket.emitLocal('reconnect_error');
+    expect(socketService.getStatus()).toBe('connecting');
+    fakeSocket.emitLocal('reconnect_failed');
+    expect(socketService.getStatus()).toBe('disconnected');
+
+    unsub();
+    await socketService.disconnect();
+  });
+
+  it('probeServerHealthy returns true on 200 and false on error/non-ok', async () => {
+    const { socketService } = await import('./socketService');
+    const svc: any = socketService;
+    const fetchSpy = vi.spyOn(globalThis, 'fetch' as any);
+
+    // ok: true
+    fetchSpy.mockResolvedValueOnce({ ok: true } as any);
+    await expect(svc.probeServerHealthy('http://x')).resolves.toBe(true);
+
+    // ok: false
+    fetchSpy.mockResolvedValueOnce({ ok: false } as any);
+    await expect(svc.probeServerHealthy('http://x')).resolves.toBe(false);
+
+    // throws
+    fetchSpy.mockRejectedValueOnce(new Error('network'));
+    await expect(svc.probeServerHealthy('http://x')).resolves.toBe(false);
+
+    fetchSpy.mockRestore();
+  });
+
+  it('probe path defers socket creation when server is down in dev', async () => {
+    const { socketService } = await import('./socketService');
+    const mod = (await import('socket.io-client')) as any;
+    (mod.io as any).mockClear?.();
+
+    // force probe to be enabled regardless of env
+    (socketService as any).setProbeOverrideForTest(true);
+
+    // Make fetch fail twice
+    const fetchSpy = vi.spyOn(globalThis, 'fetch' as any);
+    fetchSpy.mockRejectedValueOnce(new Error('down'));
+    fetchSpy.mockResolvedValueOnce({ ok: false } as any);
+
+    const unsub = socketService.subscribeStatus(() => {});
+    socketService.connect({ url: 'http://localhost:3001' });
+    // allow probe to run
+    await Promise.resolve();
+    await Promise.resolve();
+    // still no socket attempt
+    expect((mod.io as any).mock.calls.length).toBe(0);
+
+    unsub();
+    fetchSpy.mockRestore();
+    await socketService.disconnect();
+    // clear override
+    (socketService as any).setProbeOverrideForTest(undefined);
   });
 });
 

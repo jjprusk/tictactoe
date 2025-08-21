@@ -18,6 +18,14 @@ export default defineConfig(({ mode }) => ({
     port: 5173,
     open: false,
     proxy: {
+      '/healthz': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+      '/readyz': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
       '/logs': {
         target: 'http://localhost:3001',
         changeOrigin: true,

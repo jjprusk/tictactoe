@@ -18,6 +18,8 @@ const HOISTED = vi.hoisted(() => {
 	return { fakeServer };
 });
 
+// (server_factory not used by index.ts; keep tests independent of that module)
+
 describe('server bootstrap', () => {
 	it('creates an HTTP server without throwing', () => {
 		const server = http.createServer((_, res) => { res.statusCode = 200; res.end('ok'); });
@@ -37,10 +39,17 @@ describe('server bootstrap', () => {
 			vi.mock('pino-http', () => ({ default: () => (_req: unknown, _res: unknown, next: () => void) => next() }));
 			// Silence console.error noise from expected failure scenarios in this suite
 			consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+			// nothing
 		});
 		afterEach(() => {
 			process.env = originalEnv;
 			consoleErrorSpy?.mockRestore();
+		});
+
+		it('creates and listens on HTTP server', async () => {
+			process.env.SERVER_PORT = '0';
+			await import('./index');
+			expect(HOISTED.fakeServer.listen).toHaveBeenCalled();
 		});
 
 		it('throws in test if config invalid (e.g., bad port)', async () => {
@@ -56,11 +65,11 @@ describe('server bootstrap', () => {
 			await new Promise<void>((resolve) => srv.close(() => resolve()));
 		});
 
-		it('attaches socket handlers via server_factory', async () => {
+		it('attaches socket handlers via bootstrap/attachSocketHandlers', async () => {
 			process.env.SERVER_PORT = '0';
 			vi.resetModules();
-			const factory = await import('./server_factory');
-			const spy = vi.spyOn(factory, 'createServers');
+			const handlers = await import('./socket_handlers');
+			const spy = vi.spyOn(handlers, 'attachSocketHandlers');
 			await import('./index');
 			expect(spy).toHaveBeenCalledTimes(1);
 			spy.mockRestore();
@@ -98,7 +107,7 @@ describe('server bootstrap', () => {
 			const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 			await import('./index');
 			await new Promise((r) => setTimeout(r, 0));
-			expect(errSpy).toHaveBeenCalled();
+			expect(errSpy).toHaveBeenCalledWith('[mongo] failed to connect after retries:', 'oops');
 			errSpy.mockRestore();
 		});
 

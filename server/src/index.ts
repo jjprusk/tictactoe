@@ -4,7 +4,8 @@ import { logger } from './logger';
 import { loadConfig } from './config/env';
 import { buildMongoClient, connectWithRetry } from './db/mongo';
 import { app } from './app';
-import { createServers } from './server_factory';
+import { buildIoServer } from './bootstrap';
+import { attachSocketHandlers } from './socket_handlers';
 import { initTracing } from './tracing';
 
 export const httpServer = http.createServer(app);
@@ -13,10 +14,9 @@ export const httpServer = http.createServer(app);
 try {
   initTracing();
   const appConfig = loadConfig();
-  // Build Socket.IO via factory to ease testing
-  const built = createServers();
-  // close the temporary http created by factory and reuse our app-bound server
-  built.httpServer.close();
+  // Attach Socket.IO to the real HTTP server bound to our Express app
+  const io = buildIoServer(httpServer, {});
+  attachSocketHandlers(io);
 
   // Kick off Mongo connection with retry, but do not block server listening
   const mongoClient = buildMongoClient(appConfig.MONGO_URI);

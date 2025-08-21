@@ -13,6 +13,7 @@ export class SocketService {
   private status: ConnectionStatus = 'disconnected';
   private statusSubscribers: Array<(status: ConnectionStatus) => void> = [];
   private reconnectTimer?: number | undefined;
+  private probeOverride?: boolean;
 
   getStatus(): ConnectionStatus {
     return this.status;
@@ -42,12 +43,19 @@ export class SocketService {
     }
 
     const { url, ...rest } = options;
-    const target = url ?? (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001');
+    const target = (() => {
+      if (url) return url;
+      if (typeof window === 'undefined') return 'http://localhost:3001';
+      const envUrl = (import.meta as any)?.env?.VITE_SERVER_URL as string | undefined;
+      const lsUrl = (() => { try { return window.localStorage.getItem('ttt_socket_url') || undefined; } catch { return undefined; } })();
+      const preferred = lsUrl ?? envUrl;
+      return preferred ?? window.location.origin;
+    })();
 
     this.setStatus('connecting');
 
     const isTest = typeof process !== 'undefined' && process.env.NODE_ENV === 'test';
-    const shouldProbe = (import.meta as any)?.env?.DEV && !isTest && (import.meta as any)?.env?.VITE_SOCKET_PRECONNECT_PROBE !== '0';
+    const shouldProbe = this.probeOverride ?? (((import.meta as any)?.env?.DEV) && !isTest && ((import.meta as any)?.env?.VITE_SOCKET_PRECONNECT_PROBE !== '0'));
 
     const buildSocket = () => io(target, {
       path: '/socket.io',
@@ -57,6 +65,7 @@ export class SocketService {
       reconnectionAttempts: (import.meta as any)?.env?.VITE_SOCKET_RECONNECT_ATTEMPTS ? Number((import.meta as any).env.VITE_SOCKET_RECONNECT_ATTEMPTS) : 5,
       reconnectionDelay: (import.meta as any)?.env?.VITE_SOCKET_RECONNECT_DELAY ? Number((import.meta as any).env.VITE_SOCKET_RECONNECT_DELAY) : 500,
       reconnectionDelayMax: (import.meta as any)?.env?.VITE_SOCKET_RECONNECT_DELAY_MAX ? Number((import.meta as any).env.VITE_SOCKET_RECONNECT_DELAY_MAX) : 2000,
+      randomizationFactor: (import.meta as any)?.env?.VITE_SOCKET_RANDOMIZATION_FACTOR ? Number((import.meta as any).env.VITE_SOCKET_RANDOMIZATION_FACTOR) : 0.5,
       ...rest,
     });
 
@@ -133,6 +142,11 @@ export class SocketService {
     } catch {
       return false;
     }
+  }
+
+  // Test helper to force-enable or disable the probe path
+  /* @__TEST_ONLY__ */ setProbeOverrideForTest(value: boolean | undefined): void {
+    this.probeOverride = value;
   }
 }
 

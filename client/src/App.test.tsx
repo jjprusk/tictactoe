@@ -18,9 +18,11 @@ describe('App', () => {
     document.body.appendChild(container);
     const root = createRoot(container);
     const { default: App } = await import('./App');
+    const { Provider } = await import('react-redux');
+    const { store } = await import('./store');
 
     await act(async () => {
-      root.render(React.createElement(App));
+      root.render(React.createElement(Provider as any, { store }, React.createElement(App)));
     });
 
     expect(document.body.textContent || '').toContain('TicTacToe');

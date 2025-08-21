@@ -27,16 +27,24 @@ export async function sendLog(
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const origin = baseUrl ?? (typeof window !== 'undefined' ? window.location.origin : '');
+    const origin = (() => {
+      if (baseUrl) return baseUrl;
+      if (typeof window === 'undefined') return '';
+      const envUrl = (import.meta as any)?.env?.VITE_SERVER_URL as string | undefined;
+      const lsUrl = window.localStorage.getItem('ttt_socket_url') || undefined;
+      try {
+        const preferred = lsUrl ?? envUrl;
+        if (preferred) return new URL(preferred).origin;
+      } catch {}
+      return window.location.origin;
+    })();
     const res = await fetch(`${origin}/logs`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
       signal: signal ?? controller.signal,
     });
-    if (!res.ok) {
-      throw new Error(`sendLog failed: HTTP ${res.status}`);
-    }
+    if (!res.ok) throw new Error(`sendLog failed: HTTP ${res.status}`);
   } finally {
     clearTimeout(timer);
   }

@@ -8,6 +8,7 @@ import { store } from './store';
 import { ThemeProvider } from './theme/ThemeProvider';
 import { bindSocketToStore } from './socket/socketBindings';
 import { socketService } from './socket/socketService';
+import { setCurrentGame } from './store/gameSlice';
 
 const container = document.getElementById('root');
 if (container) {
@@ -29,6 +30,11 @@ if (container) {
       </ThemeProvider>
     </Provider>
   );
+
+  // Test-only utility to set current game from E2E
+  try {
+    (window as any).__tttSetCurrentGame = (id: string) => store.dispatch(setCurrentGame({ gameId: id }));
+  } catch {}
 }
 
 

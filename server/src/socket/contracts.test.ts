@@ -14,6 +14,12 @@ import {
   MakeMoveAckSchema,
   GameStatePayloadSchema,
   ErrorPayloadSchema,
+  ElevateAdminRequestSchema,
+  ElevateAdminAckSchema,
+  AdminListGamesRequestSchema,
+  AdminListGamesAckSchema,
+  AdminCloseGameRequestSchema,
+  AdminCloseGameAckSchema,
 } from './contracts';
 
 describe('socket contracts', () => {
@@ -27,15 +33,15 @@ describe('socket contracts', () => {
   it('create_game request/ack schemas', () => {
     expect(StrategySchema.parse('random')).toBe('random');
     expect(CreateGameRequestSchema.parse({})).toEqual({});
-    const ok = CreateGameAckSchema.parse({ ok: true, gameId: 'g1', player: 'X' });
+    const ok = CreateGameAckSchema.parse({ ok: true, gameId: 'g1', player: 'X', sessionToken: 's1' });
     expect(ok.ok).toBe(true);
     const err = CreateGameAckSchema.parse({ ok: false, error: 'nope' });
     expect(err.ok).toBe(false);
   });
 
   it('join_game request/ack schemas', () => {
-    expect(JoinGameRequestSchema.parse({ gameId: 'g' })).toEqual({ gameId: 'g' });
-    const ok = JoinGameAckSchema.parse({ ok: true, role: 'player', player: 'O' });
+    expect(JoinGameRequestSchema.parse({ gameId: 'g', sessionToken: 's' })).toEqual({ gameId: 'g', sessionToken: 's' });
+    const ok = JoinGameAckSchema.parse({ ok: true, role: 'player', player: 'O', sessionToken: 's2' });
     if ('role' in ok) {
       expect(ok.role).toBe('player');
     } else {
@@ -71,6 +77,26 @@ describe('socket contracts', () => {
   it('error payload schema', () => {
     const e = ErrorPayloadSchema.parse({ code: 'invalid', message: 'bad' });
     expect(e.code).toBe('invalid');
+  });
+
+  it('admin schemas', () => {
+    expect(ElevateAdminRequestSchema.parse({ adminKey: 'k' })).toEqual({ adminKey: 'k' });
+    const elevParsed = ElevateAdminAckSchema.safeParse({ ok: true, role: 'admin' });
+    expect(elevParsed.success).toBe(true);
+    if (elevParsed.success && 'role' in elevParsed.data) {
+      expect((elevParsed.data as any).role).toBe('admin');
+    }
+
+    expect(AdminListGamesRequestSchema.parse({})).toEqual({});
+    const listParsed = AdminListGamesAckSchema.safeParse({ ok: true, games: ['everest'] });
+    expect(listParsed.success).toBe(true);
+    if (listParsed.success && 'games' in listParsed.data) {
+      expect((listParsed.data as any).games).toContain('everest');
+    }
+
+    expect(AdminCloseGameRequestSchema.parse({ gameId: 'g' })).toEqual({ gameId: 'g' });
+    const closeOk = AdminCloseGameAckSchema.parse({ ok: true });
+    expect(closeOk.ok).toBe(true);
   });
 });
 

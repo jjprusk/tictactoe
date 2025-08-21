@@ -16,7 +16,7 @@ export const StrategySchema = z.enum(['random', 'ai']);
 export const CreateGameRequestSchema = z.object({ strategy: StrategySchema.optional() });
 export type CreateGameRequest = z.infer<typeof CreateGameRequestSchema>;
 
-export const OkCreateGameAckSchema = z.object({ ok: z.literal(true), gameId: z.string().min(1), player: PlayerSchema });
+export const OkCreateGameAckSchema = z.object({ ok: z.literal(true), gameId: z.string().min(1), player: PlayerSchema, sessionToken: z.string().min(1).optional() });
 export const ErrAckSchema = z.object({ ok: z.literal(false), error: z.string().min(1) });
 export const CreateGameAckSchema = z.union([OkCreateGameAckSchema, ErrAckSchema]);
 export type CreateGameAck = z.infer<typeof CreateGameAckSchema>;
@@ -24,10 +24,10 @@ export type CreateGameAck = z.infer<typeof CreateGameAckSchema>;
 // Event: join_game (client -> server)
 // request: { gameId: string }
 // ack: { ok: true, role: 'player' | 'observer', player?: Player } | { ok: false, error: string }
-export const JoinGameRequestSchema = z.object({ gameId: z.string().min(1) });
+export const JoinGameRequestSchema = z.object({ gameId: z.string().min(1), sessionToken: z.string().min(1).optional() });
 export type JoinGameRequest = z.infer<typeof JoinGameRequestSchema>;
-export const RoleSchema = z.enum(['player', 'observer']);
-export const OkJoinGameAckSchema = z.object({ ok: z.literal(true), role: RoleSchema, player: PlayerSchema.optional() });
+export const RoleSchema = z.enum(['player', 'observer', 'admin']);
+export const OkJoinGameAckSchema = z.object({ ok: z.literal(true), role: RoleSchema, player: PlayerSchema.optional(), sessionToken: z.string().min(1).optional() });
 export const JoinGameAckSchema = z.union([OkJoinGameAckSchema, ErrAckSchema]);
 export type JoinGameAck = z.infer<typeof JoinGameAckSchema>;
 
@@ -79,8 +79,44 @@ export const EventNames = {
   make_move: 'make_move',
   game_state: 'game_state',
   error: 'error',
+  elevate_admin: 'elevate_admin',
+  admin_list_games: 'admin:list_games',
+  admin_close_game: 'admin:close_game',
+  admin_room_info: 'admin:room_info',
 } as const;
-export type ClientToServerEvent = keyof Pick<typeof EventNames, 'create_game' | 'join_game' | 'leave_game' | 'make_move'>;
+export type ClientToServerEvent = keyof Pick<typeof EventNames, 'create_game' | 'join_game' | 'leave_game' | 'make_move' | 'elevate_admin' | 'admin_list_games' | 'admin_close_game' | 'admin_room_info'>;
 export type ServerToClientEvent = keyof Pick<typeof EventNames, 'game_state' | 'error'>;
+
+// Admin events and schemas
+export const ElevateAdminRequestSchema = z.object({ adminKey: z.string().min(1) });
+export type ElevateAdminRequest = z.infer<typeof ElevateAdminRequestSchema>;
+export const OkElevateAdminAckSchema = z.object({ ok: z.literal(true), role: z.literal('admin') });
+export const ElevateAdminAckSchema = z.union([OkElevateAdminAckSchema, ErrAckSchema]);
+export type ElevateAdminAck = z.infer<typeof ElevateAdminAckSchema>;
+
+export const AdminListGamesRequestSchema = z.object({});
+export type AdminListGamesRequest = z.infer<typeof AdminListGamesRequestSchema>;
+export const OkAdminListGamesAckSchema = z.object({ ok: z.literal(true), games: z.array(z.string()) });
+export const AdminListGamesAckSchema = z.union([OkAdminListGamesAckSchema, ErrAckSchema]);
+export type AdminListGamesAck = z.infer<typeof AdminListGamesAckSchema>;
+
+export const AdminCloseGameRequestSchema = z.object({ gameId: z.string().min(1) });
+export type AdminCloseGameRequest = z.infer<typeof AdminCloseGameRequestSchema>;
+export const AdminCloseGameAckSchema = z.union([OkLeaveGameAckSchema, ErrAckSchema]);
+export type AdminCloseGameAck = z.infer<typeof AdminCloseGameAckSchema>;
+
+// Admin: room info
+export const AdminRoomInfoRequestSchema = z.object({ gameId: z.string().min(1) });
+export type AdminRoomInfoRequest = z.infer<typeof AdminRoomInfoRequestSchema>;
+export const AdminRoomPlayerSchema = z.object({ socketId: z.string().min(1), player: PlayerSchema });
+export const OkAdminRoomInfoAckSchema = z.object({
+  ok: z.literal(true),
+  gameId: z.string().min(1),
+  playerCount: z.number().int().nonnegative(),
+  observerCount: z.number().int().nonnegative(),
+  players: z.array(AdminRoomPlayerSchema),
+});
+export const AdminRoomInfoAckSchema = z.union([OkAdminRoomInfoAckSchema, ErrAckSchema]);
+export type AdminRoomInfoAck = z.infer<typeof AdminRoomInfoAckSchema>;
 
 

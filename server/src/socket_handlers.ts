@@ -4,6 +4,8 @@ import { z } from 'zod';
 import { incSocketConnections, incSocketDisconnections, observeMoveLatencySeconds } from './metrics';
 import { getTracer } from './tracing';
 import { randomUUID } from 'crypto';
+import { generateMountainGameId } from './ids/mountain_names';
+import { emitStandardError, ErrorCodes } from './socket/errors';
 import {
 	CreateGameRequestSchema,
 	CreateGameAckSchema,
@@ -13,14 +15,20 @@ import {
 	LeaveGameAckSchema,
 	MakeMoveRequestSchema,
 	Player as ContractPlayer,
+	ElevateAdminRequestSchema,
+	AdminListGamesRequestSchema,
+	AdminCloseGameRequestSchema,
+	AdminRoomInfoRequestSchema,
 } from './socket/contracts';
 
-type Role = 'player' | 'observer';
+type Role = 'player' | 'observer' | 'admin';
 
 type RoomState = {
 	nonces: Set<string>;
 	playerIds: Set<string>;
 	playersBySocket: Map<string, ContractPlayer>;
+	// session token -> socketId mapping for rejoin
+	sessions?: Map<string, string>;
 };
 
 const joinSchema = z.object({ roomId: z.string().min(1) });
@@ -36,6 +44,7 @@ declare module 'socket.io' {
 
 export function attachSocketHandlers(io: IOServer) {
 	const roomIdToState = new Map<string, RoomState>();
+	const activeGameIds = new Set<string>();
 	// Simple per-socket fixed-window rate limiter for tests/integration
 	const rateLimit = Number(process.env.TEST_RATE_LIMIT || '0');
 	const rateWindowMs = Number(process.env.TEST_RATE_WINDOW_MS || '1000');
@@ -51,7 +60,7 @@ export function attachSocketHandlers(io: IOServer) {
 	function getRoomState(roomId: string): RoomState {
 		let state = roomIdToState.get(roomId);
 		if (!state) {
-			state = { nonces: new Set<string>(), playerIds: new Set<string>(), playersBySocket: new Map<string, ContractPlayer>() };
+			state = { nonces: new Set<string>(), playerIds: new Set<string>(), playersBySocket: new Map<string, ContractPlayer>(), sessions: new Map<string, string>() };
 			roomIdToState.set(roomId, state);
 		}
 		return state;
@@ -69,13 +78,17 @@ export function attachSocketHandlers(io: IOServer) {
 				ack?.(errAck('invalid-payload'));
 				return;
 			}
-			const gameId = `g_${randomUUID()}`;
+			const gameId = generateMountainGameId((id) => roomIdToState.has(id));
 			const state = getRoomState(gameId);
 			socket.join(gameId);
 			state.playerIds.add(socket.id);
 			state.playersBySocket.set(socket.id, 'X');
 			socket.data.role = 'player';
-			ack?.(okCreateAck({ gameId, player: 'X' }));
+			// create session token for host
+			const token = `s_${randomUUID()}`;
+			state.sessions?.set(token, socket.id);
+			activeGameIds.add(gameId);
+			ack?.(okCreateAck({ gameId, player: 'X', sessionToken: token }));
 		});
 
 		socket.on('join_game', (rawPayload: unknown, ack?: Ack) => {
@@ -84,12 +97,19 @@ export function attachSocketHandlers(io: IOServer) {
 				ack?.(errAck('invalid-payload'));
 				return;
 			}
-			const { gameId } = parsed.data;
+			const { gameId, sessionToken } = parsed.data as { gameId: string; sessionToken?: string };
 			const state = getRoomState(gameId);
 			socket.join(gameId);
 			let role: Role = 'observer';
 			let player: ContractPlayer | undefined;
-			if (state.playerIds.size < 2) {
+			if (sessionToken && state.sessions?.has(sessionToken)) {
+				// resume prior session as player
+				role = 'player';
+				player = state.playersBySocket.get(state.sessions.get(sessionToken)!) ?? 'X';
+				state.playerIds.add(socket.id);
+				state.playersBySocket.set(socket.id, player);
+				state.sessions?.set(sessionToken, socket.id);
+			} else if (state.playerIds.size < 2) {
 				state.playerIds.add(socket.id);
 				role = 'player';
 				const used = new Set(state.playersBySocket.values());
@@ -97,7 +117,9 @@ export function attachSocketHandlers(io: IOServer) {
 				state.playersBySocket.set(socket.id, player);
 			}
 			socket.data.role = role;
-			ack?.(okJoinAck({ role, player }));
+			const token = sessionToken ?? (role === 'player' ? `s_${randomUUID()}` : undefined);
+			if (token && role === 'player') state.sessions?.set(token, socket.id);
+			ack?.(okJoinAck({ role, player, sessionToken: token }));
 		});
 
 		socket.on('leave_game', (rawPayload: unknown, ack?: Ack) => {
@@ -112,6 +134,99 @@ export function attachSocketHandlers(io: IOServer) {
 			state.playerIds.delete(socket.id);
 			state.playersBySocket.delete(socket.id);
 			ack?.(okAck());
+		});
+
+		// Admin: elevate to admin (simple shared key auth for now)
+		socket.on('elevate_admin', (rawPayload: unknown, ack?: Ack) => {
+			const parsed = ElevateAdminRequestSchema.safeParse(rawPayload);
+			if (!parsed.success) {
+				ack?.(errAck('invalid-payload'));
+				return;
+			}
+			const { adminKey } = parsed.data;
+			const expected = process.env.ADMIN_KEY || 'dev-admin-key';
+			if (adminKey !== expected) {
+				ack?.(errAck('unauthorized'));
+				return;
+			}
+			socket.data.role = 'admin';
+			ack?.({ ok: true, role: 'admin' });
+		});
+
+		// Admin: list active games
+		socket.on('admin:list_games', (rawPayload: unknown, ack?: Ack) => {
+			const parsed = AdminListGamesRequestSchema.safeParse(rawPayload ?? {});
+			if (!parsed.success) {
+				ack?.(errAck('invalid-payload'));
+				return;
+			}
+			if (socket.data.role !== 'admin') {
+				ack?.(errAck('forbidden'));
+				return;
+			}
+			ack?.({ ok: true, games: Array.from(activeGameIds.values()) });
+		});
+
+		// Admin: close a game room
+		socket.on('admin:close_game', (rawPayload: unknown, ack?: Ack) => {
+			const parsed = AdminCloseGameRequestSchema.safeParse(rawPayload);
+			if (!parsed.success) {
+				ack?.(errAck('invalid-payload'));
+				return;
+			}
+			if (socket.data.role !== 'admin') {
+				ack?.(errAck('forbidden'));
+				return;
+			}
+			const { gameId } = parsed.data;
+			const room = io.sockets.adapter.rooms.get(gameId);
+			if (room) {
+				for (const sid of room) {
+					const s = io.sockets.sockets.get(sid);
+					s?.leave(gameId);
+					if (s) emitStandardError(s, ErrorCodes.GameClosed);
+				}
+			}
+			roomIdToState.delete(gameId);
+			activeGameIds.delete(gameId);
+			ack?.(okAck());
+		});
+
+		// Admin: room info (membership and roles)
+		socket.on('admin:room_info', (rawPayload: unknown, ack?: Ack) => {
+			const parsed = AdminRoomInfoRequestSchema.safeParse(rawPayload);
+			if (!parsed.success) {
+				ack?.(errAck('invalid-payload'));
+				return;
+			}
+			if (socket.data.role !== 'admin') {
+				ack?.(errAck('forbidden'));
+				return;
+			}
+			const { gameId } = parsed.data;
+			const state = roomIdToState.get(gameId);
+			if (!state) {
+				ack?.(errAck('not-found'));
+				return;
+			}
+			let playerCount = 0;
+			let observerCount = 0;
+			const players: { socketId: string; player: ContractPlayer }[] = [];
+			for (const sid of state.playerIds) {
+				const p = state.playersBySocket.get(sid);
+				if (p === 'X' || p === 'O') {
+					playerCount += 1;
+					players.push({ socketId: sid, player: p });
+				}
+			}
+			// Observers are members of room minus playerIds
+			const room = io.sockets.adapter.rooms.get(gameId);
+			if (room) {
+				for (const sid of room) {
+					if (!state.playerIds.has(sid)) observerCount += 1;
+				}
+			}
+			ack?.({ ok: true, gameId, playerCount, observerCount, players });
 		});
 
 		socket.on('make_move', (rawPayload: unknown, ack?: Ack) => {
@@ -276,11 +391,16 @@ function okAck(): z.infer<typeof LeaveGameAckSchema> {
 function errAck(error: string): z.infer<typeof LeaveGameAckSchema> {
 	return { ok: false, error } as const;
 }
-function okCreateAck(args: { gameId: string; player: ContractPlayer }): z.infer<typeof CreateGameAckSchema> {
-	return { ok: true, gameId: args.gameId, player: args.player } as const;
+function okCreateAck(args: { gameId: string; player: ContractPlayer; sessionToken?: string }): z.infer<typeof CreateGameAckSchema> {
+	const base: { ok: true; gameId: string; player: ContractPlayer; sessionToken?: string } = { ok: true, gameId: args.gameId, player: args.player };
+	if (args.sessionToken) base.sessionToken = args.sessionToken;
+	return base;
 }
-function okJoinAck(args: { role: Role; player?: ContractPlayer }): z.infer<typeof JoinGameAckSchema> {
-	return { ok: true, role: args.role, player: args.player } as const;
+function okJoinAck(args: { role: Role; player?: ContractPlayer; sessionToken?: string }): z.infer<typeof JoinGameAckSchema> {
+	const base: { ok: true; role: Role; player?: ContractPlayer; sessionToken?: string } = { ok: true, role: args.role };
+	if (args.player) base.player = args.player;
+	if (args.sessionToken) base.sessionToken = args.sessionToken;
+	return base;
 }
 
 

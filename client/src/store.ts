@@ -2,11 +2,13 @@
 import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import { sessionReducer } from './store/sessionSlice';
 import { socketReducer } from './store/socketSlice';
+import { gameReducer } from './store/gameSlice';
 
 // Root reducer with session slice
 const rootReducer = combineReducers({
   session: sessionReducer,
   socket: socketReducer,
+  game: gameReducer,
 });
 
 export const store = configureStore({

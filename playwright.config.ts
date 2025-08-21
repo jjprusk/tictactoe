@@ -8,10 +8,20 @@ export default defineConfig({
   retries: 0,
   use: {
     baseURL: 'http://localhost:5173',
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',
     video: 'retain-on-failure',
   },
+  reporter: [['list'], ['html', { outputFolder: 'playwright-report', open: 'never' }]],
   webServer: [
+    {
+      // Start server API for realtime tests
+      command: 'npm --workspace server run dev',
+      url: 'http://localhost:3001/healthz',
+      timeout: 120_000,
+      reuseExistingServer: true,
+      cwd: process.cwd(),
+      env: { ADMIN_KEY: 'test-admin-key' },
+    },
     {
       // Build client (ensures Tailwind compiled)
       command: 'npm --workspace client run build',
@@ -23,7 +33,7 @@ export default defineConfig({
       // Preview the built client
       command: 'npm --workspace client run preview',
       url: 'http://localhost:5173',
-      timeout: 60_000,
+      timeout: 120_000,
       reuseExistingServer: true,
       cwd: process.cwd(),
     },

@@ -136,18 +136,28 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S093: Test client start script locally
 - [x] S094: Define Socket.IO event contracts (`create_game`, `join_game`, `leave_game`, `make_move`, `game_state`, `error`)
 - [x] S095: Implement server event handlers with type-safe payloads
-- [ ] S096: Implement client emitters with type-safe payloads
-- [ ] S097: Add schema validation for received events
-- [ ] S098: Implement room creation with generated `roomId` and host role
-- [ ] S099: Implement role assignment on join (player/observer)
-- [ ] S100: Track room membership and roles on server
-- [ ] S101: Generate client-side nonce per move
-- [ ] S102: Deduplicate moves on server by nonce per game
-- [ ] S103: Use Socket.IO acknowledgements with timeouts
-- [ ] S104: Implement standardized error payloads
-- [ ] S105: Configure client reconnect with exponential backoff
-- [ ] S106: On reconnect, rejoin room using a session token
-- [ ] S106a: E2E contracts/flows: create/join/leave with acks and timeouts; standardized error payloads; reconnect with session token
+- [x] S096: Implement client emitters with type-safe payloads
+- [x] S097: Add schema validation for received events
+- [x] S098: Implement room creation with generated `roomId` and host role
+- [x] S098a: Use a list of globally recognizable mountain names for roomId values (e.g., `everest`, `k2`, `mont-blanc`); ensure uniqueness with short suffix as needed; add tests and docs
+- [x] S099: Implement role assignment on join (player/observer)
+- [x] S099a: Add `admin` role in addition to player/observer; admin can perform maintenance operations (e.g., game lifecycle controls, moderation/user management); define contracts and authorization checks
+- [x] S100: Track room membership and roles on server (maintain per-room players/observers, expose admin introspection APIs)
+- [x] S101: Generate client-side nonce per move
+- [x] S102: Deduplicate moves on server by nonce per game
+- [x] S103: Use Socket.IO acknowledgements with timeouts
+- [x] S104: Implement standardized error payloads
+- [x] S105: Configure client reconnect with exponential backoff
+- [x] S106: On reconnect, rejoin room using a session token
+- [ ] S106a: E2E contracts/flows epic (decomposed into S106b–S106i)
+- [x] S106b: Playwright E2E smoke: app load (preview), UI header/title visible
+- [x] S106c: E2E realtime connect status transitions (connect/connecting/disconnected)
+- [x] S106d: E2E contracts happy paths: create_game (gameId, player X, sessionToken), join_game (player/observer), leave_game
+- [x] S106e: E2E negative paths: invalid payloads (standardized errors), ack timeouts, duplicate nonces
+- [x] S106f: E2E reconnect with sessionToken: disconnect and rejoin as same player
+- [x] S106g: E2E admin flows: elevate_admin, admin:list_games, admin:room_info, admin:close_game (standardized error broadcast)
+- [x] S106h: E2E deterministic setup/teardown scripts: start server/client, readiness waits, clean shutdown
+- [x] S106i: E2E CI integration: GitHub Actions job, browser install/cache, artifacts on failure (screenshots, traces)
 - [ ] S107: Implement optimistic UI for moves and reconcile with server
 - [ ] S108: Build `Board.tsx` 3x3 grid component (mobile-first sizing; responsive grid; min 44px touch targets)
 - [ ] S109: Add touch and click handlers for squares (debounced; large hit areas)
