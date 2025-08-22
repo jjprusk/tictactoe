@@ -20,6 +20,7 @@ export interface GameClientState {
   winner?: Player;
   draw?: boolean;
   pendingMoves: PendingMove[];
+  role?: 'player' | 'observer';
 }
 
 const emptyBoard: BoardCell[] = Array.from({ length: 9 }, () => null);
@@ -29,6 +30,7 @@ const initialState: GameClientState = {
   board: emptyBoard.slice(),
   currentPlayer: 'X',
   pendingMoves: [],
+  role: undefined,
 };
 
 const gameSlice = createSlice({
@@ -43,6 +45,7 @@ const gameSlice = createSlice({
       state.winner = undefined;
       state.draw = undefined;
       state.pendingMoves = [];
+      state.role = undefined;
     },
     applyOptimisticMove(state, action: PayloadAction<{ gameId: string; position: number; player: Player; nonce: string }>) {
       const { gameId, position, player, nonce } = action.payload;
@@ -71,6 +74,9 @@ const gameSlice = createSlice({
       // Reconcile: drop any pending occupying confirmed cells or different gameId
       state.pendingMoves = state.pendingMoves.filter((m) => m.gameId === gs.gameId && gs.board[m.position] === null);
     },
+    setRole(state, action: PayloadAction<'player' | 'observer'>) {
+      state.role = action.payload;
+    },
     resetGameState(state) {
       state.gameId = null;
       state.board = emptyBoard.slice();
@@ -79,11 +85,12 @@ const gameSlice = createSlice({
       state.winner = undefined;
       state.draw = undefined;
       state.pendingMoves = [];
+      state.role = undefined;
     },
   },
 });
 
-export const { setCurrentGame, applyOptimisticMove, moveRejected, gameStateReceived, resetGameState } = gameSlice.actions;
+export const { setCurrentGame, applyOptimisticMove, moveRejected, gameStateReceived, resetGameState, setRole } = gameSlice.actions;
 export const gameReducer = gameSlice.reducer;
 
 // Selectors

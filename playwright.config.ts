@@ -9,7 +9,7 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:5173',
     trace: 'retain-on-failure',
-    video: 'retain-on-failure',
+    video: (process.env.PW_VIDEO as any) === 'on' ? 'on' : 'retain-on-failure',
   },
   reporter: [['list'], ['html', { outputFolder: 'playwright-report', open: 'never' }]],
   webServer: [

@@ -19,6 +19,7 @@ import {
 	AdminListGamesRequestSchema,
 	AdminCloseGameRequestSchema,
 	AdminRoomInfoRequestSchema,
+  ListGamesRequestSchema,
 } from './socket/contracts';
 
 type Role = 'player' | 'observer' | 'admin';
@@ -227,6 +228,16 @@ export function attachSocketHandlers(io: IOServer) {
 				}
 			}
 			ack?.({ ok: true, gameId, playerCount, observerCount, players });
+		});
+
+		// Public: list games (no auth)
+		socket.on('list_games', (rawPayload: unknown, ack?: Ack) => {
+			const parsed = ListGamesRequestSchema.safeParse(rawPayload ?? {});
+			if (!parsed.success) {
+				ack?.(errAck('invalid-payload'));
+				return;
+			}
+			ack?.({ ok: true, games: Array.from(activeGameIds.values()) });
 		});
 
 		socket.on('make_move', (rawPayload: unknown, ack?: Ack) => {

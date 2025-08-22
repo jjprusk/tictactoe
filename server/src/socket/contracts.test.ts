@@ -20,6 +20,8 @@ import {
   AdminListGamesAckSchema,
   AdminCloseGameRequestSchema,
   AdminCloseGameAckSchema,
+  ListGamesRequestSchema,
+  ListGamesAckSchema,
 } from './contracts';
 
 describe('socket contracts', () => {
@@ -97,6 +99,12 @@ describe('socket contracts', () => {
     expect(AdminCloseGameRequestSchema.parse({ gameId: 'g' })).toEqual({ gameId: 'g' });
     const closeOk = AdminCloseGameAckSchema.parse({ ok: true });
     expect(closeOk.ok).toBe(true);
+  });
+
+  it('public list_games schemas', () => {
+    expect(ListGamesRequestSchema.parse({})).toEqual({});
+    const ok = ListGamesAckSchema.parse({ ok: true, games: [] });
+    expect(ok.ok).toBe(true);
   });
 });
 

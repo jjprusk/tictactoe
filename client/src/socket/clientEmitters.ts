@@ -18,6 +18,10 @@ import {
   type LeaveGameAck,
   type MakeMoveRequest,
   type MakeMoveAck,
+  type ListGamesRequest,
+  type ListGamesAck,
+  ListGamesRequestSchema,
+  ListGamesAckSchema,
 } from './contracts';
 
 async function emitWithAck<TReq, TAck>(event: string, req: TReq, timeoutMs?: number): Promise<TAck> {
@@ -26,7 +30,7 @@ async function emitWithAck<TReq, TAck>(event: string, req: TReq, timeoutMs?: num
   return new Promise((resolve, reject) => {
     let settled = false;
     const sock = socketService.connect();
-    const timer = window.setTimeout(() => {
+    const timer = (globalThis as any).setTimeout(() => {
       if (!settled) {
         settled = true;
         reject(new Error('ack-timeout'));
@@ -35,7 +39,7 @@ async function emitWithAck<TReq, TAck>(event: string, req: TReq, timeoutMs?: num
     sock.emit(event, req, (ack: TAck) => {
       if (!settled) {
         settled = true;
-        window.clearTimeout(timer);
+        (globalThis as any).clearTimeout(timer);
         resolve(ack);
       }
     });
@@ -65,6 +69,12 @@ export async function makeMove(req: MakeMoveRequest, timeoutMs?: number): Promis
   const parsedReq = MakeMoveRequestSchema.parse(withNonce);
   const ack = await emitWithAck<MakeMoveRequest, MakeMoveAck>('make_move', parsedReq, timeoutMs);
   return MakeMoveAckSchema.parse(ack);
+}
+
+export async function listGames(req: ListGamesRequest = {}, timeoutMs?: number): Promise<ListGamesAck> {
+  const parsedReq = ListGamesRequestSchema.parse(req);
+  const ack = await emitWithAck<ListGamesRequest, ListGamesAck>('list_games', parsedReq, timeoutMs);
+  return ListGamesAckSchema.parse(ack);
 }
 
 

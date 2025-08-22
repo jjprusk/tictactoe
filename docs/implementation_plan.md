@@ -158,21 +158,21 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S106g: E2E admin flows: elevate_admin, admin:list_games, admin:room_info, admin:close_game (standardized error broadcast)
 - [x] S106h: E2E deterministic setup/teardown scripts: start server/client, readiness waits, clean shutdown
 - [x] S106i: E2E CI integration: GitHub Actions job, browser install/cache, artifacts on failure (screenshots, traces)
-- [ ] S107: Implement optimistic UI for moves and reconcile with server
-- [ ] S108: Build `Board.tsx` 3x3 grid component (mobile-first sizing; responsive grid; min 44px touch targets)
-- [ ] S109: Add touch and click handlers for squares (debounced; large hit areas)
-- [ ] S110: Ensure visible focus outlines and full keyboard navigation (tab/arrow keys, Enter/Space)
-- [ ] S111: Add keyboard navigation with appropriate ARIA roles
-- [ ] S112: Implement current player indicator component
-- [ ] S113: Highlight last move via CSS
-- [ ] S114: Implement result banner (win/draw/draw) with accessible semantics and clear microcopy
-- [ ] S115: Add reset button that emits reset event
-- [ ] S116: Make spectator view read-only and label spectators
-- [ ] S117: Implement lobby page fetching active games
-- [ ] S118: Implement join button emitting `join_game`
-- [ ] S119: Define `AIRequest` (gameState, player) and `AIResponse` (position) for future AI
-- [ ] S120: Implement random-move strategy `pickRandomMove(board, player, rng?)`
-- [ ] S121: Introduce `Strategy = 'random' | 'ai'` and `makeMove(board, player, strategy)` orchestrator (tracing + metrics)
+- [x] S107: Implement optimistic UI for moves and reconcile with server
+- [x] S108: Build `Board.tsx` 3x3 grid component (mobile-first sizing; responsive grid; min 44px touch targets)
+- [x] S109: Add touch and click handlers for squares (debounced; large hit areas)
+- [x] S110: Ensure visible focus outlines and full keyboard navigation (tab/arrow keys, Enter/Space)
+- [x] S111: Add keyboard navigation with appropriate ARIA roles
+- [x] S112: Implement current player indicator component
+- [x] S113: Highlight last move via CSS
+- [x] S114: Implement result banner (win/draw/draw) with accessible semantics and clear microcopy
+- [x] S115: Add reset button that emits reset event
+- [x] S116: Make spectator view read-only and label spectators
+- [x] S117: Implement lobby page fetching active games
+- [x] S118: Implement join button emitting `join_game`
+- [x] S119: Define `AIRequest` (gameState, player) and `AIResponse` (position) for future AI
+- [x] S120: Implement random-move strategy `pickRandomMove(board, player, rng?)`
+- [x] S121: Introduce `Strategy = 'random' | 'ai'` and `makeMove(board, player, strategy)` orchestrator (tracing + metrics)
 - [ ] S122: Integrate random strategy into match flow (human vs random end-to-end)
 - [ ] S123: Measure and log decision latency per strategy (Prometheus histogram)
 - [ ] S124: Implement config flag/env default `AI_STRATEGY` with per-game override

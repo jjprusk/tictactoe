@@ -183,6 +183,122 @@ describe('server bootstrap', () => {
 			expect(exitSpy).toHaveBeenCalledWith(0);
 		});
 
+		it('logs configured port when address() is unavailable and calls attachSocketHandlers once', async () => {
+			process.env.SERVER_PORT = '1234';
+			vi.resetModules();
+			// force address() to be undefined so index.ts falls back to configured port
+			(HOISTED.fakeServer.address as any).mockReturnValueOnce(undefined);
+			vi.mock('http', () => ({ default: { createServer: vi.fn(() => HOISTED.fakeServer) } }));
+			// stable config
+			const cfg = {
+				NODE_ENV: 'test',
+				SERVER_PORT: 1234,
+				MONGO_URI: 'mongodb://localhost:27017/x',
+				REDIS_URL: 'redis://localhost:6379',
+				LOG_LEVEL: 'info',
+				CORS_ORIGIN: 'http://localhost:5173',
+				JWT_SECRET: 'change-me',
+				AI_SERVICE_URL: 'http://localhost:8000',
+				MODEL_REGISTRY_DIR: './',
+				OTEL_EXPORTER_OTLP_ENDPOINT: undefined,
+				PROMETHEUS_ENABLE: false,
+				EMA_DEFAULT_N: 3,
+				MONGO_MAX_RETRIES: 0,
+				MONGO_RETRY_INITIAL_MS: 200,
+				MONGO_RETRY_MAX_MS: 2000,
+			} as any;
+			vi.doMock('./config/env', () => ({ appConfig: cfg, loadConfig: vi.fn(() => cfg) }));
+			vi.doMock('./bootstrap', () => ({ buildIoServer: vi.fn(() => ({ on: vi.fn() })) }));
+			// capture attachSocketHandlers calls
+			const handlers = await import('./socket_handlers');
+			const attachSpy = vi.spyOn(handlers, 'attachSocketHandlers');
+			vi.mock('./logger', () => {
+				const logger: any = { info: vi.fn(), child: vi.fn(() => logger) };
+				return { logger };
+			});
+			await import('./index');
+			const { logger } = await import('./logger');
+			expect(logger.info).toHaveBeenCalledWith({ port: 1234 }, 'server started');
+			expect(attachSpy).toHaveBeenCalledTimes(1);
+			attachSpy.mockRestore();
+		});
+
+
+		it('exits(1) and logs on startup error in production (loadConfig throws)', async () => {
+			const prevNodeEnv = process.env.NODE_ENV;
+			process.env.NODE_ENV = 'production';
+			process.env.SERVER_PORT = '0';
+			vi.resetModules();
+			vi.mock('http', () => ({ default: { createServer: vi.fn(() => HOISTED.fakeServer) } }));
+			const cfg = {
+				NODE_ENV: 'production',
+				SERVER_PORT: 0,
+				MONGO_URI: 'mongodb://localhost:27017/x',
+				REDIS_URL: 'redis://localhost:6379',
+				LOG_LEVEL: 'info',
+				CORS_ORIGIN: 'http://localhost:5173',
+				JWT_SECRET: 'change-me',
+				AI_SERVICE_URL: 'http://localhost:8000',
+				MODEL_REGISTRY_DIR: './',
+				OTEL_EXPORTER_OTLP_ENDPOINT: undefined,
+				PROMETHEUS_ENABLE: false,
+				EMA_DEFAULT_N: 3,
+				MONGO_MAX_RETRIES: 0,
+				MONGO_RETRY_INITIAL_MS: 200,
+				MONGO_RETRY_MAX_MS: 2000,
+			} as any;
+			vi.doMock('./config/env', () => ({ appConfig: cfg, loadConfig: vi.fn(() => { throw new Error('bad env'); }) }));
+			const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+			const exitSpy = vi.spyOn(process, 'exit').mockImplementation(((code?: string | number | null | undefined) => {
+				throw new Error(`exit ${code}`);
+			}) as never);
+			await expect(import('./index')).rejects.toBeTruthy();
+			expect(errSpy).toHaveBeenCalled();
+			const first = (errSpy as any).mock.calls.find((c: any[]) => typeof c[0] === 'string' && c[0].startsWith('[startup]'));
+			expect(first).toBeTruthy();
+			expect(exitSpy).toHaveBeenCalledWith(1);
+			errSpy.mockRestore();
+			process.env.NODE_ENV = prevNodeEnv;
+		});
+
+		it('exits(1) and logs when buildIoServer throws in production', async () => {
+			const prevNodeEnv = process.env.NODE_ENV;
+			process.env.NODE_ENV = 'production';
+			process.env.SERVER_PORT = '0';
+			vi.resetModules();
+			vi.mock('http', () => ({ default: { createServer: vi.fn(() => HOISTED.fakeServer) } }));
+			vi.doMock('./bootstrap', () => ({ buildIoServer: vi.fn(() => { throw new Error('io fail'); }) }));
+			const cfg = {
+				NODE_ENV: 'production',
+				SERVER_PORT: 0,
+				MONGO_URI: 'mongodb://localhost:27017/x',
+				REDIS_URL: 'redis://localhost:6379',
+				LOG_LEVEL: 'info',
+				CORS_ORIGIN: 'http://localhost:5173',
+				JWT_SECRET: 'change-me',
+				AI_SERVICE_URL: 'http://localhost:8000',
+				MODEL_REGISTRY_DIR: './',
+				OTEL_EXPORTER_OTLP_ENDPOINT: undefined,
+				PROMETHEUS_ENABLE: false,
+				EMA_DEFAULT_N: 3,
+				MONGO_MAX_RETRIES: 0,
+				MONGO_RETRY_INITIAL_MS: 200,
+				MONGO_RETRY_MAX_MS: 2000,
+			} as any;
+			vi.doMock('./config/env', () => ({ appConfig: cfg, loadConfig: vi.fn(() => cfg) }));
+			const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+			const exitSpy = vi.spyOn(process, 'exit').mockImplementation(((code?: string | number | null | undefined) => {
+				throw new Error(`exit ${code}`);
+			}) as never);
+			await expect(import('./index')).rejects.toBeTruthy();
+			expect(errSpy).toHaveBeenCalled();
+			const first = (errSpy as any).mock.calls.find((c: any[]) => typeof c[0] === 'string' && c[0].startsWith('[startup]'));
+			expect(first).toBeTruthy();
+			expect(exitSpy).toHaveBeenCalledWith(1);
+			errSpy.mockRestore();
+			process.env.NODE_ENV = prevNodeEnv;
+		});
+
 	});
 
 	// Additional bootstrap behavior tests omitted to avoid brittle side-effects

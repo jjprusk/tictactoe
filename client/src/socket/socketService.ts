@@ -89,14 +89,14 @@ export class SocketService {
           } else {
             this.setStatus('disconnected');
             // schedule a retry probe rather than opening a noisy WS
-            if (this.reconnectTimer) window.clearTimeout(this.reconnectTimer);
-            this.reconnectTimer = window.setTimeout(() => this.connect(options), 2000);
+            if (this.reconnectTimer) (globalThis as any).clearTimeout(this.reconnectTimer);
+            this.reconnectTimer = (globalThis as any).setTimeout(() => this.connect(options), 2000);
           }
         })
         .catch(() => {
           this.setStatus('disconnected');
-          if (this.reconnectTimer) window.clearTimeout(this.reconnectTimer);
-          this.reconnectTimer = window.setTimeout(() => this.connect(options), 2000);
+          if (this.reconnectTimer) (globalThis as any).clearTimeout(this.reconnectTimer);
+          this.reconnectTimer = (globalThis as any).setTimeout(() => this.connect(options), 2000);
         });
       // Return a dummy-like socket reference for callers that ignore it
       // Consumers should rely on subscribeStatus to react to connectivity
@@ -134,10 +134,10 @@ export class SocketService {
   private async probeServerHealthy(baseUrl: string, timeoutMs = 750): Promise<boolean> {
     try {
       const ctrl = new AbortController();
-      const timer = window.setTimeout(() => ctrl.abort(), timeoutMs);
+      const timer = (globalThis as any).setTimeout(() => ctrl.abort(), timeoutMs);
       const u = baseUrl.replace(/\/$/, '') + '/healthz';
       const res = await fetch(u, { method: 'GET', signal: ctrl.signal });
-      window.clearTimeout(timer);
+      (globalThis as any).clearTimeout(timer);
       return res.ok;
     } catch {
       return false;

@@ -60,4 +60,13 @@ export type GameStatePayload = z.infer<typeof GameStatePayloadSchema>;
 export const ErrorPayloadSchema = z.object({ code: z.string().min(1), message: z.string().min(1) });
 export type ErrorPayload = z.infer<typeof ErrorPayloadSchema>;
 
+// Public list_games
+export const ListGamesRequestSchema = z.object({});
+export type ListGamesRequest = z.infer<typeof ListGamesRequestSchema>;
+export const ListGamesAckSchema = z.union([
+  z.object({ ok: z.literal(true), games: z.array(z.string()) }),
+  z.object({ ok: z.literal(false), error: z.string().min(1) }),
+]);
+export type ListGamesAck = z.infer<typeof ListGamesAckSchema>;
+
 

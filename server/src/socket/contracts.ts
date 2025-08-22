@@ -83,8 +83,9 @@ export const EventNames = {
   admin_list_games: 'admin:list_games',
   admin_close_game: 'admin:close_game',
   admin_room_info: 'admin:room_info',
+  list_games: 'list_games',
 } as const;
-export type ClientToServerEvent = keyof Pick<typeof EventNames, 'create_game' | 'join_game' | 'leave_game' | 'make_move' | 'elevate_admin' | 'admin_list_games' | 'admin_close_game' | 'admin_room_info'>;
+export type ClientToServerEvent = keyof Pick<typeof EventNames, 'create_game' | 'join_game' | 'leave_game' | 'make_move' | 'elevate_admin' | 'admin_list_games' | 'admin_close_game' | 'admin_room_info' | 'list_games'>;
 export type ServerToClientEvent = keyof Pick<typeof EventNames, 'game_state' | 'error'>;
 
 // Admin events and schemas
@@ -119,4 +120,10 @@ export const OkAdminRoomInfoAckSchema = z.object({
 export const AdminRoomInfoAckSchema = z.union([OkAdminRoomInfoAckSchema, ErrAckSchema]);
 export type AdminRoomInfoAck = z.infer<typeof AdminRoomInfoAckSchema>;
 
+// Public: list games (no auth)
+export const ListGamesRequestSchema = z.object({});
+export type ListGamesRequest = z.infer<typeof ListGamesRequestSchema>;
+export const OkListGamesAckSchema = z.object({ ok: z.literal(true), games: z.array(z.string()) });
+export const ListGamesAckSchema = z.union([OkListGamesAckSchema, ErrAckSchema]);
+export type ListGamesAck = z.infer<typeof ListGamesAckSchema>;
 

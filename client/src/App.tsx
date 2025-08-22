@@ -6,6 +6,11 @@ import ConnectionStatus from './components/ConnectionStatus';
 import { MotionConfig, motion, useReducedMotion } from 'framer-motion';
 import Logo from './components/Logo';
 import Board from './components/Board';
+import CurrentPlayer from './components/CurrentPlayer';
+import ResultBanner from './components/ResultBanner';
+import ResetButton from './components/ResetButton';
+import ObserverNotice from './components/ObserverNotice';
+import Lobby from './components/Lobby';
 
 export default function App() {
   useEffect(() => {
@@ -42,6 +47,16 @@ export default function App() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25, ease: 'easeOut' }}
         >
+          <div className="mb-2">
+            <ObserverNotice />
+          </div>
+          <div className="mb-2">
+            <CurrentPlayer />
+          </div>
+          <div className="flex items-center justify-between mb-2">
+            <ResultBanner />
+            <ResetButton />
+          </div>
           <Board />
         </motion.section>
         <motion.section
@@ -51,8 +66,7 @@ export default function App() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25, ease: 'easeOut', delay: 0.05 }}
         >
-          {/* Insights placeholder (S086 will replace) */}
-          <div className="text-sm text-slate-500">Insights will appear here during play.</div>
+          <Lobby />
         </motion.section>
       </main>
     </div>

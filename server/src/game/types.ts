@@ -41,4 +41,7 @@ export interface GameState {
   moves: number[];
 }
 
+/** Strategy for computer decisions. */
+export type Strategy = 'random' | 'ai';
+
 
