@@ -23,6 +23,7 @@ import {
   ListGamesRequestSchema,
   ListGamesAckSchema,
 } from './contracts';
+import { getStoredStrategy } from '../utils/clientLogger';
 
 async function emitWithAck<TReq, TAck>(event: string, req: TReq, timeoutMs?: number): Promise<TAck> {
   const defaultTimeout = Number((import.meta as any)?.env?.VITE_SOCKET_ACK_TIMEOUT_MS ?? 800);
@@ -47,7 +48,8 @@ async function emitWithAck<TReq, TAck>(event: string, req: TReq, timeoutMs?: num
 }
 
 export async function createGame(req: CreateGameRequest, timeoutMs?: number): Promise<CreateGameAck> {
-  const parsedReq = CreateGameRequestSchema.parse(req);
+  const withDefault = typeof (req as any)?.strategy === 'undefined' ? { ...req, strategy: getStoredStrategy() } : req;
+  const parsedReq = CreateGameRequestSchema.parse(withDefault);
   const ack = await emitWithAck<CreateGameRequest, CreateGameAck>('create_game', parsedReq, timeoutMs);
   return CreateGameAckSchema.parse(ack);
 }

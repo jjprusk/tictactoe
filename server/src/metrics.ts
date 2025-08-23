@@ -10,6 +10,7 @@ const metricsEnabled = appConfig.PROMETHEUS_ENABLE === true;
 
 let httpRequestDurationSeconds: Histogram<'method' | 'route' | 'status_code'> | undefined;
 let moveLatencySeconds: Histogram<'status'> | undefined;
+let aiDecisionLatencySeconds: Histogram<'strategy'> | undefined;
 let socketConnectionsCounter: Counter<string> | undefined;
 let socketDisconnectionsCounter: Counter<string> | undefined;
 
@@ -27,6 +28,13 @@ if (metricsEnabled) {
     help: 'Latency for processing move:make events in seconds',
     labelNames: ['status'] as const,
     buckets: [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1],
+    registers: [metricsRegistry],
+  });
+  aiDecisionLatencySeconds = new Histogram({
+    name: 'ai_decision_latency_seconds',
+    help: 'Latency for AI strategy decision making in seconds',
+    labelNames: ['strategy'] as const,
+    buckets: [0.0005, 0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25],
     registers: [metricsRegistry],
   });
   socketConnectionsCounter = new Counter({
@@ -90,6 +98,12 @@ export function resetMetricsForTest(): void {
 export function observeMoveLatencySeconds(status: 'ok' | 'error', seconds: number): void {
   if (metricsEnabled && moveLatencySeconds) {
     moveLatencySeconds.labels(status).observe(seconds);
+  }
+}
+
+export function observeAiDecisionLatencySeconds(strategy: 'random' | 'ai', seconds: number): void {
+  if (metricsEnabled && aiDecisionLatencySeconds) {
+    aiDecisionLatencySeconds.labels(strategy).observe(seconds);
   }
 }
 

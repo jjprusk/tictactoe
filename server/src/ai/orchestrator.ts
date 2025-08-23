@@ -2,7 +2,7 @@
 import { getLegalMoves } from '../game/rules';
 import type { Board, Player, Strategy } from '../game/types';
 import { pickRandomMove } from './random';
-import { observeMoveLatencySeconds } from '../metrics';
+import { observeAiDecisionLatencySeconds, observeMoveLatencySeconds } from '../metrics';
 import { getTracer } from '../tracing';
 
 export async function makeMove(board: Board, player: Player, strategy: Strategy): Promise<number> {
@@ -16,6 +16,7 @@ export async function makeMove(board: Board, player: Player, strategy: Strategy)
       const pos = pickRandomMove(board, player);
       const end = process.hrtime.bigint();
       observeMoveLatencySeconds('ok', Number(end - start) / 1e9);
+      observeAiDecisionLatencySeconds('random', Number(end - start) / 1e9);
       span.end();
       return pos;
     }
@@ -24,6 +25,7 @@ export async function makeMove(board: Board, player: Player, strategy: Strategy)
     const pos = legal.length ? legal[0] : -1;
     const end = process.hrtime.bigint();
     observeMoveLatencySeconds('ok', Number(end - start) / 1e9);
+    observeAiDecisionLatencySeconds('ai', Number(end - start) / 1e9);
     span.end();
     return pos;
   } catch (_e) {

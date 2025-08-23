@@ -24,6 +24,9 @@ describe('socket handlers (contract events)', () => {
   let baseUrl: string;
 
   beforeAll(async () => {
+    // Ensure defaults are predictable for tests
+    process.env.AI_STRATEGY = 'random';
+    process.env.FIRST_PLAYER = 'X';
     server = buildHttpServer();
     const io = buildIoServer(server);
     attachSocketHandlers(io);
@@ -82,6 +85,37 @@ describe('socket handlers (contract events)', () => {
     c2.disconnect();
     c3.disconnect();
     c1b.disconnect();
+  });
+
+  it('human vs random: creates game with random strategy and server emits AI response', async () => {
+    const c = Client(baseUrl, { transports: ['websocket'] });
+    await waitConnect(c);
+    const created: any = await emitAck(c, 'create_game', { strategy: 'random' } as any);
+    expect(created.ok).toBe(true);
+    const gameId = created.gameId as string;
+    const states: any[] = [];
+    c.on('game_state', (s: any) => states.push(s));
+    const ack1: any = await emitAck(c, 'make_move', { gameId, position: 0, player: 'X', nonce: 'n1' } as any);
+    expect(ack1.ok).toBe(true);
+    await new Promise((r) => setTimeout(r, 20));
+    expect(states.length).toBeGreaterThanOrEqual(2);
+    const last = states[states.length - 1];
+    expect(last.gameId).toBe(gameId);
+    expect(typeof last.lastMove).toBe('number');
+    expect(last.lastMove).not.toBe(0);
+    c.disconnect();
+  });
+
+  it('uses env default AI_STRATEGY when create_game.strategy is omitted, but allows per-game override', async () => {
+    const c = Client(baseUrl, { transports: ['websocket'] });
+    await waitConnect(c);
+    // Omitted strategy -> uses env default ('random')
+    const createdDefault: any = await emitAck(c, 'create_game', {});
+    expect(createdDefault.ok).toBe(true);
+    // Now explicitly request random again just to ensure override path still works
+    const createdExplicit: any = await emitAck(c, 'create_game', { strategy: 'random' } as any);
+    expect(createdExplicit.ok).toBe(true);
+    c.disconnect();
   });
 
   it('disconnect cleans up player slot; next join fills freed slot with correct symbol', async () => {

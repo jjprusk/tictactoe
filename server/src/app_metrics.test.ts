@@ -25,6 +25,7 @@ describe('metrics enabled', () => {
     expect(res.text).toContain('method="GET"');
     expect(res.text).toContain('route="/healthz"');
     expect(res.text).toContain('status_code="200"');
+    // ai_decision_latency_seconds may appear when orchestrator runs
   });
 });
 

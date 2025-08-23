@@ -173,11 +173,11 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S119: Define `AIRequest` (gameState, player) and `AIResponse` (position) for future AI
 - [x] S120: Implement random-move strategy `pickRandomMove(board, player, rng?)`
 - [x] S121: Introduce `Strategy = 'random' | 'ai'` and `makeMove(board, player, strategy)` orchestrator (tracing + metrics)
-- [ ] S122: Integrate random strategy into match flow (human vs random end-to-end)
-- [ ] S123: Measure and log decision latency per strategy (Prometheus histogram)
-- [ ] S124: Implement config flag/env default `AI_STRATEGY` with per-game override
-- [ ] S125: Alternate first move across games; add config to choose first player
-- [ ] S126: Implement client Options Panel toggle (Random/AI) persisted to localStorage; accessible form controls; send in `create_game`
+- [x] S122: Integrate random strategy into match flow (human vs random end-to-end)
+- [x] S123: Measure and log decision latency per strategy (Prometheus histogram)
+- [x] S124: Implement config flag/env default `AI_STRATEGY` with per-game override
+- [x] S125: Alternate first move across games; add config to choose first player
+- [x] S126: Implement client Options Panel toggle (Random/AI) persisted to localStorage; accessible form controls; send in `create_game`
 - [ ] S126a: E2E gameplay (HvRandom): alternating first turns, making moves, and result banner behavior
 - [ ] S127: Implement offline mode: detect disconnects and switch to local random strategy
 - [ ] S128: Show offline banner and disable server emits while offline

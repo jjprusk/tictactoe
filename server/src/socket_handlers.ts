@@ -20,7 +20,12 @@ import {
 	AdminCloseGameRequestSchema,
 	AdminRoomInfoRequestSchema,
   ListGamesRequestSchema,
+  type CreateGameRequest,
 } from './socket/contracts';
+import type { Board } from './game/types';
+import { applyMove, nextPlayer, checkWin, checkDraw } from './game/rules';
+import { appConfig } from './config/env';
+import { makeMove as orchestrateMove } from './ai/orchestrator';
 
 type Role = 'player' | 'observer' | 'admin';
 
@@ -30,6 +35,10 @@ type RoomState = {
 	playersBySocket: Map<string, ContractPlayer>;
 	// session token -> socketId mapping for rejoin
 	sessions?: Map<string, string>;
+  // game state
+  board?: Board;
+  currentPlayer?: ContractPlayer;
+  strategy?: 'random' | 'ai';
 };
 
 const joinSchema = z.object({ roomId: z.string().min(1) });
@@ -85,11 +94,22 @@ export function attachSocketHandlers(io: IOServer) {
 			state.playerIds.add(socket.id);
 			state.playersBySocket.set(socket.id, 'X');
 			socket.data.role = 'player';
+      // initialize game state
+      state.board = Array.from({ length: 9 }, () => null) as Board;
+      // Prefer runtime env FIRST_PLAYER if present; fallback to loaded appConfig
+      const envFirst = (process.env.FIRST_PLAYER as 'X' | 'O' | 'alternate' | undefined);
+      const cfgFirst = envFirst ?? appConfig.FIRST_PLAYER;
+      const nextFirst = getNextFirstPlayer(cfgFirst);
+      state.currentPlayer = nextFirst;
+      // Ensure host player mapping reflects first player
+      state.playersBySocket.set(socket.id, nextFirst);
+      const req = parsed.data as CreateGameRequest;
+      state.strategy = (req.strategy ?? appConfig.AI_STRATEGY);
 			// create session token for host
 			const token = `s_${randomUUID()}`;
 			state.sessions?.set(token, socket.id);
 			activeGameIds.add(gameId);
-			ack?.(okCreateAck({ gameId, player: 'X', sessionToken: token }));
+			ack?.(okCreateAck({ gameId, player: nextFirst, sessionToken: token }));
 		});
 
 		socket.on('join_game', (rawPayload: unknown, ack?: Ack) => {
@@ -240,7 +260,7 @@ export function attachSocketHandlers(io: IOServer) {
 			ack?.({ ok: true, games: Array.from(activeGameIds.values()) });
 		});
 
-		socket.on('make_move', (rawPayload: unknown, ack?: Ack) => {
+		socket.on('make_move', async (rawPayload: unknown, ack?: Ack) => {
 			const tracer = getTracer();
 			const span = tracer.startSpan('socket.make_move');
 			const start = process.hrtime.bigint();
@@ -266,7 +286,7 @@ export function attachSocketHandlers(io: IOServer) {
 				span.end();
 				return;
 			}
-			const { gameId, nonce } = parsed.data as z.infer<typeof MakeMoveRequestSchema>;
+			const { gameId, nonce, position, player } = parsed.data as z.infer<typeof MakeMoveRequestSchema>;
 			const state = getRoomState(gameId);
 			if (state.nonces.has(nonce)) {
 				ack?.(errAck('duplicate'));
@@ -278,10 +298,53 @@ export function attachSocketHandlers(io: IOServer) {
 				return;
 			}
 			state.nonces.add(nonce);
-			ack?.(okAck());
-			const end = process.hrtime.bigint();
-			observeMoveLatencySeconds('ok', Number(end - start) / 1e9);
-			span.end();
+			try {
+				// Apply player move
+				if (!state.board) state.board = Array.from({ length: 9 }, () => null) as Board;
+				if (!state.currentPlayer) state.currentPlayer = 'X';
+				const legalCellEmpty = state.board[position] === null;
+				if (!legalCellEmpty || state.currentPlayer !== player) {
+					ack?.(errAck('invalid-move'));
+					const end = process.hrtime.bigint();
+					observeMoveLatencySeconds('error', Number(end - start) / 1e9);
+					span.setAttribute('error', true);
+					span.setAttribute('error.kind', 'invalid-move');
+					span.end();
+					return;
+				}
+				state.board = applyMove(state.board, position, player) as Board;
+				let winner = checkWin(state.board) as ContractPlayer | null;
+				const draw = winner ? false : checkDraw(state.board);
+				state.currentPlayer = winner || draw ? state.currentPlayer : nextPlayer(player) as ContractPlayer;
+				io.to(gameId).emit('game_state', { gameId, board: state.board, currentPlayer: state.currentPlayer!, lastMove: position, winner: winner ?? undefined, draw: draw || undefined });
+				ack?.(okAck());
+				// Trigger AI move if configured and applicable
+				if (!winner && !draw && state.strategy === 'random') {
+					// Determine if next player is AI-controlled (no human assigned for that letter)
+					const assigned = new Set(state.playersBySocket.values());
+					const aiPlayers: ContractPlayer[] = (['X', 'O'] as const).filter((p) => !assigned.has(p)) as ContractPlayer[];
+					if (aiPlayers.includes(state.currentPlayer!)) {
+						const aiPos = await orchestrateMove(state.board, state.currentPlayer!, 'random');
+						if (aiPos >= 0 && state.board[aiPos] === null) {
+							const aiPlayer = state.currentPlayer!;
+							state.board = applyMove(state.board, aiPos, aiPlayer) as Board;
+							winner = checkWin(state.board) as ContractPlayer | null;
+							const aiDraw = winner ? false : checkDraw(state.board);
+							state.currentPlayer = winner || aiDraw ? state.currentPlayer : nextPlayer(aiPlayer) as ContractPlayer;
+							io.to(gameId).emit('game_state', { gameId, board: state.board, currentPlayer: state.currentPlayer!, lastMove: aiPos, winner: winner ?? undefined, draw: aiDraw || undefined });
+						}
+					}
+				}
+				const end = process.hrtime.bigint();
+				observeMoveLatencySeconds('ok', Number(end - start) / 1e9);
+				span.end();
+			} catch {
+				ack?.(errAck('error'));
+				const end = process.hrtime.bigint();
+				observeMoveLatencySeconds('error', Number(end - start) / 1e9);
+				span.setAttribute('error', true);
+				span.end();
+			}
 		});
 
 		// Legacy/test routes retained for existing tests
@@ -412,6 +475,17 @@ function okJoinAck(args: { role: Role; player?: ContractPlayer; sessionToken?: s
 	if (args.player) base.player = args.player;
 	if (args.sessionToken) base.sessionToken = args.sessionToken;
 	return base;
+}
+
+function getNextFirstPlayer(configValue: 'X' | 'O' | 'alternate'): ContractPlayer {
+	if (configValue === 'X' || configValue === 'O') return configValue;
+	// Very lightweight alternation in-memory per process using a typed global map
+	const key = '__ttt_alternate_first__';
+	const globalMap = globalThis as unknown as Record<string, ContractPlayer | undefined>;
+	const prev = globalMap[key];
+	const next: ContractPlayer = prev === 'O' ? 'X' : 'O';
+	globalMap[key] = next;
+	return next;
 }
 
 

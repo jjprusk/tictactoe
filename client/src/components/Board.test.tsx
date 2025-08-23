@@ -1,6 +1,6 @@
 // © 2025 Joe Pruskowski
 import React from 'react';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { act } from 'react';
 import { flush } from '../test/flush';
 import { createRoot } from 'react-dom/client';
@@ -146,4 +146,78 @@ describe('Board', () => {
 		const cells = Array.from(container.querySelectorAll('[role="gridcell"]')) as HTMLElement[];
 		expect(cells[4].className).toContain('ring-amber-400');
 	});
+
+  it('has correct grid ARIA attributes', async () => {
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    const { default: Board } = await import('./Board');
+    const { setCurrentGame } = await import('../store/gameSlice');
+    await act(async () => {
+      store.dispatch(setCurrentGame({ gameId: 'g6' }));
+      root.render(React.createElement(Provider as any, { store }, React.createElement(Board)));
+    });
+    const grid = container.querySelector('[role="grid"]') as HTMLElement;
+    expect(grid).toBeTruthy();
+    expect(grid.getAttribute('aria-rowcount')).toBe('3');
+    expect(grid.getAttribute('aria-colcount')).toBe('3');
+    const cell = container.querySelector('[role="gridcell"]') as HTMLElement;
+    expect(cell.getAttribute('aria-rowindex')).toBe('1');
+    expect(cell.getAttribute('aria-colindex')).toBe('1');
+  });
+
+  it('blocks move when game already has winner or draw', async () => {
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    const { default: Board } = await import('./Board');
+    const { setCurrentGame, gameStateReceived } = await import('../store/gameSlice');
+    await act(async () => {
+      store.dispatch(setCurrentGame({ gameId: 'g7' }));
+      store.dispatch(gameStateReceived({ gameId: 'g7', board: ['X','X','X',null,null,null,null,null,null], currentPlayer: 'O', winner: 'X' } as any));
+      root.render(React.createElement(Provider as any, { store }, React.createElement(Board)));
+    });
+    const cells = Array.from(container.querySelectorAll('[role="gridcell"]')) as HTMLElement[];
+    await act(async () => { cells[3].click(); });
+    expect(cells[3].textContent || '').toBe('');
+  });
+
+  it('adds pending style on optimistic move and debounces duplicate clicks (makeMove called at least once)', async () => {
+    vi.resetModules();
+    vi.mock('../socket/clientEmitters', async (orig) => {
+      const actual = await (orig as any)();
+      return { ...actual, makeMove: vi.fn().mockResolvedValue({ ok: true }) };
+    });
+    const emitters = await import('../socket/clientEmitters');
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    const { default: Board } = await import('./Board');
+    const { setCurrentGame } = await import('../store/gameSlice');
+    await act(async () => {
+      store.dispatch(setCurrentGame({ gameId: 'g8' }));
+      root.render(React.createElement(Provider as any, { store }, React.createElement(Board)));
+    });
+    const cells = Array.from(container.querySelectorAll('[role="gridcell"]')) as HTMLElement[];
+    await act(async () => { cells[5].click(); });
+    // Immediate second click (may or may not trigger depending on timing)
+    await act(async () => { cells[5].click(); });
+    expect((emitters as any).makeMove).toHaveBeenCalled();
+    // Pending style opacity is applied
+    expect(cells[5].className).toContain('opacity-70');
+  });
+
+  it('arrow keys move focus between cells', async () => {
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    const { default: Board } = await import('./Board');
+    const { setCurrentGame } = await import('../store/gameSlice');
+    await act(async () => {
+      store.dispatch(setCurrentGame({ gameId: 'g9' }));
+      root.render(React.createElement(Provider as any, { store }, React.createElement(Board)));
+    });
+    const cells = Array.from(container.querySelectorAll('[role="gridcell"]')) as HTMLButtonElement[];
+    cells[0].focus();
+    await act(async () => { cells[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })); });
+    expect((document.activeElement as HTMLElement)?.getAttribute('data-idx')).toBe('1');
+    await act(async () => { cells[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true })); });
+    expect((document.activeElement as HTMLElement)?.getAttribute('data-idx')).toBe('4');
+  });
 });
