@@ -28,16 +28,29 @@ const SUPPRESSED_PATTERNS = [
   'act(...).',
   'not wrapped in act',
   'ReactDOMTestUtils.act is deprecated',
+  // Network noise during tests when no backend is running
+  'ECONNREFUSED',
+  'connect ECONNREFUSED',
+  'AggregateError',
+  // happy-dom abort noise during teardown of pending fetches
+  'The operation was aborted',
+  'AbortError',
 ];
+function shouldSuppress(args: unknown[]): boolean {
+  try {
+    const combined = args.map((a) => (typeof a === 'string' ? a : (a as any)?.message || JSON.stringify(a))).join(' ');
+    return SUPPRESSED_PATTERNS.some((p) => combined.includes(p));
+  } catch {
+    return false;
+  }
+}
 console.error = (...args: unknown[]) => {
-  const msg = typeof args[0] === 'string' ? args[0] : '';
-  if (SUPPRESSED_PATTERNS.some((p) => msg.includes(p))) return;
+  if (shouldSuppress(args)) return;
   // @ts-ignore
   origError(...args);
 };
 console.warn = (...args: unknown[]) => {
-  const msg = typeof args[0] === 'string' ? args[0] : '';
-  if (SUPPRESSED_PATTERNS.some((p) => msg.includes(p))) return;
+  if (shouldSuppress(args)) return;
   // @ts-ignore
   origWarn(...args);
 };

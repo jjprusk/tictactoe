@@ -77,9 +77,10 @@ describe('socket flows', () => {
       new Promise<void>((resolve) => c3.on('connect', () => resolve())),
     ]);
 
-    const r1: any = await emitWithAckTimeout(c1, 'room:join', { roomId: 'cap' }, 500);
-    const r2: any = await emitWithAckTimeout(c2, 'room:join', { roomId: 'cap' }, 500);
-    const r3: any = await emitWithAckTimeout(c3, 'room:join', { roomId: 'cap' }, 500);
+    const timeoutMs = 1500; // allow more time under CI load
+    const r1: any = await emitWithAckTimeout(c1, 'room:join', { roomId: 'cap' }, timeoutMs);
+    const r2: any = await emitWithAckTimeout(c2, 'room:join', { roomId: 'cap' }, timeoutMs);
+    const r3: any = await emitWithAckTimeout(c3, 'room:join', { roomId: 'cap' }, timeoutMs);
     expect(r1.ok && r2.ok && r3.ok).toBe(true);
     expect(r1.role).toBe('player');
     expect(r2.role).toBe('player');

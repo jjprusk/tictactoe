@@ -2,14 +2,19 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectGame, resetGameState } from '../store/gameSlice';
+import { resetGame } from '../socket/clientEmitters';
 
 export default function ResetButton(): JSX.Element | null {
   const dispatch = useDispatch();
   const { gameId } = useSelector(selectGame);
   if (!gameId) return null;
 
-  const onReset = (): void => {
+  const onReset = async (): Promise<void> => {
+    // Optimistic clear for instantaneous UI feedback
     dispatch(resetGameState());
+    try {
+      if (gameId) await resetGame({ gameId });
+    } catch {}
   };
 
   return (

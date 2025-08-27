@@ -22,9 +22,10 @@ describe('Board', () => {
 		const root = createRoot(container);
 
 		const { default: Board } = await import('./Board');
-		const { setCurrentGame } = await import('../store/gameSlice');
+		const { setCurrentGame, setMyPlayer } = await import('../store/gameSlice');
 		await act(async () => {
 			store.dispatch(setCurrentGame({ gameId: 'g1' }));
+			store.dispatch(setMyPlayer('X' as any));
 			root.render(React.createElement(Provider as any, { store }, React.createElement(Board)));
 		});
 		await flush();
@@ -63,9 +64,10 @@ describe('Board', () => {
 		const container = document.createElement('div');
 		const root = createRoot(container);
 		const { default: Board } = await import('./Board');
-		const { setCurrentGame, gameStateReceived } = await import('../store/gameSlice');
+		const { setCurrentGame, gameStateReceived, setMyPlayer } = await import('../store/gameSlice');
 		await act(async () => {
 			store.dispatch(setCurrentGame({ gameId: 'g2' }));
+			store.dispatch(setMyPlayer('O' as any));
 			store.dispatch(gameStateReceived({ gameId: 'g2', board: ['X', null, null, null, null, null, null, null, null], currentPlayer: 'O' } as any));
 			root.render(React.createElement(Provider as any, { store }, React.createElement(Board)));
 		});
@@ -81,9 +83,10 @@ describe('Board', () => {
 		const container = document.createElement('div');
 		const root = createRoot(container);
 		const { default: Board } = await import('./Board');
-		const { setCurrentGame } = await import('../store/gameSlice');
+		const { setCurrentGame, setMyPlayer } = await import('../store/gameSlice');
 		await act(async () => {
 			store.dispatch(setCurrentGame({ gameId: 'g3' }));
+			store.dispatch(setMyPlayer('X' as any));
 			root.render(React.createElement(Provider as any, { store }, React.createElement(Board)));
 		});
 		await flush();
@@ -100,9 +103,10 @@ describe('Board', () => {
 		const container = document.createElement('div');
 		const root = createRoot(container);
 		const { default: Board } = await import('./Board');
-		const { setCurrentGame } = await import('../store/gameSlice');
+		const { setCurrentGame, setMyPlayer } = await import('../store/gameSlice');
 		await act(async () => {
 			store.dispatch(setCurrentGame({ gameId: 'g4' }));
+			store.dispatch(setMyPlayer('X' as any));
 			root.render(React.createElement(Provider as any, { store }, React.createElement(Board)));
 		});
 		await flush();
@@ -190,9 +194,10 @@ describe('Board', () => {
     const container = document.createElement('div');
     const root = createRoot(container);
     const { default: Board } = await import('./Board');
-    const { setCurrentGame } = await import('../store/gameSlice');
+    const { setCurrentGame, setMyPlayer } = await import('../store/gameSlice');
     await act(async () => {
       store.dispatch(setCurrentGame({ gameId: 'g8' }));
+      store.dispatch(setMyPlayer('X' as any));
       root.render(React.createElement(Provider as any, { store }, React.createElement(Board)));
     });
     const cells = Array.from(container.querySelectorAll('[role="gridcell"]')) as HTMLElement[];

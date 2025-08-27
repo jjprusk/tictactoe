@@ -9,10 +9,11 @@ export const BoardSchema = z.array(BoardCellSchema).length(9);
 export type Board = z.infer<typeof BoardSchema>;
 
 export const StrategySchema = z.enum(['random', 'ai']);
-export const CreateGameRequestSchema = z.object({ strategy: StrategySchema.optional() });
+export const StartModeSchema = z.enum(['ai', 'human', 'alternate']);
+export const CreateGameRequestSchema = z.object({ strategy: StrategySchema.optional(), aiStarts: z.boolean().optional(), startMode: StartModeSchema.optional() });
 export type CreateGameRequest = z.infer<typeof CreateGameRequestSchema>;
 export const CreateGameAckSchema = z.union([
-  z.object({ ok: z.literal(true), gameId: z.string().min(1), player: PlayerSchema }),
+  z.object({ ok: z.literal(true), gameId: z.string().min(1), player: PlayerSchema, currentPlayer: PlayerSchema.optional() }),
   z.object({ ok: z.literal(false), error: z.string().min(1) }),
 ]);
 export type CreateGameAck = z.infer<typeof CreateGameAckSchema>;
@@ -45,6 +46,15 @@ export const MakeMoveAckSchema = z.union([
   z.object({ ok: z.literal(false), error: z.string().min(1) }),
 ]);
 export type MakeMoveAck = z.infer<typeof MakeMoveAckSchema>;
+
+// Reset game
+export const ResetGameRequestSchema = z.object({ gameId: z.string().min(1) });
+export type ResetGameRequest = z.infer<typeof ResetGameRequestSchema>;
+export const ResetGameAckSchema = z.union([
+  z.object({ ok: z.literal(true) }),
+  z.object({ ok: z.literal(false), error: z.string().min(1) }),
+]);
+export type ResetGameAck = z.infer<typeof ResetGameAckSchema>;
 
 // Server -> Client events
 export const GameStatePayloadSchema = z.object({

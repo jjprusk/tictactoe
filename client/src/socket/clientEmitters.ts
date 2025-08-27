@@ -22,8 +22,13 @@ import {
   type ListGamesAck,
   ListGamesRequestSchema,
   ListGamesAckSchema,
+  ResetGameRequestSchema,
+  type ResetGameRequest,
+  ResetGameAckSchema,
+  type ResetGameAck,
 } from './contracts';
 import { getStoredStrategy } from '../utils/clientLogger';
+import { sendLog } from '../utils/clientLogger';
 
 async function emitWithAck<TReq, TAck>(event: string, req: TReq, timeoutMs?: number): Promise<TAck> {
   const defaultTimeout = Number((import.meta as any)?.env?.VITE_SOCKET_ACK_TIMEOUT_MS ?? 800);
@@ -34,13 +39,16 @@ async function emitWithAck<TReq, TAck>(event: string, req: TReq, timeoutMs?: num
     const timer = (globalThis as any).setTimeout(() => {
       if (!settled) {
         settled = true;
+        void sendLog({ level: 'warn', message: 'client:ack-timeout', context: { event, timeoutMs: ms } }).catch(() => void 0);
         reject(new Error('ack-timeout'));
       }
     }, ms);
+    void sendLog({ level: 'info', message: 'client:emit', context: { event, req } }).catch(() => void 0);
     sock.emit(event, req, (ack: TAck) => {
       if (!settled) {
         settled = true;
         (globalThis as any).clearTimeout(timer);
+        void sendLog({ level: 'info', message: 'client:ack', context: { event, ok: (ack as any)?.ok ?? undefined } }).catch(() => void 0);
         resolve(ack);
       }
     });
@@ -77,6 +85,13 @@ export async function listGames(req: ListGamesRequest = {}, timeoutMs?: number):
   const parsedReq = ListGamesRequestSchema.parse(req);
   const ack = await emitWithAck<ListGamesRequest, ListGamesAck>('list_games', parsedReq, timeoutMs);
   return ListGamesAckSchema.parse(ack);
+}
+
+export async function resetGame(req: ResetGameRequest, timeoutMs?: number): Promise<ResetGameAck> {
+  const parsedReq = ResetGameRequestSchema.parse(req);
+  void sendLog({ level: 'info', message: 'client:emit reset_game', context: { gameId: (parsedReq as any).gameId } }).catch(() => void 0);
+  const ack = await emitWithAck<ResetGameRequest, ResetGameAck>('reset_game', parsedReq, timeoutMs);
+  return ResetGameAckSchema.parse(ack);
 }
 
 

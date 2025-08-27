@@ -11,6 +11,8 @@ import ResultBanner from './components/ResultBanner';
 import ResetButton from './components/ResetButton';
 import ObserverNotice from './components/ObserverNotice';
 import Lobby from './components/Lobby';
+import DebugPanel from './components/DebugPanel';
+import NoGameNotice from './components/NoGameNotice';
 
 export default function App() {
   useEffect(() => {
@@ -48,6 +50,9 @@ export default function App() {
           transition={{ duration: 0.25, ease: 'easeOut' }}
         >
           <div className="mb-2">
+            <NoGameNotice />
+          </div>
+          <div className="mb-2">
             <ObserverNotice />
           </div>
           <div className="mb-2">
@@ -69,6 +74,7 @@ export default function App() {
           <Lobby />
         </motion.section>
       </main>
+      <DebugPanel />
     </div>
     </MotionConfig>
   );

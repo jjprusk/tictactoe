@@ -7,6 +7,9 @@ export ADMIN_KEY="test-admin-key"
 ./scripts/kill-port.sh 3001 || true
 ./scripts/kill-port.sh 5173 || true
 
+# Kill any lingering dev/preview/node processes from previous runs
+./scripts/kill-procs.sh "node .*server/dist/index" "vite" "npm run preview" || true
+
 # Build client to ensure assets are fresh
 npm --workspace client run build >/dev/null 2>&1 || true
 

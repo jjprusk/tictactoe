@@ -1,5 +1,5 @@
 // © 2025 Joe Pruskowski
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { listGames, joinGame } from '../socket/clientEmitters';
 import { setCurrentGame, setRole } from '../store/gameSlice';
@@ -9,27 +9,31 @@ export default function Lobby(): JSX.Element {
   const [games, setGames] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState<string | null>(null);
+  const mountedRef = useRef(true);
 
   useEffect(() => {
+    mountedRef.current = true;
     let cancelled = false;
-    (async () => {
+    const run = async () => {
       try {
         const ack = await listGames({});
-        if (!cancelled && ack.ok) setGames(ack.games);
+        if (!cancelled && mountedRef.current && typeof window !== 'undefined' && ack.ok) setGames(ack.games);
       } catch {
         // ignore
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled && mountedRef.current && typeof window !== 'undefined') setLoading(false);
       }
-    })();
+    };
+    void run();
     return () => {
       cancelled = true;
+      mountedRef.current = false;
     };
   }, []);
 
   const handleJoin = async (gameId: string) => {
     try {
-      setJoining(gameId);
+      if (mountedRef.current && typeof window !== 'undefined') setJoining(gameId);
       const ack = await joinGame({ gameId });
       if ((ack as any).ok) {
         dispatch(setCurrentGame({ gameId }));
@@ -37,12 +41,12 @@ export default function Lobby(): JSX.Element {
           dispatch(setRole((ack as any).role));
         }
         const token = (ack as any).sessionToken as string | undefined;
-        if (token) {
+        if (token && typeof window !== 'undefined') {
           try { window.localStorage.setItem(`ttt_session_${gameId}`, token); } catch {}
         }
       }
     } finally {
-      setJoining(null);
+      if (mountedRef.current && typeof window !== 'undefined') setJoining(null);
     }
   };
 

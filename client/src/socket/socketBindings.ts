@@ -4,6 +4,7 @@ import { store } from '../store';
 import { setSocketError, setSocketStatus } from '../store/socketSlice';
 import { GameStatePayloadSchema, ErrorPayloadSchema } from './contracts';
 import { gameStateReceived } from '../store/gameSlice';
+import { sendLog } from '../utils/clientLogger';
 
 export function bindSocketToStore(): void {
   // Reflect status changes into Redux
@@ -30,7 +31,15 @@ export function bindSocketToStore(): void {
       store.dispatch(setSocketError('protocol: invalid game_state payload'));
       return;
     }
-    store.dispatch(gameStateReceived(parsed.data));
+    try {
+      const s1: any = (store as any).getState?.() ?? {};
+      const before = (s1 as any).game;
+      void sendLog({ level: 'info', message: 'client:recv game_state', context: { payload: parsed.data, before: before ? { gameId: before.gameId, lastMove: before.lastMove } : 'n/a' } }).catch(() => void 0);
+      store.dispatch(gameStateReceived(parsed.data));
+      const s2: any = (store as any).getState?.() ?? {};
+      const after = (s2 as any).game;
+      void sendLog({ level: 'info', message: 'client:applied game_state', context: { after: after ? { gameId: after.gameId, lastMove: after.lastMove, board: after.board } : 'n/a' } }).catch(() => void 0);
+    } catch {}
   });
 }
 

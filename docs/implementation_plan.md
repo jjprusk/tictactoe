@@ -198,6 +198,8 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [ ] S143: Implement admin endpoint to change log level (with auth)
 - [ ] S144: Propagate new log level to connected clients
 - [ ] S145: Implement log export endpoint (CSV/JSON) and streaming query
+- [ ] S145a: Add Debug menu to the client UI (accessible menu component in header or options area) with a scalable structure for future debug actions.
+- [ ] S145b: Wire initial Debug actions: "Send Test Log" (invokes client sendLog to server) and "Toggle Debug Panel" (shows/hides on‑page Redux state overlay; persist preference in localStorage); add unit tests.
 - [ ] S146: Create Python AI microservice under `server/ai_service`
 - [ ] S147: Initialize FastAPI app with `/infer` and `/train` endpoints
 - [ ] S148: Define Pydantic schemas aligned with Node types

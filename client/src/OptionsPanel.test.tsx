@@ -18,6 +18,8 @@ describe('OptionsPanel', () => {
   afterEach(() => {
     vi.clearAllMocks();
     try { window.localStorage.removeItem('ttt_strategy'); } catch {}
+    try { window.localStorage.removeItem('ttt_ai_starts'); } catch {}
+    try { window.localStorage.removeItem('ttt_start_mode'); } catch {}
   });
 
   it('renders strategy select and updates localStorage on change', async () => {
@@ -47,11 +49,10 @@ describe('OptionsPanel', () => {
     const container = document.createElement('div');
     const root = createRoot(container);
 
-    // default stored strategy should be 'random'
     await act(async () => { root.render(React.createElement(Provider as any, { store }, React.createElement(OptionsPanel))); });
     const btn = container.querySelector('[data-testid="create-game-btn"]') as HTMLButtonElement;
     await act(async () => { btn.click(); });
-    expect((emitters.createGame as unknown as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith({});
+    expect((emitters.createGame as unknown as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith({ strategy: 'random', aiStarts: false, startMode: 'human' });
   });
 
   it('selecting AI then New Game uses AI strategy', async () => {

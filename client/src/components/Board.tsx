@@ -3,6 +3,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectGame, applyOptimisticMove } from '../store/gameSlice';
 import { makeMove } from '../socket/clientEmitters';
+import { sendLog } from '../utils/clientLogger';
 import { generateNonce } from '../socket/nonce';
 
 export default function Board(): JSX.Element {
@@ -18,16 +19,20 @@ export default function Board(): JSX.Element {
     if (!game.gameId) return;
     if (game.role === 'observer') return;
     if (game.winner || game.draw) return;
+    // Only allow input when it's this client's turn
+    if (!game.myPlayer || game.myPlayer !== game.currentPlayer) return;
     const cellValue = game.board[index];
     const isPendingHere = game.pendingMoves.some((m) => m.position === index);
     if (cellValue || isPendingHere) return;
     // Optimistic enqueue only; server truth will update board via game_state
+    void sendLog({ level: 'info', message: 'client:click', context: { index, gameId: game.gameId, player: game.currentPlayer } }).catch(() => void 0);
     const nonce = generateNonce();
     dispatch(applyOptimisticMove({ gameId: game.gameId, position: index, player: game.currentPlayer, nonce }));
     try {
-      await makeMove({ gameId: game.gameId, position: index, player: game.currentPlayer, nonce });
+      await makeMove({ gameId: game.gameId, position: index, player: game.myPlayer, nonce } as any);
     } catch {
       // Ack timeout or error; server will not send confirming state; rely on subsequent state or user retry
+      void sendLog({ level: 'warn', message: 'client:makeMove-failed', context: { index, gameId: game.gameId } }).catch(() => void 0);
     }
   };
 

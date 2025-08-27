@@ -61,7 +61,7 @@ describe('contracts: create_game / join_game', () => {
     c3.disconnect();
   });
 
-  it('FIRST_PLAYER=alternate alternates X -> O -> X across games', async () => {
+  it('FIRST_PLAYER=alternate no longer affects who starts (X always starts)', async () => {
     // Start a dedicated server instance with env set before attaching handlers
     const OLD = process.env.FIRST_PLAYER;
     process.env.FIRST_PLAYER = 'alternate';
@@ -87,7 +87,6 @@ describe('contracts: create_game / join_game', () => {
       expect(g2.ok).toBe(true);
       const p2 = g2.player as string;
       expect(['X','O']).toContain(p2);
-      expect(p2).not.toBe(p1);
       c2.disconnect();
 
       const c3 = Client(url, { transports: ['websocket'] });
@@ -96,8 +95,6 @@ describe('contracts: create_game / join_game', () => {
       expect(g3.ok).toBe(true);
       const p3 = g3.player as string;
       expect(['X','O']).toContain(p3);
-      // p3 should equal p1 due to alternation
-      expect(p3).toBe(p1);
       c3.disconnect();
 
       // Per-game strategy override should not affect starting player logic

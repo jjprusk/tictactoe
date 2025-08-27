@@ -23,15 +23,8 @@ export default defineConfig({
       env: { ADMIN_KEY: 'test-admin-key' },
     },
     {
-      // Build client (ensures Tailwind compiled)
-      command: 'npm --workspace client run build',
-      timeout: 120_000,
-      reuseExistingServer: true,
-      cwd: process.cwd(),
-    },
-    {
-      // Preview the built client
-      command: 'npm --workspace client run preview',
+      // Preview the built client (scripts/e2e-start.sh builds beforehand)
+      command: 'npm --workspace client run preview -- --strictPort',
       url: 'http://localhost:5173',
       timeout: 120_000,
       reuseExistingServer: true,

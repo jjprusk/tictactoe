@@ -2,13 +2,17 @@
 import http from 'http';
 import { logger } from './logger';
 import { loadConfig } from './config/env';
-import { buildMongoClient, connectWithRetry } from './db/mongo';
+import { buildMongoClient, connectWithRetry, closeMongoClient } from './db/mongo';
 import { app } from './app';
 import { buildIoServer } from './bootstrap';
 import { attachSocketHandlers } from './socket_handlers';
 import { initTracing } from './tracing';
+import { closeRedisClient } from './db/redis';
 
 export const httpServer = http.createServer(app);
+
+let shutdownTimer: NodeJS.Timeout | undefined;
+let ioInstance: ReturnType<typeof buildIoServer> | undefined;
 
 // Attach Socket.IO to the HTTP server (no events yet; see S023)
 try {
@@ -16,6 +20,7 @@ try {
   const appConfig = loadConfig();
   // Attach Socket.IO to the real HTTP server bound to our Express app
   const io = buildIoServer(httpServer, {});
+  ioInstance = io;
   attachSocketHandlers(io);
 
   // Kick off Mongo connection with retry, but do not block server listening
@@ -44,15 +49,35 @@ try {
   }
 }
 
-function gracefulShutdown(signal: string) {
+async function gracefulShutdown(signal: string) {
   logger.info(`${signal} received, initiating graceful shutdown`);
-  httpServer.close(() => {
-    logger.info('HTTP server closed; exiting with code 0');
-    process.exit(0);
-  });
+  try {
+    // Stop accepting new connections; disconnect socket.io clients
+    try { ioInstance?.close(); } catch (e) { logger.info({ err: (e as Error)?.message }, 'io close failed'); }
+    // Close HTTP server and then exit
+    httpServer.close(() => {
+      logger.info('HTTP server closed; exiting with code 0');
+      closeMongoClient().catch((e) => logger.info({ err: (e as Error)?.message }, 'mongo close failed'));
+      closeRedisClient().catch((e) => logger.info({ err: (e as Error)?.message }, 'redis close failed'));
+      if (shutdownTimer) clearTimeout(shutdownTimer);
+      process.exit(0);
+    });
+    // Fallback: force exit if not closed within timeout (skip in tests)
+    if (process.env.NODE_ENV !== 'test') {
+      shutdownTimer = setTimeout(() => {
+        logger.info('Graceful shutdown timeout exceeded; forcing exit');
+        closeMongoClient().catch(() => void 0);
+        closeRedisClient().catch(() => void 0);
+        process.exit(1);
+      }, 5000).unref();
+    }
+  } catch (e) {
+    if (process.env.NODE_ENV !== 'test') process.exit(1);
+    logger.info({ err: (e as Error)?.message }, 'graceful shutdown error');
+  }
 }
 
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGTERM', () => void gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => void gracefulShutdown('SIGINT'));
 
 

@@ -21,6 +21,8 @@ export interface GameClientState {
   draw?: boolean;
   pendingMoves: PendingMove[];
   role?: 'player' | 'observer';
+  myPlayer?: Player;
+  showNewGameHint?: boolean;
 }
 
 const emptyBoard: BoardCell[] = Array.from({ length: 9 }, () => null);
@@ -31,21 +33,28 @@ const initialState: GameClientState = {
   currentPlayer: 'X',
   pendingMoves: [],
   role: undefined,
+  myPlayer: undefined,
+  showNewGameHint: false,
 };
 
 const gameSlice = createSlice({
   name: 'game',
   initialState,
   reducers: {
-    setCurrentGame(state, action: PayloadAction<{ gameId: string }>) {
+    setCurrentGame(state, action: PayloadAction<{ gameId: string; startingPlayer?: Player }>) {
       state.gameId = action.payload.gameId;
       state.board = emptyBoard.slice();
-      state.currentPlayer = 'X';
+      state.currentPlayer = action.payload.startingPlayer ?? 'X';
       state.lastMove = undefined;
       state.winner = undefined;
       state.draw = undefined;
       state.pendingMoves = [];
       state.role = undefined;
+      state.showNewGameHint = false;
+      // myPlayer remains until explicitly set by join/create ack
+    },
+    setMyPlayer(state, action: PayloadAction<Player | undefined>) {
+      state.myPlayer = action.payload;
     },
     applyOptimisticMove(state, action: PayloadAction<{ gameId: string; position: number; player: Player; nonce: string }>) {
       const { gameId, position, player, nonce } = action.payload;
@@ -73,6 +82,7 @@ const gameSlice = createSlice({
       state.draw = gs.draw;
       // Reconcile: drop any pending occupying confirmed cells or different gameId
       state.pendingMoves = state.pendingMoves.filter((m) => m.gameId === gs.gameId && gs.board[m.position] === null);
+      state.showNewGameHint = false;
     },
     setRole(state, action: PayloadAction<'player' | 'observer'>) {
       state.role = action.payload;
@@ -86,11 +96,13 @@ const gameSlice = createSlice({
       state.draw = undefined;
       state.pendingMoves = [];
       state.role = undefined;
+      state.myPlayer = undefined;
+      state.showNewGameHint = true;
     },
   },
 });
 
-export const { setCurrentGame, applyOptimisticMove, moveRejected, gameStateReceived, resetGameState, setRole } = gameSlice.actions;
+export const { setCurrentGame, setMyPlayer, applyOptimisticMove, moveRejected, gameStateReceived, resetGameState, setRole } = gameSlice.actions;
 export const gameReducer = gameSlice.reducer;
 
 // Selectors

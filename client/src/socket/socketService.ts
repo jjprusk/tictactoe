@@ -14,6 +14,7 @@ export class SocketService {
   private statusSubscribers: Array<(status: ConnectionStatus) => void> = [];
   private reconnectTimer?: number | undefined;
   private probeOverride?: boolean;
+  private pendingHandlers: Array<{ event: string; handler: (payload: unknown) => void } > = [];
 
   getStatus(): ConnectionStatus {
     return this.status;
@@ -34,6 +35,8 @@ export class SocketService {
 
   private setStatus(next: ConnectionStatus): void {
     this.status = next;
+    // In test teardown, the DOM/window may be unavailable; avoid calling React setState handlers
+    if (typeof window === 'undefined') return;
     for (const s of this.statusSubscribers) s(next);
   }
 
@@ -78,6 +81,13 @@ export class SocketService {
       socket.on('reconnect_error', () => this.setStatus('connecting'));
       socket.on('reconnect_failed', () => this.setStatus('disconnected'));
       this.socket = socket;
+      // Attach any handlers registered before the socket existed
+      if (this.pendingHandlers.length > 0) {
+        for (const { event, handler } of this.pendingHandlers) {
+          this.socket.on(event, handler as any);
+        }
+        this.pendingHandlers = [];
+      }
       return socket;
     };
 
@@ -120,7 +130,8 @@ export class SocketService {
   }
 
   on<T = unknown>(event: string, handler: (payload: T) => void): void {
-    this.socket?.on(event, handler as any);
+    if (this.socket) this.socket.on(event, handler as any);
+    else this.pendingHandlers.push({ event, handler: handler as any });
   }
 
   off<T = unknown>(event: string, handler: (payload: T) => void): void {
