@@ -34,7 +34,7 @@ const EnvSchema = z.object({
   OTEL_EXPORTER_OTLP_ENDPOINT: z.string().url().optional(),
   PROMETHEUS_ENABLE: z.coerce.boolean().default(false),
   EMA_DEFAULT_N: z.coerce.number().int().positive().default(3),
-  AI_STRATEGY: z.enum(['random', 'ai']).default('random'),
+  AI_STRATEGY: z.enum(['ai0', 'ai1', 'ai2', 'ai3']).default('ai0'),
   FIRST_PLAYER: z.enum(['X', 'O', 'alternate']).default('X'),
 
   // Mongo retry config

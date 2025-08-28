@@ -8,12 +8,12 @@ export const BoardCellSchema = z.union([z.literal('X'), z.literal('O'), z.null()
 export const BoardSchema = z.array(BoardCellSchema).length(9);
 export type Board = z.infer<typeof BoardSchema>;
 
-export const StrategySchema = z.enum(['random', 'ai']);
+export const StrategySchema = z.enum(['ai0', 'ai1', 'ai2', 'ai3', 'random', 'ai']);
 export const StartModeSchema = z.enum(['ai', 'human', 'alternate']);
 export const CreateGameRequestSchema = z.object({ strategy: StrategySchema.optional(), aiStarts: z.boolean().optional(), startMode: StartModeSchema.optional() });
 export type CreateGameRequest = z.infer<typeof CreateGameRequestSchema>;
 export const CreateGameAckSchema = z.union([
-  z.object({ ok: z.literal(true), gameId: z.string().min(1), player: PlayerSchema, currentPlayer: PlayerSchema.optional() }),
+  z.object({ ok: z.literal(true), gameId: z.string().min(1), player: PlayerSchema, currentPlayer: PlayerSchema.optional(), sessionToken: z.string().optional() }),
   z.object({ ok: z.literal(false), error: z.string().min(1) }),
 ]);
 export type CreateGameAck = z.infer<typeof CreateGameAckSchema>;

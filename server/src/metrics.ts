@@ -101,7 +101,10 @@ export function observeMoveLatencySeconds(status: 'ok' | 'error', seconds: numbe
   }
 }
 
-export function observeAiDecisionLatencySeconds(strategy: 'random' | 'ai', seconds: number): void {
+export function observeAiDecisionLatencySeconds(
+  strategy: 'random' | 'ai' | 'ai0' | 'ai1' | 'ai2' | 'ai3',
+  seconds: number
+): void {
   if (metricsEnabled && aiDecisionLatencySeconds) {
     aiDecisionLatencySeconds.labels(strategy).observe(seconds);
   }

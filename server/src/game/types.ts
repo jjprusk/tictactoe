@@ -41,7 +41,7 @@ export interface GameState {
   moves: number[];
 }
 
-/** Strategy for computer decisions. */
-export type Strategy = 'random' | 'ai';
+/** Strategy for computer decisions. Expanded to support multiple AI levels. */
+export type Strategy = 'ai0' | 'ai1' | 'ai2' | 'ai3';
 
 

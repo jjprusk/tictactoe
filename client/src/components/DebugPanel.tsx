@@ -12,8 +12,8 @@ function isDebugOn(): boolean {
 }
 
 export default function DebugPanel(): JSX.Element | null {
-  if (!isDebugOn()) return null;
   const game = useSelector(selectGame);
+  if (!isDebugOn()) return null;
   return (
     <pre
       style={{

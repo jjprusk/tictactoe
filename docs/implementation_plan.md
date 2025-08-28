@@ -178,10 +178,28 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S124: Implement config flag/env default `AI_STRATEGY` with per-game override
 - [x] S125: Alternate first move across games; add config to choose first player
 - [x] S126: Implement client Options Panel toggle (Random/AI) persisted to localStorage; accessible form controls; send in `create_game`
-- [ ] S126a: E2E gameplay (HvRandom): alternating first turns, making moves, and result banner behavior
-- [ ] S127: Implement offline mode: detect disconnects and switch to local random strategy
-- [ ] S128: Show offline banner and disable server emits while offline
-- [ ] S129: On reconnect, maintain session; do not replay offline games to server
+- [x] S126a: E2E gameplay (HvRandom): alternating first turns, making moves, and result banner behavior
+- [x] S127: Implement offline mode: detect disconnects and switch to local random strategy
+- [x] S128: Show offline banner and disable server emits while offline
+- [x] S129: On reconnect, maintain session; do not replay offline games to server
+- [x] S129a: Enhance connection status to a small slider to show status (green/red) and allow the user to take the client offline/online
+- [x] S129b: Server – expand `Strategy` union in `server/src/game/types.ts` to 'ai0' | 'ai1' | 'ai2' | 'ai3'
+- [x] S129c: Server – extend `CreateGameRequest` (Zod) in `server/src/socket/contracts.ts` to accept 'ai0'...'ai3' and (temporarily) legacy 'random'/'ai'
+- [x] S129d: Server – add `normalizeStrategy(s)` util: map 'random'→'ai0', 'ai'→'ai1', pass-through 'ai0'...'ai3', default→'ai0'
+- [x] S129e: Server – call `normalizeStrategy` inside `create_game` (and other entry points) before invoking AI
+- [x] S129f: Server – update `server/src/ai/orchestrator.ts` to accept new union; internally normalize and route all to current 'ai0' behavior; tag requested and normalized strategies in metrics/logs
+- [x] S129g: Server – tests: unit-test `normalizeStrategy`; adjust type-based tests; ensure all inputs produce a valid move or -1 via 'ai0'
+- [x] S129h: Client – change `StrategyOption` in `client/src/utils/clientLogger.ts` to 'ai0' | 'ai1' | 'ai2' | 'ai3'
+- [x] S129i: Client – add read-time migration in `getStoredStrategy()` mapping legacy 'random'→'ai0', 'ai'→'ai1' and persist normalized value
+- [x] S129j: Client – update `OptionsPanel.tsx` Opponent menu values: Basic→'ai0' (enabled), Average→'ai1', Smart→'ai2', Genius→'ai3' (greyed/disabled)
+- [x] S129k: Client – ensure `createOrResetGame` thunk sends normalized `strategy` from `getStoredStrategy()`
+- [x] S129l: Client – update socket contracts (Zod) to allow 'ai0'...'ai3' (optionally accept legacy during transition)
+- [x] S129m: Client – tests: update unit/integration tests and add migration test for legacy storage values
+- [x] S129n: Client – update snapshots if labels changed (Opponent menu)
+- [x] S129o: Deploy – roll out server first (accepts legacy and new; normalizes to 'ai0')
+- [x] S129p: Deploy – roll out client emitting 'ai0'/'ai1'/'ai2'/'ai3'; verify no schema errors
+- [x] S129q: Post-deploy – remove legacy 'random'/'ai' acceptance from server contracts/normalizer after adoption; keep client migration for a while
+- [x] S129r: Roadmap – implement distinct logic for 'ai1'/'ai2'/'ai3' and add per-level metrics, but maintain mapping all AI levels to AI0 for now.
 - [ ] S130: Define MongoDB schemas for games, moves, sessions, models, logs
 - [ ] S131: Add compound indexes for `gameId`, `sessionId`, timestamps
 - [ ] S132: Add migration tooling (migrate-mongo) and initial baseline migration

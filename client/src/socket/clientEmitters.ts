@@ -1,5 +1,7 @@
 // © 2025 Joe Pruskowski
 import { socketService } from './socketService';
+import { store } from '../store';
+import { selectGame } from '../store/gameSlice';
 import { generateNonce } from './nonce';
 import {
   CreateGameRequestSchema,
@@ -35,6 +37,13 @@ async function emitWithAck<TReq, TAck>(event: string, req: TReq, timeoutMs?: num
   const ms = typeof timeoutMs === 'number' ? timeoutMs : defaultTimeout;
   return new Promise((resolve, reject) => {
     let settled = false;
+    // Only block emits if the user explicitly forced offline
+    try {
+      if ((socketService as any).getForcedOffline?.()) {
+        reject(new Error('offline'));
+        return;
+      }
+    } catch {}
     const sock = socketService.connect();
     const timer = (globalThis as any).setTimeout(() => {
       if (!settled) {
@@ -63,7 +72,15 @@ export async function createGame(req: CreateGameRequest, timeoutMs?: number): Pr
 }
 
 export async function joinGame(req: JoinGameRequest, timeoutMs?: number): Promise<JoinGameAck> {
-  const parsedReq = JoinGameRequestSchema.parse(req);
+  // Inject sessionToken if present in localStorage for this gameId
+  let enhanced = { ...req } as any;
+  try {
+    if (!enhanced.sessionToken && enhanced.gameId) {
+      const t = localStorage.getItem(`ttt_session_${enhanced.gameId}`);
+      if (t) enhanced.sessionToken = t;
+    }
+  } catch {}
+  const parsedReq = JoinGameRequestSchema.parse(enhanced);
   const ack = await emitWithAck<JoinGameRequest, JoinGameAck>('join_game', parsedReq, timeoutMs);
   return JoinGameAckSchema.parse(ack);
 }

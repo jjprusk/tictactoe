@@ -21,7 +21,7 @@ export default function ResetButton(): JSX.Element | null {
     <button
       type="button"
       onClick={onReset}
-      className="inline-flex items-center rounded-md bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600 px-3 py-1.5 text-sm font-medium"
+      className="inline-flex items-center rounded-md bg-primary-100 hover:bg-primary-200 text-primary-900 border border-primary-300 dark:bg-primary-800 dark:hover:bg-primary-700 dark:text-white dark:border-primary-600 px-3 py-1.5 text-sm font-medium"
       data-testid="reset-button"
     >
       Reset

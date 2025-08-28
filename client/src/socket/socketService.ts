@@ -15,6 +15,9 @@ export class SocketService {
   private reconnectTimer?: number | undefined;
   private probeOverride?: boolean;
   private pendingHandlers: Array<{ event: string; handler: (payload: unknown) => void } > = [];
+  // Persist all registered handlers so we can reattach them on reconnects
+  private handlerRegistry: Map<string, Set<(payload: unknown) => void>> = new Map();
+  private forcedOffline = false;
 
   getStatus(): ConnectionStatus {
     return this.status;
@@ -33,6 +36,39 @@ export class SocketService {
     };
   }
 
+  getForcedOffline(): boolean {
+    if (typeof window !== 'undefined') {
+      try {
+        const v = window.localStorage.getItem('ttt_force_offline');
+        this.forcedOffline = v === '1';
+      } catch {}
+    }
+    return this.forcedOffline;
+  }
+
+  setForcedOffline(value: boolean): void {
+    this.forcedOffline = value;
+    if (typeof window !== 'undefined') {
+      try {
+        if (value) window.localStorage.setItem('ttt_force_offline', '1');
+        else window.localStorage.removeItem('ttt_force_offline');
+      } catch {}
+    }
+    if (value) {
+      void this.disconnect();
+      // Ensure UI reflects offline immediately
+      this.setStatus('disconnected');
+    }
+    if (!value) {
+      // Attempt to reconnect immediately when going back online
+      try {
+        this.connect();
+      } catch {
+        // ignore
+      }
+    }
+  }
+
   private setStatus(next: ConnectionStatus): void {
     this.status = next;
     // In test teardown, the DOM/window may be unavailable; avoid calling React setState handlers
@@ -42,6 +78,13 @@ export class SocketService {
 
   connect(options: ConnectOptions = {}): IoSocket {
     if (this.socket) {
+      return this.socket;
+    }
+
+    // Respect user-forced offline mode
+    if (this.getForcedOffline()) {
+      this.setStatus('disconnected');
+      // @ts-expect-error returning possibly undefined to satisfy callers; they should observe status
       return this.socket;
     }
 
@@ -88,13 +131,21 @@ export class SocketService {
         }
         this.pendingHandlers = [];
       }
+      // Reattach all persisted handlers from the registry
+      if (this.handlerRegistry.size > 0) {
+        for (const [event, handlers] of this.handlerRegistry.entries()) {
+          for (const h of handlers) {
+            this.socket.on(event, h as any);
+          }
+        }
+      }
       return socket;
     };
 
     if (shouldProbe) {
       void this.probeServerHealthy(target)
         .then((ok) => {
-          if (ok) {
+          if (ok && !this.forcedOffline) {
             startSocket();
           } else {
             this.setStatus('disconnected');
@@ -130,12 +181,21 @@ export class SocketService {
   }
 
   on<T = unknown>(event: string, handler: (payload: T) => void): void {
+    // Persist in registry for future reconnects
+    const set = this.handlerRegistry.get(event) ?? new Set();
+    set.add(handler as any);
+    this.handlerRegistry.set(event, set);
     if (this.socket) this.socket.on(event, handler as any);
     else this.pendingHandlers.push({ event, handler: handler as any });
   }
 
   off<T = unknown>(event: string, handler: (payload: T) => void): void {
     this.socket?.off(event, handler as any);
+    const set = this.handlerRegistry.get(event);
+    if (set) {
+      set.delete(handler as any);
+      if (set.size === 0) this.handlerRegistry.delete(event);
+    }
   }
 
   emit<T = unknown>(event: string, payload?: T): void {

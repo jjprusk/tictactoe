@@ -36,7 +36,7 @@ describe('contracts: create_game / join_game', () => {
   it('creates a new game with host assigned to X by default (FIRST_PLAYER=X)', async () => {
     const c1 = Client(baseUrl, { transports: ['websocket'] });
     await new Promise<void>((resolve) => c1.on('connect', () => resolve()));
-    const createAck: any = await emitWithAck(c1, 'create_game', { strategy: 'random' });
+    const createAck: any = await emitWithAck(c1, 'create_game', { strategy: 'ai0' as any });
     expect(createAck).toMatchObject({ ok: true, player: 'X' });
     expect(typeof createAck.gameId).toBe('string');
 
@@ -100,7 +100,7 @@ describe('contracts: create_game / join_game', () => {
       // Per-game strategy override should not affect starting player logic
       const c4 = Client(url, { transports: ['websocket'] });
       await new Promise<void>((r) => c4.on('connect', () => r()));
-      const g4: any = await emitWithAck(c4, 'create_game', { strategy: 'random' } as any);
+      const g4: any = await emitWithAck(c4, 'create_game', { strategy: 'ai0' } as any);
       expect(g4.ok).toBe(true);
       const p4 = g4.player as string;
       expect(['X','O']).toContain(p4);

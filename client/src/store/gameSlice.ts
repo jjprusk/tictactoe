@@ -2,6 +2,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { Player } from '../socket/contracts';
 import type { GameStatePayload } from '../socket/contracts';
+import { checkWin as localCheckWin, checkDraw as localCheckDraw, nextPlayer as localNextPlayer } from '../game/localRules';
 
 export type BoardCell = Player | null;
 
@@ -23,6 +24,7 @@ export interface GameClientState {
   role?: 'player' | 'observer';
   myPlayer?: Player;
   showNewGameHint?: boolean;
+  offline: boolean;
 }
 
 const emptyBoard: BoardCell[] = Array.from({ length: 9 }, () => null);
@@ -35,12 +37,16 @@ const initialState: GameClientState = {
   role: undefined,
   myPlayer: undefined,
   showNewGameHint: false,
+  offline: false,
 };
 
 const gameSlice = createSlice({
   name: 'game',
   initialState,
   reducers: {
+    setOffline(state, action: PayloadAction<boolean>) {
+      state.offline = action.payload;
+    },
     setCurrentGame(state, action: PayloadAction<{ gameId: string; startingPlayer?: Player }>) {
       state.gameId = action.payload.gameId;
       state.board = emptyBoard.slice();
@@ -61,6 +67,26 @@ const gameSlice = createSlice({
       if (state.gameId !== gameId) return;
       // Record pending; board is reconciled only from server truth
       state.pendingMoves.push({ gameId, position, player, nonce });
+    },
+    applyLocalMove(state, action: PayloadAction<{ position: number }>) {
+      const { position } = action.payload;
+      if (state.gameId === null) return;
+      if (state.board[position] !== null) return;
+      const nextBoard = state.board.slice();
+      nextBoard[position] = state.currentPlayer;
+      state.board = nextBoard;
+      state.lastMove = position;
+      const winner = localCheckWin(nextBoard);
+      const draw = winner ? false : localCheckDraw(nextBoard);
+      if (winner) {
+        state.winner = winner as Player;
+        state.draw = false;
+      } else if (draw) {
+        state.winner = undefined;
+        state.draw = true;
+      } else {
+        state.currentPlayer = localNextPlayer(state.currentPlayer) as Player;
+      }
     },
     moveRejected(state, action: PayloadAction<{ gameId: string; nonce: string }>) {
       const { gameId, nonce } = action.payload;
@@ -102,7 +128,7 @@ const gameSlice = createSlice({
   },
 });
 
-export const { setCurrentGame, setMyPlayer, applyOptimisticMove, moveRejected, gameStateReceived, resetGameState, setRole } = gameSlice.actions;
+export const { setCurrentGame, setMyPlayer, applyOptimisticMove, applyLocalMove, moveRejected, gameStateReceived, resetGameState, setRole, setOffline } = gameSlice.actions;
 export const gameReducer = gameSlice.reducer;
 
 // Selectors

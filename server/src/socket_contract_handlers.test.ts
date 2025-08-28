@@ -90,7 +90,7 @@ describe('socket handlers (contract events)', () => {
   it('human vs random: creates game with random strategy and server emits AI response', async () => {
     const c = Client(baseUrl, { transports: ['websocket'] });
     await waitConnect(c);
-    const created: any = await emitAck(c, 'create_game', { strategy: 'random' } as any);
+    const created: any = await emitAck(c, 'create_game', { strategy: 'ai0' } as any);
     expect(created.ok).toBe(true);
     const gameId = created.gameId as string;
     const states: any[] = [];
@@ -113,7 +113,7 @@ describe('socket handlers (contract events)', () => {
     const createdDefault: any = await emitAck(c, 'create_game', {});
     expect(createdDefault.ok).toBe(true);
     // Now explicitly request random again just to ensure override path still works
-    const createdExplicit: any = await emitAck(c, 'create_game', { strategy: 'random' } as any);
+    const createdExplicit: any = await emitAck(c, 'create_game', { strategy: 'ai0' } as any);
     expect(createdExplicit.ok).toBe(true);
     c.disconnect();
   });

@@ -9,10 +9,14 @@ import Board from './components/Board';
 import CurrentPlayer from './components/CurrentPlayer';
 import ResultBanner from './components/ResultBanner';
 import ResetButton from './components/ResetButton';
+import NewGameButton from './components/NewGameButton';
 import ObserverNotice from './components/ObserverNotice';
 import Lobby from './components/Lobby';
 import DebugPanel from './components/DebugPanel';
 import NoGameNotice from './components/NoGameNotice';
+import OfflineBanner from './components/OfflineBanner';
+import AIFirstBadge from './components/AIFirstBadge';
+import GameRoomBadge from './components/GameRoomBadge';
 
 export default function App() {
   useEffect(() => {
@@ -27,18 +31,15 @@ export default function App() {
           <Logo size={28} />
           <h1 data-testid="app-title" className="text-2xl font-semibold text-primary-700 dark:text-primary-300">TicTacToe</h1>
         </div>
-        <div className="hidden sm:block">
+        <div className="block">
           <ConnectionStatus />
         </div>
       </header>
       <div className="flex items-center gap-4 sm:justify-between flex-wrap">
         <OptionsPanel />
-        <div className="sm:hidden">
-          <ConnectionStatus />
-        </div>
       </div>
       <p className="text-sm text-slate-600 dark:text-slate-300">
-        Choose a strategy and then tap or click a square to play. The opponent will respond automatically. 
+        Choose a strategy and beginning player then select New Game. Tap or click a square to play. The opponent will respond automatically. 
         You can switch strategies at any time from the options.
       </p>
       <main className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -50,19 +51,29 @@ export default function App() {
           transition={{ duration: 0.25, ease: 'easeOut' }}
         >
           <div className="mb-2">
+            <OfflineBanner />
+          </div>
+          <div className="mb-2">
             <NoGameNotice />
           </div>
           <div className="mb-2">
             <ObserverNotice />
           </div>
-          <div className="mb-2">
+          <div className="mb-2 flex items-center justify-between">
             <CurrentPlayer />
+            <AIFirstBadge />
           </div>
           <div className="flex items-center justify-between mb-2">
             <ResultBanner />
-            <ResetButton />
           </div>
           <Board />
+          <div className="mt-2 flex items-center justify-center">
+            <GameRoomBadge />
+          </div>
+          <div className="mt-3 flex items-center justify-center gap-2">
+            <NewGameButton />
+            <ResetButton />
+          </div>
         </motion.section>
         <motion.section
           aria-label="Insights Panel"

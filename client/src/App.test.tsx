@@ -6,7 +6,7 @@ import { act } from 'react';
 
 vi.mock('./utils/clientLogger', () => ({
   sendLog: vi.fn(async () => undefined),
-  getStoredStrategy: vi.fn(() => 'random'),
+  getStoredStrategy: vi.fn(() => 'ai0'),
   setStoredStrategy: vi.fn((s: string) => {
     window.localStorage.setItem('ttt_strategy', s as any);
   }),

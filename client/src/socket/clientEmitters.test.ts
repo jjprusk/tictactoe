@@ -41,7 +41,7 @@ describe('client emitters', () => {
     const { socketService } = await import('./socketService');
     (socketService as any).__setEmitter('create_game', () => ({ ok: true, gameId: 'g1', player: 'X' }));
     const { createGame } = await import('./clientEmitters');
-    const ack = await createGame({ strategy: 'random' });
+    const ack = await createGame({ strategy: 'ai0' as any });
     expect(ack.ok).toBe(true);
   });
 

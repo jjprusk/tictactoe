@@ -2,6 +2,7 @@
 import { socketService } from './socketService';
 import { store } from '../store';
 import { setSocketError, setSocketStatus } from '../store/socketSlice';
+import { setOffline } from '../store/gameSlice';
 import { GameStatePayloadSchema, ErrorPayloadSchema } from './contracts';
 import { gameStateReceived } from '../store/gameSlice';
 import { sendLog } from '../utils/clientLogger';
@@ -10,6 +11,7 @@ export function bindSocketToStore(): void {
   // Reflect status changes into Redux
   socketService.subscribeStatus((s) => {
     store.dispatch(setSocketStatus(s));
+    store.dispatch(setOffline(s !== 'connected'));
   });
 
   // Example error binding (if we later emit standardized errors)

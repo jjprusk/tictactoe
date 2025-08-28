@@ -10,9 +10,9 @@ export const BoardSchema = z.array(BoardCellSchema).length(9);
 export type Board = z.infer<typeof BoardSchema>;
 
 // Event: create_game (client -> server)
-// request: { strategy?: 'random' | 'ai' }
+// request: { strategy?: 'ai0' | 'ai1' | 'ai2' | 'ai3' }
 // ack: { ok: true, gameId: string, player: Player } | { ok: false, error: string }
-export const StrategySchema = z.enum(['random', 'ai']);
+export const StrategySchema = z.enum(['ai0', 'ai1', 'ai2', 'ai3']);
 export const StartModeSchema = z.enum(['ai', 'human', 'alternate']);
 export const CreateGameRequestSchema = z.object({ strategy: StrategySchema.optional(), aiStarts: z.boolean().optional(), startMode: StartModeSchema.optional() });
 export type CreateGameRequest = z.infer<typeof CreateGameRequestSchema>;

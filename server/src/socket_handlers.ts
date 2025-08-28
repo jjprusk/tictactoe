@@ -23,10 +23,10 @@ import {
   type CreateGameRequest,
   ResetGameRequestSchema,
 } from './socket/contracts';
-import type { Board } from './game/types';
+import type { Board, Strategy } from './game/types';
 import { applyMove, nextPlayer, checkWin, checkDraw } from './game/rules';
 import { appConfig } from './config/env';
-import { makeMove as orchestrateMove } from './ai/orchestrator';
+import { makeMove as orchestrateMove, normalizeStrategy } from './ai/orchestrator';
 
 type Role = 'player' | 'observer' | 'admin';
 
@@ -39,7 +39,9 @@ type RoomState = {
   // game state
   board?: Board;
   currentPlayer?: ContractPlayer;
-  strategy?: 'random' | 'ai';
+  strategy?: Strategy;
+  // last time anything happened in this room (ms since epoch)
+  lastActiveAt?: number;
 };
 
 const joinSchema = z.object({ roomId: z.string().min(1) });
@@ -71,10 +73,53 @@ export function attachSocketHandlers(io: IOServer) {
 	function getRoomState(roomId: string): RoomState {
 		let state = roomIdToState.get(roomId);
 		if (!state) {
-			state = { nonces: new Set<string>(), playerIds: new Set<string>(), playersBySocket: new Map<string, ContractPlayer>(), sessions: new Map<string, string>() };
+			state = { nonces: new Set<string>(), playerIds: new Set<string>(), playersBySocket: new Map<string, ContractPlayer>(), sessions: new Map<string, string>(), lastActiveAt: Date.now() };
 			roomIdToState.set(roomId, state);
 		}
 		return state;
+	}
+
+	function leaveOtherGameRooms(socket: Socket, keepGameId?: string): void {
+		for (const gameId of roomIdToState.keys()) {
+			if (keepGameId && gameId === keepGameId) continue;
+			const room = io.sockets.adapter.rooms.get(gameId);
+			if (room && room.has(socket.id)) {
+				socket.leave(gameId);
+				const state = roomIdToState.get(gameId);
+				if (state) {
+					state.playerIds.delete(socket.id);
+					state.playersBySocket.delete(socket.id);
+				}
+			}
+		}
+		pruneInactiveRooms();
+	}
+
+	function touchRoom(gameId: string): void {
+		const s = roomIdToState.get(gameId);
+		if (s) s.lastActiveAt = Date.now();
+	}
+
+	const roomTtlMs = Number(process.env.GAME_TTL_MS || '120000'); // 2 minutes default
+
+	function pruneInactiveRooms(): void {
+		const now = Date.now();
+		for (const gameId of Array.from(activeGameIds.values())) {
+			const room = io.sockets.adapter.rooms.get(gameId);
+			const members = room?.size ?? 0;
+			const state = roomIdToState.get(gameId);
+			const last = state?.lastActiveAt ?? 0;
+			// Only expire when room is empty and beyond TTL
+			if (members === 0 && now - last > roomTtlMs) {
+				roomIdToState.delete(gameId);
+				activeGameIds.delete(gameId);
+			}
+		}
+	}
+
+	// Periodic sweep in development/production; tests rely on explicit pruning hooks
+	if (!isTest) {
+		setInterval(pruneInactiveRooms, Math.min(Math.max(roomTtlMs / 4, 5000), 60000));
 	}
 
 	io.on('connection', (socket: Socket) => {
@@ -91,6 +136,8 @@ export function attachSocketHandlers(io: IOServer) {
 			}
 			const gameId = generateMountainGameId((id) => roomIdToState.has(id));
 			const state = getRoomState(gameId);
+			// Move socket exclusively to this new room
+			leaveOtherGameRooms(socket, gameId);
 			socket.join(gameId);
 			state.playerIds.add(socket.id);
 			socket.data.role = 'player';
@@ -98,7 +145,8 @@ export function attachSocketHandlers(io: IOServer) {
       state.board = Array.from({ length: 9 }, () => null) as Board;
       state.currentPlayer = 'X';
       const req = parsed.data as CreateGameRequest & { aiStarts?: boolean; startMode?: 'ai' | 'human' | 'alternate' };
-      state.strategy = (req.strategy ?? appConfig.AI_STRATEGY);
+      const normalizedStrategy = normalizeStrategy(req.strategy ?? appConfig.AI_STRATEGY);
+      state.strategy = normalizedStrategy as Strategy;
       // Determine who starts (AI vs Human). X always moves first.
       let effectiveAiStarts: boolean;
       if (req.startMode === 'ai') effectiveAiStarts = true;
@@ -120,15 +168,17 @@ export function attachSocketHandlers(io: IOServer) {
 			const token = `s_${randomUUID()}`;
 			state.sessions?.set(token, socket.id);
 			activeGameIds.add(gameId);
+			touchRoom(gameId);
 			ack?.(okCreateAck({ gameId, player: hostPlayer, sessionToken: token, currentPlayer: state.currentPlayer! }));
       // If AI starts, trigger immediate AI opening move
       if (effectiveAiStarts) {
         (async () => {
           try {
             const assigned = new Set(state.playersBySocket.values());
-            const aiPlayers: ContractPlayer[] = (['X', 'O'] as const).filter((p) => !assigned.has(p)) as ContractPlayer[];
-            if (aiPlayers.includes(state.currentPlayer!)) {
-              const aiPos = await orchestrateMove(state.board!, state.currentPlayer!, 'random');
+            // AI controls X when host is O
+            const aiControlsX = assigned.has('O') && !assigned.has('X');
+            if (aiControlsX && state.currentPlayer === 'X') {
+              const aiPos = await orchestrateMove(state.board!, state.currentPlayer!, state.strategy ?? 'ai0');
               if (aiPos >= 0 && state.board![aiPos] === null) {
                 const aiPlayer = state.currentPlayer!;
                 state.board = applyMove(state.board!, aiPos, aiPlayer) as Board;
@@ -153,6 +203,8 @@ export function attachSocketHandlers(io: IOServer) {
 			}
 			const { gameId, sessionToken } = parsed.data as { gameId: string; sessionToken?: string };
 			const state = getRoomState(gameId);
+			// Move socket exclusively to target room
+			leaveOtherGameRooms(socket, gameId);
 			socket.join(gameId);
 			let role: Role = 'observer';
 			let player: ContractPlayer | undefined;
@@ -173,6 +225,7 @@ export function attachSocketHandlers(io: IOServer) {
 			socket.data.role = role;
 			const token = sessionToken ?? (role === 'player' ? `s_${randomUUID()}` : undefined);
 			if (token && role === 'player') state.sessions?.set(token, socket.id);
+			touchRoom(gameId);
 			ack?.(okJoinAck({ role, player, sessionToken: token }));
 		});
 
@@ -188,6 +241,8 @@ export function attachSocketHandlers(io: IOServer) {
 			state.playerIds.delete(socket.id);
 			state.playersBySocket.delete(socket.id);
 			ack?.(okAck());
+			// If room is now empty, prune it from active list
+			pruneInactiveRooms();
 		});
 
 		// Admin: elevate to admin (simple shared key auth for now)
@@ -218,7 +273,9 @@ export function attachSocketHandlers(io: IOServer) {
 				ack?.(errAck('forbidden'));
 				return;
 			}
-			ack?.({ ok: true, games: Array.from(activeGameIds.values()) });
+			pruneInactiveRooms();
+			const withMembers = Array.from(activeGameIds.values()).filter((id) => (io.sockets.adapter.rooms.get(id)?.size ?? 0) > 0);
+			ack?.({ ok: true, games: withMembers });
 		});
 
 		// Admin: close a game room
@@ -290,7 +347,9 @@ export function attachSocketHandlers(io: IOServer) {
 				ack?.(errAck('invalid-payload'));
 				return;
 			}
-			ack?.({ ok: true, games: Array.from(activeGameIds.values()) });
+			pruneInactiveRooms();
+			const withMembers = Array.from(activeGameIds.values()).filter((id) => (io.sockets.adapter.rooms.get(id)?.size ?? 0) > 0);
+			ack?.({ ok: true, games: withMembers });
 		});
 
 		// Reset game: clear board, starting player is always 'X', possibly trigger AI opening move
@@ -309,12 +368,13 @@ export function attachSocketHandlers(io: IOServer) {
 			ack?.(okAck());
 			// Emit cleared state first
 			io.to(gameId).emit('game_state', { gameId, board: state.board, currentPlayer: state.currentPlayer! });
-			// If AI should start, make an immediate move (use 'random' until AI is implemented)
+			touchRoom(gameId);
+			// If AI should start, make an immediate move (using current configured strategy)
 			try {
 				const assigned = new Set(state.playersBySocket.values());
 				const aiPlayers: ContractPlayer[] = (['X', 'O'] as const).filter((p) => !assigned.has(p)) as ContractPlayer[];
 				if (aiPlayers.includes(state.currentPlayer!)) {
-					const aiPos = await orchestrateMove(state.board, state.currentPlayer!, 'random');
+					const aiPos = await orchestrateMove(state.board, state.currentPlayer!, state.strategy ?? 'ai0');
 					if (aiPos >= 0 && state.board[aiPos] === null) {
 						const aiPlayer = state.currentPlayer!;
 						state.board = applyMove(state.board, aiPos, aiPlayer) as Board;
@@ -387,13 +447,13 @@ export function attachSocketHandlers(io: IOServer) {
 				state.currentPlayer = winner || draw ? state.currentPlayer : nextPlayer(player) as ContractPlayer;
 				io.to(gameId).emit('game_state', { gameId, board: state.board, currentPlayer: state.currentPlayer!, lastMove: position, winner: winner ?? undefined, draw: draw || undefined });
 				ack?.(okAck());
-				// Trigger AI move if configured and applicable
-				if (!winner && !draw && state.strategy === 'random') {
+				// Trigger AI move if applicable based on current configured strategy
+				if (!winner && !draw) {
 					// Determine if next player is AI-controlled (no human assigned for that letter)
 					const assigned = new Set(state.playersBySocket.values());
 					const aiPlayers: ContractPlayer[] = (['X', 'O'] as const).filter((p) => !assigned.has(p)) as ContractPlayer[];
 					if (aiPlayers.includes(state.currentPlayer!)) {
-						const aiPos = await orchestrateMove(state.board, state.currentPlayer!, 'random');
+						const aiPos = await orchestrateMove(state.board, state.currentPlayer!, state.strategy ?? 'ai0');
 						if (aiPos >= 0 && state.board[aiPos] === null) {
 							const aiPlayer = state.currentPlayer!;
 							state.board = applyMove(state.board, aiPos, aiPlayer) as Board;
@@ -407,6 +467,7 @@ export function attachSocketHandlers(io: IOServer) {
 				const end = process.hrtime.bigint();
 				observeMoveLatencySeconds('ok', Number(end - start) / 1e9);
 				span.end();
+				touchRoom(gameId);
 			} catch {
 				ack?.(errAck('error'));
 				const end = process.hrtime.bigint();
@@ -522,6 +583,8 @@ export function attachSocketHandlers(io: IOServer) {
 				state.playerIds.delete(socket.id);
 				state.playersBySocket.delete(socket.id);
 			}
+			// Prune any rooms that no longer have members
+			pruneInactiveRooms();
 			log('disconnected', socket.id);
 			incSocketDisconnections();
 		});

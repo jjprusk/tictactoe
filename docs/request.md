@@ -82,7 +82,8 @@ A web-based TicTacToe game where a human player competes against a state-of-the-
 - Continuous Learning: Updates neural weights after every move for real-time adaptation (all handled on backend, with optimizations for speed); learns across all games by default unless learning has been acquiesced/disabled for specific sessions
 - Performance Tracking: Displays AI thinking time (computed and sent from backend); tracks loss ratio using a selectable N-game exponential moving average (EMA) with recency bias alpha=0.3 (default N=3, max 20) to show learning progress (given perfect play results in draws); excludes acquiesced/disabled sessions from stats; handles initial games with SMA fallback and note; smooths anomalies with thresholds; weights draws neutrally with secondary draw ratio metric
 - Acceleration Techniques: Experience replay, self-play (capped at 500 iterations for gradual improvement), advanced optimizers for faster and more complete learning; optional GPU acceleration
-- Difficulty Levels: Toggle for beginner (random, high target loss ratio ~40-50%), learning (variable), or advanced (pre-trained, low target loss ratio ~0%) modes; each with configurable target loss ratios
+- AI learns when playing. The multiple levels of AI players are capped when learning takes them to a specific loss ration and stored for future play (i.e., no further learning)
+- Difficulty Levels: Basic (AI0, random, high loss ratio), Average (AI1, loss ratio ~ 66%), Smart (AI2, loss ratio ~ 33%), and Genius (AI3, loss ration 0%)
 - Reset Capability: Ability to reset the neural net to initial state (no knowledge) for any specific robot or difficulty level
 - Model Versioning: Register and tag checkpoints with metadata (date, games played, loss ratios)
 - Export/Import: Download and restore model weights for sharing and backups

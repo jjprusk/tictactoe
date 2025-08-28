@@ -10,7 +10,7 @@ describe('Redux store', () => {
     // With session slice present
     const state = store.getState();
     expect(state).toHaveProperty('session');
-    expect(state.session.strategy === 'random' || state.session.strategy === 'ai').toBe(true);
+    expect(['ai0','ai1','ai2','ai3']).toContain(state.session.strategy);
   });
 });
 

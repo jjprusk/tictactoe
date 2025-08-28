@@ -1,10 +1,11 @@
 // © 2025 Joe Pruskowski
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectGame, applyOptimisticMove } from '../store/gameSlice';
+import { selectGame, applyOptimisticMove, applyLocalMove } from '../store/gameSlice';
 import { makeMove } from '../socket/clientEmitters';
 import { sendLog } from '../utils/clientLogger';
 import { generateNonce } from '../socket/nonce';
+import { pickRandomMove, applyMove as localApplyMove, checkWin as localCheckWin, checkDraw as localCheckDraw, nextPlayer as localNextPlayer } from '../game/localRules';
 
 export default function Board(): JSX.Element {
   const dispatch = useDispatch();
@@ -26,13 +27,28 @@ export default function Board(): JSX.Element {
     if (cellValue || isPendingHere) return;
     // Optimistic enqueue only; server truth will update board via game_state
     void sendLog({ level: 'info', message: 'client:click', context: { index, gameId: game.gameId, player: game.currentPlayer } }).catch(() => void 0);
-    const nonce = generateNonce();
-    dispatch(applyOptimisticMove({ gameId: game.gameId, position: index, player: game.currentPlayer, nonce }));
-    try {
-      await makeMove({ gameId: game.gameId, position: index, player: game.myPlayer, nonce } as any);
-    } catch {
-      // Ack timeout or error; server will not send confirming state; rely on subsequent state or user retry
-      void sendLog({ level: 'warn', message: 'client:makeMove-failed', context: { index, gameId: game.gameId } }).catch(() => void 0);
+    if (game.offline) {
+      // Local move: apply immediately and have AI respond locally until reconnect
+      dispatch(applyLocalMove({ position: index }));
+      // Recompute winner/draw locally, and if game continues and opponent is random, pick a move
+      const afterHuman = localApplyMove(game.board, index, game.currentPlayer);
+      const w = localCheckWin(afterHuman);
+      const d = w ? false : localCheckDraw(afterHuman);
+      if (!w && !d) {
+        const aiPos = pickRandomMove(afterHuman);
+        if (aiPos >= 0) {
+          dispatch(applyLocalMove({ position: aiPos }));
+        }
+      }
+    } else {
+      const nonce = generateNonce();
+      dispatch(applyOptimisticMove({ gameId: game.gameId, position: index, player: game.currentPlayer, nonce }));
+      try {
+        await makeMove({ gameId: game.gameId, position: index, player: game.myPlayer, nonce } as any);
+      } catch {
+        // Ack timeout or error; server will not send confirming state; rely on subsequent state or user retry
+        void sendLog({ level: 'warn', message: 'client:makeMove-failed', context: { index, gameId: game.gameId } }).catch(() => void 0);
+      }
     }
   };
 
