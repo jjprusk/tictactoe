@@ -10,6 +10,7 @@ vi.mock('./utils/clientLogger', () => ({
   setStoredStrategy: vi.fn((s: string) => {
     window.localStorage.setItem('ttt_strategy', s as any);
   }),
+  createClientLogger: () => ({ info: vi.fn(async () => undefined) }),
 }));
 
 describe('App', () => {

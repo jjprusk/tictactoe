@@ -1,6 +1,6 @@
 // © 2025 Joe Pruskowski
-import React, { useCallback, useMemo, useState } from 'react';
-import { getStoredStrategy, setStoredStrategy, StrategyOption } from './utils/clientLogger';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { getStoredStrategy, setStoredStrategy, StrategyOption, getStoredStartMode, setStoredStartMode } from './utils/clientLogger';
 import { createGame } from './socket/clientEmitters';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCurrentGame, setRole, setMyPlayer, applyLocalMove, selectGame } from './store/gameSlice';
@@ -13,24 +13,6 @@ export interface OptionsPanelProps {
 }
 
 type StartMode = 'ai' | 'human' | 'alternate' | '';
-const START_MODE_KEY = 'ttt_start_mode';
-const getStartMode = (): StartMode => {
-  try {
-    const v = localStorage.getItem(START_MODE_KEY) as StartMode | null;
-    return v === 'ai' || v === 'alternate' || v === 'human' ? v : '';
-  } catch {
-    return '' as StartMode;
-  }
-};
-const setStartMode = (v: StartMode): void => {
-  try {
-    if (v === '' as StartMode) {
-      localStorage.removeItem(START_MODE_KEY);
-    } else {
-      localStorage.setItem(START_MODE_KEY, v);
-    }
-  } catch {}
-};
 
 export const OptionsPanel: React.FC<OptionsPanelProps> = ({ onStrategyChange }) => {
   const selectedFromStorage = useMemo(() => {
@@ -43,7 +25,9 @@ export const OptionsPanel: React.FC<OptionsPanelProps> = ({ onStrategyChange }) 
     }
   }, []);
   const [selectedStrategy, setSelectedStrategy] = useState<StrategyOption | ''>(selectedFromStorage);
-  const [startMode, setStartModeState] = useState<StartMode>(getStartMode());
+  const [startMode, setStartModeState] = useState<StartMode>(() => {
+    try { return getStoredStartMode() as StartMode; } catch { return 'alternate' as StartMode; }
+  });
   const dispatch = useDispatch();
   const game = useSelector(selectGame);
 
@@ -64,10 +48,36 @@ export const OptionsPanel: React.FC<OptionsPanelProps> = ({ onStrategyChange }) 
   );
 
   const handleStartModeChange = useCallback<React.ChangeEventHandler<HTMLSelectElement>>((e) => {
-    const v = (e.target.value as StartMode) ?? 'human';
+    const v = (e.target.value as StartMode) ?? '';
     setStartModeState(v);
-    setStartMode(v);
+    try {
+      if (v === '') {
+        if (typeof window !== 'undefined') window.localStorage.removeItem('ttt_start_mode');
+      } else {
+        setStoredStartMode(v as any);
+      }
+    } catch {}
     try { if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('ttt:session-change')); } catch {}
+  }, []);
+
+  // Reflect external changes (e.g., Debug Menu "Reset Defaults") into dropdowns
+  useEffect(() => {
+    function onSessionChange() {
+      try {
+        const rawStart = typeof window !== 'undefined' ? (window.localStorage.getItem('ttt_start_mode') as StartMode | null) : null;
+        if (rawStart === 'ai' || rawStart === 'human' || rawStart === 'alternate') {
+          setStartModeState(rawStart);
+        } else {
+          // No stored value -> show placeholder
+          setStartModeState('');
+        }
+        const raw = typeof window !== 'undefined' ? (window.localStorage.getItem('ttt_strategy') as string | null) : null;
+        const s = raw === 'ai0' || raw === 'ai1' || raw === 'ai2' || raw === 'ai3' ? (raw as StrategyOption) : ('' as '');
+        setSelectedStrategy(s);
+      } catch {}
+    }
+    if (typeof window !== 'undefined') window.addEventListener('ttt:session-change' as any, onSessionChange as any);
+    return () => { if (typeof window !== 'undefined') window.removeEventListener('ttt:session-change' as any, onSessionChange as any); };
   }, []);
 
   const handleCreate = useCallback(async () => {
@@ -191,7 +201,7 @@ export const OptionsPanel: React.FC<OptionsPanelProps> = ({ onStrategyChange }) 
             title="Clear start mode"
             onClick={() => {
               setStartModeState('');
-              setStartMode('');
+              try { if (typeof window !== 'undefined') window.localStorage.removeItem('ttt_start_mode'); } catch {}
               try { if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('ttt:session-change')); } catch {}
             }}
             style={{
@@ -215,16 +225,7 @@ export const OptionsPanel: React.FC<OptionsPanelProps> = ({ onStrategyChange }) 
         ) : null}
       </div>
 
-      {/* New Game link removed from header; use the dedicated NewGameButton below the board */}
-      <button
-        type="button"
-        onClick={async () => {
-          const { sendLog } = await import('./utils/clientLogger');
-          void sendLog({ level: 'info', message: 'client:button-log', context: { from: 'OptionsPanel' } }).catch(() => void 0);
-        }}
-      >
-        Send Test Log
-      </button>
+      {/* Debug/test actions should live only in the Debug menu */}
     </div>
   );
 };

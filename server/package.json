@@ -11,7 +11,11 @@
     "lint": "eslint src --ext .ts --max-warnings=0",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:cov": "vitest run --coverage"
+    "test:cov": "vitest run --coverage",
+    "migrate:status": "migrate-mongo status -f ./server/migrate-mongo-config.js",
+    "migrate:up": "migrate-mongo up -f ./server/migrate-mongo-config.js",
+    "migrate:down": "migrate-mongo down -f ./server/migrate-mongo-config.js",
+    "migrate:create": "migrate-mongo create -f ./server/migrate-mongo-config.js"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",
@@ -46,6 +50,7 @@
     "supertest": "^7.0.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.4.0",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "migrate-mongo": "^11.0.0"
   }
 }

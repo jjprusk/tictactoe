@@ -21,4 +21,12 @@
   import { sendLog } from '../utils/clientLogger';
   await sendLog('info', 'feature-x', { message: 'clicked', buttonId });
   ```
- - This ensures logs are centralized in the backend `LOG` file via the `/logs` endpoint and remain consistent.
+- This ensures logs are centralized in the backend `LOG` file via the `/logs` endpoint and remain consistent.
+
+## Testing and Completion Policy
+
+- Before requesting to mark any step/milestone as complete (e.g., S13x items), you MUST:
+  - Run the full server test suite: `npm --workspace server run test` (and client tests if affected).
+  - Fix any failing tests and linter/type errors introduced by the change.
+  - Ensure a green run locally. Only then propose marking the item complete in `docs/implementation_plan.md`.
+- This policy reduces churn and ensures each step is verifiably done.

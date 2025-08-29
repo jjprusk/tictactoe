@@ -56,4 +56,38 @@ export function __setClientForTest(client: MongoClient | null): void {
 	cachedClient = client;
 }
 
+// S131: Ensure compound and TTL indexes
+export async function ensureIndexes(dbName = 'tictactoe'): Promise<void> {
+	if (!cachedClient) return;
+	const db = cachedClient.db(dbName);
+	// Games: active by updatedAt; unique id is implicit (_id)
+	await db.collection('games').createIndexes([
+		{ key: { status: 1, updatedAt: -1 }, name: 'status_updatedAt' },
+		{ key: { createdAt: 1 }, name: 'createdAt_asc' },
+		{ key: { updatedAt: -1 }, name: 'updatedAt_desc' },
+	]);
+	// Moves: unique per (gameId, idx), chronological per game
+	await db.collection('moves').createIndexes([
+		{ key: { gameId: 1, idx: 1 }, name: 'game_idx', unique: true },
+		{ key: { gameId: 1, createdAt: 1 }, name: 'game_createdAt' },
+	]);
+	// Sessions: latest by game, TTL expiry on expiresAt if present
+	await db.collection('sessions').createIndexes([
+		{ key: { gameId: 1, updatedAt: -1 }, name: 'game_updatedAt_desc' },
+		// TTL index requires expireAfterSeconds; if expiresAt missing, doc is not expired
+		{ key: { expiresAt: 1 }, name: 'expiresAt_ttl', expireAfterSeconds: 0 },
+	]);
+	// Models: unique version; tag + createdAt for discovery
+	await db.collection('models').createIndexes([
+		{ key: { version: 1 }, name: 'version_unique', unique: true },
+		{ key: { tags: 1, createdAt: -1 }, name: 'tags_createdAt_desc' },
+	]);
+	// Logs: by game/time, session/time, level/time
+	await db.collection('logs').createIndexes([
+		{ key: { gameId: 1, createdAt: 1 }, name: 'game_createdAt' },
+		{ key: { sessionId: 1, createdAt: 1 }, name: 'session_createdAt' },
+		{ key: { level: 1, createdAt: 1 }, name: 'level_createdAt' },
+	]);
+}
+
 

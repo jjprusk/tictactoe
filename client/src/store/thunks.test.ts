@@ -37,6 +37,7 @@ describe('createOrResetGame thunk', () => {
     // First create
     await store.dispatch<any>(createOrResetGame());
     // Then reset path
+    try { window.localStorage.setItem('ttt_start_mode', 'human'); } catch {}
     await store.dispatch<any>(createOrResetGame());
     expect((emitters.resetGame as unknown as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith({ gameId: 'g1' });
   });

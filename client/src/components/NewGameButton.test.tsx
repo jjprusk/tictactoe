@@ -221,6 +221,42 @@ describe('NewGameButton', () => {
     expect(s.gameId).toBe('g-new-2');
     expect(s.myPlayer).toBe('X');
   });
+
+  it('renders disabled when start mode or strategy not set; click is no-op', async () => {
+    // ensure storage is empty
+    try { window.localStorage.removeItem('ttt_start_mode'); } catch {}
+    try { window.localStorage.removeItem('ttt_strategy'); } catch {}
+    const container = await render();
+    const btn = container.querySelector('[data-testid="create-game-btn-secondary"]') as HTMLButtonElement;
+    expect(btn.disabled).toBe(true);
+    btn.click();
+    await flush();
+    const emitters = await import('../socket/clientEmitters');
+    expect((emitters.createGame as unknown as ReturnType<typeof vi.fn>)).not.toHaveBeenCalled();
+  });
+
+  it('has expected title and classes', async () => {
+    const container = await render();
+    const btn = container.querySelector('[data-testid="create-game-btn-secondary"]') as HTMLButtonElement;
+    expect(btn.title).toBe('Start a new game');
+    expect(btn.className).toContain('bg-primary-600');
+    expect(btn.className).toContain('rounded-md');
+  });
+
+  it('updates readiness on ttt:session-change event', async () => {
+    // start with not ready
+    try { window.localStorage.removeItem('ttt_start_mode'); } catch {}
+    try { window.localStorage.removeItem('ttt_strategy'); } catch {}
+    const container = await render();
+    const btn = container.querySelector('[data-testid="create-game-btn-secondary"]') as HTMLButtonElement;
+    expect(btn.disabled).toBe(true);
+    // set storage and dispatch event
+    try { window.localStorage.setItem('ttt_start_mode', 'human'); } catch {}
+    try { window.localStorage.setItem('ttt_strategy', 'ai0'); } catch {}
+    window.dispatchEvent(new Event('ttt:session-change' as any));
+    await flush();
+    expect(btn.disabled).toBe(false);
+  });
 });
 
 

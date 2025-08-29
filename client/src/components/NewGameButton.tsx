@@ -22,8 +22,9 @@ export default function NewGameButton(): JSX.Element {
     try {
       const strategy = window.localStorage.getItem('ttt_strategy');
       const start = window.localStorage.getItem('ttt_start_mode');
+      // Treat missing as not ready so button is disabled until selection is made
       return Boolean(strategy) && Boolean(start);
-    } catch { return true; }
+    } catch { return false; }
   });
 
   useEffect(() => {

@@ -2,7 +2,7 @@
 import http from 'http';
 import { logger } from './logger';
 import { loadConfig } from './config/env';
-import { buildMongoClient, connectWithRetry, closeMongoClient } from './db/mongo';
+import { buildMongoClient, connectWithRetry, closeMongoClient, ensureIndexes } from './db/mongo';
 import { app } from './app';
 import { buildIoServer } from './bootstrap';
 import { attachSocketHandlers } from './socket_handlers';
@@ -32,6 +32,13 @@ try {
   }).catch((err) => {
     // eslint-disable-next-line no-console
     console.error('[mongo] failed to connect after retries:', (err as Error).message);
+  }).then(async () => {
+    try {
+      await ensureIndexes();
+      logger.info('mongo indexes ensured');
+    } catch (e) {
+      logger.info({ err: (e as Error)?.message }, 'ensureIndexes failed');
+    }
   });
 
   httpServer.listen(appConfig.SERVER_PORT, () => {

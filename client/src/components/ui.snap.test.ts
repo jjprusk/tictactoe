@@ -58,6 +58,7 @@ describe('UI snapshots (lightweight)', () => {
     await act(async () => { store.dispatch(resetGameState()); store.dispatch(setCurrentGame({ gameId: 'g-badge' } as any)); });
     const c = renderEl(React.createElement(Provider as any, { store }, React.createElement(GameRoomBadge)));
     await flush();
+    await flush();
     const node = c.querySelector('[data-testid="game-room-badge"]');
     expect(node).toBeTruthy();
   });

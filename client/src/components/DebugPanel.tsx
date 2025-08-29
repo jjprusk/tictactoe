@@ -1,5 +1,5 @@
 // © 2025 Joe Pruskowski
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { selectGame } from '../store/gameSlice';
 
@@ -13,9 +13,24 @@ function isDebugOn(): boolean {
 
 export default function DebugPanel(): JSX.Element | null {
   const game = useSelector(selectGame);
+  const [rev, setRev] = useState(0);
+
+  useEffect(() => {
+    function onToggle() {
+      setRev((v) => v + 1);
+    }
+    if (typeof window !== 'undefined') {
+      window.addEventListener('ttt:debug-toggle', onToggle as any);
+    }
+    return () => {
+      if (typeof window !== 'undefined') window.removeEventListener('ttt:debug-toggle', onToggle as any);
+    };
+  }, []);
+
   if (!isDebugOn()) return null;
   return (
     <pre
+      data-testid="debug-panel"
       style={{
         position: 'fixed',
         left: 8,

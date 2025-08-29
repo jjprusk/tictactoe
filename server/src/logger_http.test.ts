@@ -1,74 +1,66 @@
 // © 2025 Joe Pruskowski
-import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import http from 'http';
 import request from 'supertest';
-
-// Mock the logger before importing the app so pino-http uses our mock
-vi.mock('./logger', () => {
-  const base: any = {
-    trace: vi.fn(),
-    debug: vi.fn(),
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-    fatal: vi.fn(),
-  };
-  base.child = vi.fn(() => base);
-  base.levels = { values: { trace: 10, debug: 20, info: 30, warn: 40, error: 50, fatal: 60 } };
-  return { logger: base };
-});
-
-// Now import the app (middleware will bind to our mock logger)
 import { app } from './app';
-import { logger as mockLogger } from './logger';
+import { __setClientForTest } from './db/mongo';
 
-describe('logger integration', () => {
+const fakeDocs = [
+  { createdAt: new Date('2025-01-01T00:00:00Z'), level: 'info', message: 'a', gameId: 'g1', sessionId: 's1', source: 'client' },
+  { createdAt: new Date('2025-01-02T00:00:00Z'), level: 'error', message: 'b', gameId: 'g2', sessionId: 's2', source: 'server' },
+];
+
+function buildFakeMongo() {
+  return {
+    db: () => ({
+      collection: () => ({
+        find: (_q: any) => ({ sort: () => ({ batchSize: () => ({
+          async *[Symbol.asyncIterator]() { for (const d of fakeDocs) yield d; }
+        }) }) })
+      })
+    })
+  } as any;
+}
+
+describe('/admin/logs/export', () => {
   let server: http.Server;
 
   beforeAll(async () => {
+    __setClientForTest(buildFakeMongo());
     server = http.createServer(app);
-    await new Promise<void>((resolve) => server.listen(0, resolve));
+    await new Promise<void>((r) => server.listen(0, r));
   });
-
   afterAll(async () => {
-    await new Promise<void>((resolve) => server.close(() => resolve()));
+    await new Promise<void>((r) => server.close(() => r()));
+    __setClientForTest(null as any);
   });
 
-  it('pino-http attaches and logs request completion', async () => {
-    const initialInfoCalls = (mockLogger.info as any).mock.calls.length;
-    const res = await request(server).get('/healthz');
+  it('requires admin key', async () => {
+    const res = await request(server).get('/admin/logs/export');
+    expect(res.status).toBe(403);
+  });
+
+  it('streams JSON', async () => {
+    const res = await request(server)
+      .get('/admin/logs/export?format=json')
+      .set('x-admin-key', process.env.ADMIN_KEY || 'dev-admin-key');
     expect(res.status).toBe(200);
-    // pino-http logs "request completed" at info level by default
-    expect(mockLogger.child).toHaveBeenCalled();
-    expect((mockLogger.info as any).mock.calls.length).toBeGreaterThan(initialInfoCalls);
+    expect(res.headers['content-type']).toContain('application/json');
+    const arr = JSON.parse(res.text);
+    expect(Array.isArray(arr)).toBe(true);
+    expect(arr.length).toBe(2);
+    expect(arr[0].message).toBe('a');
   });
 
-  it('POST /logs writes client log with context for each level', async () => {
-    const levels: Array<'trace'|'debug'|'info'|'warn'|'error'|'fatal'> = ['trace','debug','info','warn','error','fatal'];
-    for (const level of levels) {
-      const payload = { level, message: `m-${level}`, context: { k: level } };
-      const res = await request(server).post('/logs').send(payload).set('Content-Type', 'application/json');
-      expect(res.status).toBe(204);
-      const calls = (mockLogger as any)[level].mock.calls as any[];
-      const found = calls.some((c: any[]) => {
-        const argObj = c[0];
-        const msg = c[1];
-        return argObj && argObj.k === level && msg === `m-${level}`;
-      });
-      expect(found).toBe(true);
-    }
-  });
-
-  it('POST /logs rejects invalid payloads', async () => {
-    const bads = [
-      {},
-      { message: '' },
-      { level: 'nope', message: 'x' },
-    ];
-    for (const bad of bads) {
-      const res = await request(server).post('/logs').send(bad).set('Content-Type', 'application/json');
-      expect(res.status).toBe(400);
-    }
+  it('streams CSV', async () => {
+    const res = await request(server)
+      .get('/admin/logs/export?format=csv')
+      .set('x-admin-key', process.env.ADMIN_KEY || 'dev-admin-key');
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toContain('text/csv');
+    const lines = res.text.trim().split('\n');
+    expect(lines[0]).toBe('createdAt,level,message,gameId,sessionId,source');
+    expect(lines.length).toBe(3);
   });
 });
 

@@ -17,6 +17,7 @@ import NoGameNotice from './components/NoGameNotice';
 import OfflineBanner from './components/OfflineBanner';
 import AIFirstBadge from './components/AIFirstBadge';
 import GameRoomBadge from './components/GameRoomBadge';
+import DebugMenu from './components/DebugMenu';
 
 export default function App() {
   useEffect(() => {
@@ -31,7 +32,8 @@ export default function App() {
           <Logo size={28} />
           <h1 data-testid="app-title" className="text-2xl font-semibold text-primary-700 dark:text-primary-300">TicTacToe</h1>
         </div>
-        <div className="block">
+        <div className="block flex items-center gap-2">
+          <DebugMenu />
           <ConnectionStatus />
         </div>
       </header>

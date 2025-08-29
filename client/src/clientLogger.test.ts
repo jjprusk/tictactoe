@@ -1,6 +1,6 @@
 // © 2025 Joe Pruskowski
 import { describe, it, expect, vi } from 'vitest';
-import { sendLog, getStoredStrategy, setStoredStrategy, getStoredStartMode, setStoredStartMode } from './utils/clientLogger';
+import { sendLog, getStoredStrategy, setStoredStrategy, getStoredStartMode, setStoredStartMode, createClientLogger } from './utils/clientLogger';
 
 describe('client sendLog', () => {
   it('posts a log payload to /logs (S073a smoke)', async () => {
@@ -49,6 +49,25 @@ describe('client sendLog', () => {
   });
 });
 
+describe('client logger wrapper', () => {
+  it('samples info logs and always sends warn+', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch' as any).mockResolvedValue(new Response(null, { status: 204 }) as any);
+    // Force Math.random to return 0.9 (above 0.5)
+    const randSpy = vi.spyOn(Math, 'random').mockReturnValue(0.9);
+    const logger = createClientLogger({ sampleRate: 0.5, staticContext: { app: 'ttt' } });
+    await logger.info('informational', { a: 1 }); // should be dropped
+    await logger.warn('warning', { b: 2 }); // should be sent
+    // info should not have been sent
+    const sentBodies = fetchSpy.mock.calls.map(([, init]) => JSON.parse((init as any).body as string));
+    const hasInfo = sentBodies.some((b: any) => b.message === 'informational');
+    const hasWarn = sentBodies.some((b: any) => b.message === 'warning' && b.context?.app === 'ttt' && b.context?.b === 2);
+    expect(hasInfo).toBe(false);
+    expect(hasWarn).toBe(true);
+    randSpy.mockRestore();
+    fetchSpy.mockRestore();
+  });
+});
+
 describe('strategy storage helpers', () => {
   it('getStoredStrategy defaults to ai0 when unset/invalid and migrates legacy', () => {
     const orig = window.localStorage.getItem('ttt_strategy');
@@ -68,11 +87,11 @@ describe('strategy storage helpers', () => {
 });
 
 describe('start mode storage helpers', () => {
-  it('getStoredStartMode defaults to human on unset/invalid/errors', () => {
+  it('getStoredStartMode defaults to alternate on unset/invalid/errors', () => {
     try { window.localStorage.removeItem('ttt_start_mode'); } catch {}
-    expect(getStoredStartMode()).toBe('human');
+    expect(getStoredStartMode()).toBe('alternate');
     try { window.localStorage.setItem('ttt_start_mode', 'nope'); } catch {}
-    expect(getStoredStartMode()).toBe('human');
+    expect(getStoredStartMode()).toBe('alternate');
   });
 
   it('setStoredStartMode persists and is readable', () => {

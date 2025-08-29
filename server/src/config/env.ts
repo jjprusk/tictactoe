@@ -41,6 +41,13 @@ const EnvSchema = z.object({
   MONGO_MAX_RETRIES: z.coerce.number().int().min(0).default(5),
   MONGO_RETRY_INITIAL_MS: z.coerce.number().int().min(10).default(200),
   MONGO_RETRY_MAX_MS: z.coerce.number().int().min(50).default(2000),
+
+  // Retention config
+  LOG_RETENTION_DAYS: z.coerce.number().int().min(1).default(7),
+
+  // Logger sinks & sampling
+  LOG_TO_MONGO: z.coerce.boolean().default(false),
+  LOG_SAMPLE_RATE: z.coerce.number().min(0).max(1).default(0.1),
 });
 
 export type AppConfig = z.infer<typeof EnvSchema>;

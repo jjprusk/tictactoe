@@ -12,9 +12,12 @@ type StartMode = 'ai' | 'human' | 'alternate';
 function getStartMode(): StartMode {
   try {
     const v = window.localStorage.getItem('ttt_start_mode') as StartMode | null;
-    return v === 'ai' || v === 'alternate' || v === 'human' ? v : 'human';
+    if (v === 'ai' || v === 'alternate' || v === 'human') return v;
+    // Default to 'alternate' and persist for first-run consistency
+    window.localStorage.setItem('ttt_start_mode', 'alternate');
+    return 'alternate';
   } catch {
-    return 'human';
+    return 'alternate';
   }
 }
 
@@ -51,10 +54,12 @@ export const createOrResetGame = createAsyncThunk(
       return { gameId: localId, mode: 'offline' as const };
     }
 
-    // Online: if already in a room, reset within the same room; otherwise create a new one
+    // Online:
+    // - If already in a room and startMode is 'human', reset within the same room
+    // - If startMode is 'ai' or 'alternate', create a new game so roles/starting player can change
     const state: any = getState();
     const gameId: string | null = state?.game?.gameId ?? null;
-    if (gameId && !gameId.startsWith('local_')) {
+    if (gameId && !gameId.startsWith('local_') && startMode === 'human') {
       await resetGame({ gameId });
       return { gameId, mode: 'online-reset' as const };
     }

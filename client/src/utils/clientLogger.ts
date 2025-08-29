@@ -50,6 +50,31 @@ export async function sendLog(
   }
 }
 
+/** Client log wrapper with context and sampling */
+export function createClientLogger(options?: { sampleRate?: number; staticContext?: Record<string, unknown> }) {
+  const rate = typeof options?.sampleRate === 'number' ? Math.max(0, Math.min(1, options.sampleRate)) : 1;
+  const staticCtx = options?.staticContext ?? {};
+  function shouldSend(level: LogLevel): boolean {
+    if (rate >= 1) return true;
+    // Always send warn+; sample info/debug/trace
+    const priority: Record<LogLevel, number> = { fatal: 6, error: 5, warn: 4, info: 3, debug: 2, trace: 1 };
+    if (priority[level] >= 4) return true;
+    return Math.random() < rate;
+  }
+  async function log(level: LogLevel, message: string, context?: Record<string, unknown>): Promise<void> {
+    if (!shouldSend(level)) return;
+    const merged = { ...staticCtx, ...(context ?? {}), userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined };
+    await sendLog({ level, message, context: merged });
+  }
+  return {
+    trace: (m: string, c?: Record<string, unknown>) => log('trace', m, c),
+    debug: (m: string, c?: Record<string, unknown>) => log('debug', m, c),
+    info: (m: string, c?: Record<string, unknown>) => log('info', m, c),
+    warn: (m: string, c?: Record<string, unknown>) => log('warn', m, c),
+    error: (m: string, c?: Record<string, unknown>) => log('error', m, c),
+    fatal: (m: string, c?: Record<string, unknown>) => log('fatal', m, c),
+  };
+}
 
 export type StrategyOption = 'ai0' | 'ai1' | 'ai2' | 'ai3';
 
@@ -89,9 +114,11 @@ const START_MODE_KEY = 'ttt_start_mode';
 export function getStoredStartMode(): StartModeOption {
   try {
     const v = typeof window !== 'undefined' ? (window.localStorage.getItem(START_MODE_KEY) as StartModeOption | null) : null;
-    return v === 'ai' || v === 'human' || v === 'alternate' ? v : 'human';
+    const normalized: StartModeOption = v === 'ai' || v === 'human' || v === 'alternate' ? v : 'alternate';
+    if (typeof window !== 'undefined') window.localStorage.setItem(START_MODE_KEY, normalized);
+    return normalized;
   } catch {
-    return 'human';
+    return 'alternate';
   }
 }
 

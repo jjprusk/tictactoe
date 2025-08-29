@@ -27,6 +27,7 @@ import type { Board, Strategy } from './game/types';
 import { applyMove, nextPlayer, checkWin, checkDraw } from './game/rules';
 import { appConfig } from './config/env';
 import { makeMove as orchestrateMove, normalizeStrategy } from './ai/orchestrator';
+import { bus } from './bus';
 
 type Role = 'player' | 'observer' | 'admin';
 
@@ -69,6 +70,15 @@ export function attachSocketHandlers(io: IOServer) {
 			console.log('[socket]', ...args);
 		}
 	};
+
+  // Propagate admin log-level changes to connected clients
+  bus.on('log-level-changed', (level) => {
+    try {
+      io.emit('admin:log-level', { level });
+    } catch {
+      // ignore
+    }
+  });
 
 	function getRoomState(roomId: string): RoomState {
 		let state = roomIdToState.get(roomId);

@@ -200,24 +200,26 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S129p: Deploy – roll out client emitting 'ai0'/'ai1'/'ai2'/'ai3'; verify no schema errors
 - [x] S129q: Post-deploy – remove legacy 'random'/'ai' acceptance from server contracts/normalizer after adoption; keep client migration for a while
 - [x] S129r: Roadmap – implement distinct logic for 'ai1'/'ai2'/'ai3' and add per-level metrics, but maintain mapping all AI levels to AI0 for now.
-- [ ] S130: Define MongoDB schemas for games, moves, sessions, models, logs
-- [ ] S131: Add compound indexes for `gameId`, `sessionId`, timestamps
-- [ ] S132: Add migration tooling (migrate-mongo) and initial baseline migration
-- [ ] S133: Implement `saveGameStart(game)` persistence
-- [ ] S134: Implement `saveMove(move)` persistence
-- [ ] S135: Implement `saveGameOutcome(gameId, result)` persistence
-- [ ] S136: Implement Redis key patterns for live game state
-- [ ] S137: Implement Redis set/get with TTL for caches
-- [ ] S138: Implement retention job to delete old logs
-- [ ] S139: Add configuration for retention TTL days
-- [ ] S140: Configure server logger transport to MongoDB and sampling
-- [ ] S141: Implement client log wrapper and pre-filtering
-- [ ] S142: Send batched client logs to server endpoint
-- [ ] S143: Implement admin endpoint to change log level (with auth)
-- [ ] S144: Propagate new log level to connected clients
-- [ ] S145: Implement log export endpoint (CSV/JSON) and streaming query
-- [ ] S145a: Add Debug menu to the client UI (accessible menu component in header or options area) with a scalable structure for future debug actions.
-- [ ] S145b: Wire initial Debug actions: "Send Test Log" (invokes client sendLog to server) and "Toggle Debug Panel" (shows/hides on‑page Redux state overlay; persist preference in localStorage); add unit tests.
+- [x] S130: Define MongoDB schemas for games, moves, sessions, models, logs
+- [x] S131: Add compound indexes for `gameId`, `sessionId`, timestamps
+- [x] S132: Add migration tooling (migrate-mongo) and initial baseline migration
+- [x] S133: Implement `saveGameStart(game)` persistence
+- [x] S134: Implement `saveMove(move)` persistence
+- [x] S135: Implement `saveGameOutcome(gameId, result)` persistence
+- [x] S136: Implement Redis key patterns for live game state
+- [x] S137: Implement Redis set/get with TTL for caches
+- [x] S138: Implement retention job to delete old logs
+- [x] S139: Add configuration for retention TTL days
+- [x] S140: Configure server logger transport to MongoDB and sampling
+- [x] S141: Implement client log wrapper and pre-filtering
+- [x] S142: Send batched client logs to server endpoint
+- [x] S143: Implement admin endpoint to change log level (with auth)
+- [x] S144: Propagate new log level to connected clients
+- [x] S145: Implement log export endpoint (CSV/JSON) and streaming query
+- [x] S145a: Default to Basic opponent & Alternating Begins on new browser connection
+- [x] S145b: Add Debug menu to the client UI (accessible menu component in header or options area) with a scalable structure for future debug actions.
+- [x] S145c: Wire initial Debug actions: "Send Test Log" (invokes client sendLog to server) and "Toggle Debug Panel" (shows/hides on‑page Redux state overlay; persist preference in localStorage); add unit tests.
+- [ ] S145d: retest alternating game play, reset, new games, etc.
 - [ ] S146: Create Python AI microservice under `server/ai_service`
 - [ ] S147: Initialize FastAPI app with `/infer` and `/train` endpoints
 - [ ] S148: Define Pydantic schemas aligned with Node types

@@ -4,12 +4,14 @@ import cors from 'cors';
 import helmet from 'helmet';
 import pinoHttp from 'pino-http';
 import { logger } from './logger';
+import { bus } from './bus';
 import { z } from 'zod';
 import { appConfig } from './config/env';
 import { getMongoClient } from './db/mongo';
 import { getRedisClient } from './db/redis';
 import { randomUUID } from 'crypto';
 import { getMetricsText, recordHttpMetricsMiddleware } from './metrics';
+import type { MongoClient } from 'mongodb';
 
 export const app = express();
 
@@ -113,6 +115,151 @@ app.post('/logs', (req, res) => {
       break;
   }
   res.status(204).end();
+});
+
+// Batched client logs endpoint
+app.post('/logs/batch', (req, res) => {
+  const arr = Array.isArray(req.body) ? req.body : null;
+  if (!arr || arr.length === 0) {
+    res.status(400).json({ ok: false, error: 'invalid-payload' });
+    return;
+  }
+  for (const item of arr) {
+    const parsed = clientLogSchema.safeParse(item);
+    if (!parsed.success) {
+      res.status(400).json({ ok: false, error: 'invalid-payload' });
+      return;
+    }
+    const { level, message, context } = parsed.data;
+    const ctx: Record<string, unknown> = context ?? {};
+    switch (level) {
+      case 'trace':
+        logger.trace(ctx, message);
+        break;
+      case 'debug':
+        logger.debug(ctx, message);
+        break;
+      case 'info':
+        logger.info(ctx, message);
+        break;
+      case 'warn':
+        logger.warn(ctx, message);
+        break;
+      case 'error':
+        logger.error(ctx, message);
+        break;
+      case 'fatal':
+        logger.fatal(ctx, message);
+        break;
+    }
+  }
+  res.status(204).end();
+});
+
+// Admin: change log level (simple shared-key auth)
+const logLevelSchema = z.object({ level: z.enum(['trace','debug','info','warn','error','fatal','silent']) });
+app.post('/admin/log-level', (req, res) => {
+  const adminKey = (req.headers['x-admin-key'] as string | undefined)?.trim();
+  const expected = process.env.ADMIN_KEY || 'dev-admin-key';
+  if (!adminKey || adminKey !== expected) {
+    res.status(403).json({ ok: false, error: 'forbidden' });
+    return;
+  }
+  const parsed = logLevelSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ ok: false, error: 'invalid-payload' });
+    return;
+  }
+  logger.level = parsed.data.level;
+  // Notify other modules (e.g., socket handlers) to propagate change
+  try { bus.emit('log-level-changed', logger.level as unknown as 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal' | 'silent'); } catch {
+    // ignore
+  }
+  res.json({ ok: true, level: logger.level });
+});
+
+// Admin: export logs as JSON or CSV (streaming)
+const exportQuerySchema = z.object({
+  from: z.coerce.date().optional(),
+  to: z.coerce.date().optional(),
+  level: z.enum(['trace','debug','info','warn','error','fatal']).optional(),
+  format: z.enum(['json','csv']).default('json'),
+});
+
+app.get('/admin/logs/export', async (req, res) => {
+  const adminKey = (req.headers['x-admin-key'] as string | undefined)?.trim();
+  const expected = process.env.ADMIN_KEY || 'dev-admin-key';
+  if (!adminKey || adminKey !== expected) {
+    res.status(403).json({ ok: false, error: 'forbidden' });
+    return;
+  }
+  const parsed = exportQuerySchema.safeParse({
+    from: req.query.from,
+    to: req.query.to,
+    level: req.query.level,
+    format: req.query.format ?? 'json',
+  });
+  if (!parsed.success) {
+    res.status(400).json({ ok: false, error: 'invalid-query' });
+    return;
+  }
+  const { from, to, level, format } = parsed.data;
+  const client = getMongoClient() as MongoClient | null;
+  if (!client) {
+    res.status(503).json({ ok: false, error: 'mongo-unavailable' });
+    return;
+  }
+  const coll = client.db('tictactoe').collection('logs');
+  type DateRange = { $gte?: Date; $lte?: Date };
+  const query: { level?: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'; createdAt?: DateRange } = {};
+  if (level) query.level = level;
+  if (from || to) {
+    query.createdAt = {};
+    if (from) query.createdAt.$gte = from;
+    if (to) query.createdAt.$lte = to;
+  }
+  const cursorRaw = coll.find(query as Record<string, unknown>).sort({ createdAt: 1 }).batchSize(1000);
+  type ExportLog = { createdAt?: Date | string | number; level?: string; message?: unknown; gameId?: string; sessionId?: string; source?: string; origin?: string; _id?: unknown };
+  const cursorIter: AsyncIterable<ExportLog> = cursorRaw as unknown as AsyncIterable<ExportLog>;
+
+  if (format === 'json') {
+    res.setHeader('Content-Type', 'application/json');
+    res.write('[');
+    let first = true;
+    for await (const doc of cursorIter) {
+      const safe: Record<string, unknown> = { ...doc, _id: undefined };
+      res.write((first ? '' : ',') + JSON.stringify(safe));
+      first = false;
+    }
+    res.write(']');
+    res.end();
+    return;
+  }
+
+  // CSV
+  res.setHeader('Content-Type', 'text/csv');
+  // Fixed header set for known fields; unknown context keys omitted
+  const headers = ['createdAt','level','message','gameId','sessionId','source'];
+  res.write(headers.join(',') + '\n');
+  for await (const doc of cursorIter) {
+    const createdAtValue = new Date(doc.createdAt as unknown as Date).toISOString();
+    const levelValue = doc.level ?? '';
+    const messageText = String((doc as Record<string, unknown>).message ?? '').replaceAll('\n',' ').replaceAll('"','""');
+    const gameIdValue = doc.gameId ?? '';
+    const sessionIdValue = doc.sessionId ?? '';
+    const sourceValue = doc.source ?? doc.origin ?? 'server';
+    const row = [
+      createdAtValue,
+      levelValue,
+      messageText,
+      gameIdValue,
+      sessionIdValue,
+      sourceValue,
+    ];
+    // CSV quoting
+    res.write(row.map((v) => `"${String(v)}"`).join(',') + '\n');
+  }
+  res.end();
 });
 
 
