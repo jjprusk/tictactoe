@@ -15,7 +15,9 @@ describe('mongo retry', () => {
 	});
   it('ensureIndexes best-effort: should not crash when client missing; may reject when server requires auth', async () => {
     await expect(ensureIndexes('tictactoe_test')).resolves.toBeUndefined();
-    const client = buildMongoClient('mongodb://localhost:27017');
+    const uri = process.env.MONGO_TEST_URI;
+    if (!uri) return; // skip live-connect path in CI without Mongo
+    const client = buildMongoClient(uri);
     try {
       await connectWithRetry(client, { maxRetries: 0, initialDelayMs: 10, maxDelayMs: 10 });
       try {

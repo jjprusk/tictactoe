@@ -219,7 +219,7 @@ Concise, incremental steps to implement the TicTacToe AI system defined in `docs
 - [x] S145a: Default to Basic opponent & Alternating Begins on new browser connection
 - [x] S145b: Add Debug menu to the client UI (accessible menu component in header or options area) with a scalable structure for future debug actions.
 - [x] S145c: Wire initial Debug actions: "Send Test Log" (invokes client sendLog to server) and "Toggle Debug Panel" (shows/hides on‑page Redux state overlay; persist preference in localStorage); add unit tests.
-- [ ] S145d: retest alternating game play, reset, new games, etc.
+- [x] S145d: retest alternating game play, reset, new games, etc.
 - [ ] S146: Create Python AI microservice under `server/ai_service`
 - [ ] S147: Initialize FastAPI app with `/infer` and `/train` endpoints
 - [ ] S148: Define Pydantic schemas aligned with Node types

@@ -10,13 +10,19 @@ describe('repository.saveGameStart', () => {
   let client: MongoClient | null = null;
 
   beforeAll(async () => {
+    const uri = process.env.MONGO_TEST_URI;
+    if (!uri) {
+      __setClientForTest(null);
+      client = null;
+      return;
+    }
     try {
-      client = buildMongoClient('mongodb://localhost:27017');
+      client = buildMongoClient(uri);
       await connectWithRetry(client, { maxRetries: 0, initialDelayMs: 10, maxDelayMs: 10 });
       __setClientForTest(client);
     } catch (e) {
       __setClientForTest(null);
-      expect(e).toBeDefined();
+      client = null;
     }
   });
 
