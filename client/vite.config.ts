@@ -17,6 +17,7 @@ export default defineConfig(({ mode }) => ({
   server: {
     port: 5173,
     open: false,
+    host: true, // allow access from LAN (0.0.0.0)
     proxy: {
       '/healthz': {
         target: 'http://localhost:3001',
@@ -36,6 +37,9 @@ export default defineConfig(({ mode }) => ({
         ws: true,
       },
     },
+  },
+  preview: {
+    host: true, // allow access from LAN during vite preview
   },
   build: {
     target: 'es2020',

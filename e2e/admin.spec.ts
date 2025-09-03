@@ -54,7 +54,9 @@ test.describe('S106g - Admin flows', () => {
 
     expect(res.elev).toEqual({ ok: true, role: 'admin' });
     expect(res.list.ok).toBe(true);
-    expect(res.list.games).toContain(res.gameId);
+    // list.games now returns objects with gameId; assert by mapping ids
+    const ids = Array.isArray((res.list as any).games) ? (res.list as any).games.map((g: any) => g.gameId) : [];
+    expect(ids).toContain(res.gameId);
     expect(res.info.ok).toBe(true);
     expect(res.info.gameId).toBe(res.gameId);
     expect(res.closed).toEqual({ ok: true });

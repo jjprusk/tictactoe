@@ -17,7 +17,9 @@ test.describe('S107 - Optimistic UI', () => {
     await page.goto('/');
 
     // Start a new game via UI so the client store has myPlayer and role set
-    await page.getByTestId('create-game-btn').click();
+    const createBtn = (await page.$('[data-testid="create-game-btn"]')) ?? (await page.$('[data-testid="create-game-btn-secondary"]'));
+    if (!createBtn) throw new Error('create game button not found');
+    await createBtn.click();
 
     // Click top-left cell
     const cell = page.getByRole('gridcell', { name: /cell 1/i });

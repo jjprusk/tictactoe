@@ -20,6 +20,7 @@ import {
 	AdminCloseGameRequestSchema,
 	AdminRoomInfoRequestSchema,
   ListGamesRequestSchema,
+  OkListGamesAckSchema,
   type CreateGameRequest,
   ResetGameRequestSchema,
 } from './socket/contracts';
@@ -43,6 +44,8 @@ type RoomState = {
   strategy?: Strategy;
   // last time anything happened in this room (ms since epoch)
   lastActiveAt?: number;
+  // whether game completed (win/draw)
+  completed?: boolean;
 };
 
 const joinSchema = z.object({ roomId: z.string().min(1) });
@@ -180,6 +183,7 @@ export function attachSocketHandlers(io: IOServer) {
 			activeGameIds.add(gameId);
 			touchRoom(gameId);
 			ack?.(okCreateAck({ gameId, player: hostPlayer, sessionToken: token, currentPlayer: state.currentPlayer! }));
+			try { io.emit('lobby:update'); } catch {}
       // If AI starts, trigger immediate AI opening move
       if (effectiveAiStarts) {
         (async () => {
@@ -211,12 +215,13 @@ export function attachSocketHandlers(io: IOServer) {
 				ack?.(errAck('invalid-payload'));
 				return;
 			}
-			const { gameId, sessionToken } = parsed.data as { gameId: string; sessionToken?: string };
+			const { gameId, sessionToken, asObserver } = parsed.data as { gameId: string; sessionToken?: string; asObserver?: boolean };
 			const state = getRoomState(gameId);
 			// Move socket exclusively to target room
 			leaveOtherGameRooms(socket, gameId);
 			socket.join(gameId);
 			let role: Role = 'observer';
+			const beforePlayers = state.playerIds.size;
 			let player: ContractPlayer | undefined;
 			if (sessionToken && state.sessions?.has(sessionToken)) {
 				// resume prior session as player
@@ -225,7 +230,7 @@ export function attachSocketHandlers(io: IOServer) {
 				state.playerIds.add(socket.id);
 				state.playersBySocket.set(socket.id, player);
 				state.sessions?.set(sessionToken, socket.id);
-			} else if (state.playerIds.size < 2) {
+			} else if (!asObserver && state.playerIds.size < 2) {
 				state.playerIds.add(socket.id);
 				role = 'player';
 				const used = new Set(state.playersBySocket.values());
@@ -237,6 +242,20 @@ export function attachSocketHandlers(io: IOServer) {
 			if (token && role === 'player') state.sessions?.set(token, socket.id);
 			touchRoom(gameId);
 			ack?.(okJoinAck({ role, player, sessionToken: token }));
+			// If this join fills the second human seat, reset the game for fair H2H and notify room
+			try {
+				if (role === 'player' && beforePlayers < 2 && state.playerIds.size >= 2) {
+					// Reset board and turn
+					state.nonces = new Set<string>();
+					state.board = Array.from({ length: 9 }, () => null) as Board;
+					state.currentPlayer = 'X';
+					state.completed = false;
+					io.to(gameId).emit('game_state', { gameId, board: state.board, currentPlayer: state.currentPlayer! });
+					io.to(gameId).emit('room:notice', { message: 'A player joined. Game reset to head-to-head.' });
+					io.to(gameId).emit('room:mode', { h2h: true });
+				}
+			} catch {}
+			try { io.emit('lobby:update'); } catch {}
 		});
 
 		socket.on('leave_game', (rawPayload: unknown, ack?: Ack) => {
@@ -251,6 +270,7 @@ export function attachSocketHandlers(io: IOServer) {
 			state.playerIds.delete(socket.id);
 			state.playersBySocket.delete(socket.id);
 			ack?.(okAck());
+			try { io.emit('lobby:update'); } catch {}
 			// If room is now empty, prune it from active list
 			pruneInactiveRooms();
 		});
@@ -284,8 +304,28 @@ export function attachSocketHandlers(io: IOServer) {
 				return;
 			}
 			pruneInactiveRooms();
-			const withMembers = Array.from(activeGameIds.values()).filter((id) => (io.sockets.adapter.rooms.get(id)?.size ?? 0) > 0);
-			ack?.({ ok: true, games: withMembers });
+			const items = Array.from(activeGameIds.values())
+				.map((id) => {
+					const state = roomIdToState.get(id);
+					const room = io.sockets.adapter.rooms.get(id);
+					if (!state) return null;
+					let observerCount = 0;
+					if (room) {
+						for (const sid of room) {
+							if (!state.playerIds.has(sid)) observerCount += 1;
+						}
+					}
+					const assigned = new Set(state.playersBySocket.values());
+					const hasX = assigned.has('X');
+					const hasO = assigned.has('O');
+					const status = state.completed ? 'complete' : hasX && hasO ? 'in_progress' : 'waiting';
+					const lastActiveAt = state.lastActiveAt ?? Date.now();
+					return { gameId: id, hasX, hasO, observerCount, status, lastActiveAt };
+				})
+				.filter((v): v is NonNullable<typeof v> => !!v)
+				.sort((a, b) => b.lastActiveAt - a.lastActiveAt);
+			const ackPayload = OkListGamesAckSchema.parse({ ok: true, games: items });
+			ack?.(ackPayload);
 		});
 
 		// Admin: close a game room
@@ -311,6 +351,7 @@ export function attachSocketHandlers(io: IOServer) {
 			roomIdToState.delete(gameId);
 			activeGameIds.delete(gameId);
 			ack?.(okAck());
+			try { io.emit('lobby:update'); } catch {}
 		});
 
 		// Admin: room info (membership and roles)
@@ -358,8 +399,29 @@ export function attachSocketHandlers(io: IOServer) {
 				return;
 			}
 			pruneInactiveRooms();
-			const withMembers = Array.from(activeGameIds.values()).filter((id) => (io.sockets.adapter.rooms.get(id)?.size ?? 0) > 0);
-			ack?.({ ok: true, games: withMembers });
+			const items = Array.from(activeGameIds.values())
+				.map((id) => {
+					const state = roomIdToState.get(id);
+					const room = io.sockets.adapter.rooms.get(id);
+					const members = room?.size ?? 0;
+					if (!state || members === 0) return null;
+					let observerCount = 0;
+					if (room) {
+						for (const sid of room) {
+							if (!state.playerIds.has(sid)) observerCount += 1;
+						}
+					}
+					const assigned = new Set(state.playersBySocket.values());
+					const hasX = assigned.has('X');
+					const hasO = assigned.has('O');
+					const status = state.completed ? 'complete' : hasX && hasO ? 'in_progress' : 'waiting';
+					const lastActiveAt = state.lastActiveAt ?? Date.now();
+					return { gameId: id, hasX, hasO, observerCount, status, lastActiveAt };
+				})
+				.filter((v): v is NonNullable<typeof v> => !!v)
+				.sort((a, b) => b.lastActiveAt - a.lastActiveAt);
+			const ackPayload = OkListGamesAckSchema.parse({ ok: true, games: items });
+			ack?.(ackPayload);
 		});
 
 		// Reset game: clear board, starting player is always 'X', possibly trigger AI opening move
@@ -378,6 +440,7 @@ export function attachSocketHandlers(io: IOServer) {
 			ack?.(okAck());
 			// Emit cleared state first
 			io.to(gameId).emit('game_state', { gameId, board: state.board, currentPlayer: state.currentPlayer! });
+			try { io.emit('lobby:update'); } catch {}
 			touchRoom(gameId);
 			// If AI should start, make an immediate move (using current configured strategy)
 			try {
@@ -455,6 +518,7 @@ export function attachSocketHandlers(io: IOServer) {
 				let winner = checkWin(state.board) as ContractPlayer | null;
 				const draw = winner ? false : checkDraw(state.board);
 				state.currentPlayer = winner || draw ? state.currentPlayer : nextPlayer(player) as ContractPlayer;
+				if (winner || draw) state.completed = true;
 				io.to(gameId).emit('game_state', { gameId, board: state.board, currentPlayer: state.currentPlayer!, lastMove: position, winner: winner ?? undefined, draw: draw || undefined });
 				ack?.(okAck());
 				// Trigger AI move if applicable based on current configured strategy
@@ -470,6 +534,7 @@ export function attachSocketHandlers(io: IOServer) {
 							winner = checkWin(state.board) as ContractPlayer | null;
 							const aiDraw = winner ? false : checkDraw(state.board);
 							state.currentPlayer = winner || aiDraw ? state.currentPlayer : nextPlayer(aiPlayer) as ContractPlayer;
+							if (winner || aiDraw) state.completed = true;
 							io.to(gameId).emit('game_state', { gameId, board: state.board, currentPlayer: state.currentPlayer!, lastMove: aiPos, winner: winner ?? undefined, draw: aiDraw || undefined });
 						}
 					}

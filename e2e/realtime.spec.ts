@@ -46,8 +46,8 @@ test('realtime connect indicator transitions to Connected when backend is up', a
   await page.waitForSelector('h1', { timeout: 20000, state: 'attached' });
   await page.waitForSelector('[data-testid="status-text"]', { timeout: 20000, state: 'attached' });
   const status = page.getByRole('banner').getByTestId('status-text');
-  // Eventually should show Connected when server is running via webServer
-  await expect(status).toHaveText(/connected/i, { timeout: 20_000 });
+  // App labels connected state as "Online" in UI; accept either "Connected" or "Online" text
+  await expect(status).toHaveText(/connected|online/i, { timeout: 20_000 });
 });
 
 test('realtime shows Disconnected when backend is unreachable', async ({ page }) => {

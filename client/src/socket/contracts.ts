@@ -18,7 +18,7 @@ export const CreateGameAckSchema = z.union([
 ]);
 export type CreateGameAck = z.infer<typeof CreateGameAckSchema>;
 
-export const JoinGameRequestSchema = z.object({ gameId: z.string().min(1) });
+export const JoinGameRequestSchema = z.object({ gameId: z.string().min(1), asObserver: z.coerce.boolean().optional() });
 export type JoinGameRequest = z.infer<typeof JoinGameRequestSchema>;
 export const JoinGameAckSchema = z.union([
   z.object({ ok: z.literal(true), role: z.enum(['player', 'observer']), player: PlayerSchema.optional() }),
@@ -73,8 +73,17 @@ export type ErrorPayload = z.infer<typeof ErrorPayloadSchema>;
 // Public list_games
 export const ListGamesRequestSchema = z.object({});
 export type ListGamesRequest = z.infer<typeof ListGamesRequestSchema>;
+export const LobbyGameItemSchema = z.object({
+  gameId: z.string().min(1),
+  hasX: z.boolean(),
+  hasO: z.boolean(),
+  observerCount: z.number().int().nonnegative(),
+  status: z.enum(['waiting','in_progress','complete']),
+  lastActiveAt: z.number().int().nonnegative(),
+});
+export type LobbyGameItem = z.infer<typeof LobbyGameItemSchema>;
 export const ListGamesAckSchema = z.union([
-  z.object({ ok: z.literal(true), games: z.array(z.string()) }),
+  z.object({ ok: z.literal(true), games: z.array(LobbyGameItemSchema) }),
   z.object({ ok: z.literal(false), error: z.string().min(1) }),
 ]);
 export type ListGamesAck = z.infer<typeof ListGamesAckSchema>;

@@ -26,7 +26,7 @@
     "test:watch": "npm --workspace server run test:watch",
     "test:cov": "npm --workspace server run test:cov && npm --workspace client run test:cov",
     "load:socket": "artillery run server/load/socketio.yml",
-    "e2e": "bash -lc './scripts/e2e-start.sh && playwright test; code=$?; ./scripts/e2e-stop.sh; exit $code'"
+    "e2e": "bash -lc './scripts/e2e-start.sh && E2E_BACKEND=1 playwright test; code=$?; ./scripts/e2e-stop.sh; exit $code'"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",

@@ -18,6 +18,7 @@ import OfflineBanner from './components/OfflineBanner';
 import AIFirstBadge from './components/AIFirstBadge';
 import GameRoomBadge from './components/GameRoomBadge';
 import DebugMenu from './components/DebugMenu';
+import NoticeBanner from './components/NoticeBanner';
 
 export default function App() {
   useEffect(() => {
@@ -44,14 +45,17 @@ export default function App() {
         Choose a strategy and beginning player then select New Game. Tap or click a square to play. The opponent will respond automatically. 
         You can switch strategies at any time from the options.
       </p>
-      <main className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <main className="grid grid-cols-1 md:grid-cols-[auto,1fr] gap-4">
         <motion.section
           aria-label="Game Board"
-          className="md:col-span-2 min-h-[260px] border border-slate-200 dark:border-slate-700 rounded-md p-3"
+          className="md:col-span-1 md:w-max md:justify-self-start min-h-[260px] border border-slate-200 dark:border-slate-700 rounded-md py-3 px-4 md:px-8 lg:px-10"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25, ease: 'easeOut' }}
         >
+          <div className="mb-2">
+            <NoticeBanner />
+          </div>
           <div className="mb-2">
             <OfflineBanner />
           </div>
@@ -76,6 +80,16 @@ export default function App() {
             <NewGameButton />
             <ResetButton />
           </div>
+        </motion.section>
+        {/* Mobile-only lobby below the board */}
+        <motion.section
+          aria-label="Lobby"
+          className="sm:hidden min-h-[140px] border border-slate-200 dark:border-slate-700 rounded-md p-3"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: 'easeOut', delay: 0.05 }}
+        >
+          <Lobby />
         </motion.section>
         <motion.section
           aria-label="Insights Panel"

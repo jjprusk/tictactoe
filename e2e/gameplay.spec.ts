@@ -38,8 +38,10 @@ test.describe('E2E gameplay (S126a)', () => {
     await page.waitForSelector('#root', { state: 'attached', timeout: 20_000 });
     await page.getByTestId('app-title').waitFor({ state: 'visible' });
 
-    // Start new game
-    await page.getByTestId('create-game-btn').click();
+    // Start new game (mobile layout uses secondary id)
+    const createBtn = (await page.$('[data-testid="create-game-btn"]')) ?? (await page.$('[data-testid="create-game-btn-secondary"]'));
+    if (!createBtn) throw new Error('create game button not found');
+    await createBtn.click();
 
     // Click center cell (4) as human
     const center = gridCell(page, 4);
@@ -63,8 +65,9 @@ test.describe('E2E gameplay (S126a)', () => {
     await page.waitForSelector('#root', { state: 'attached', timeout: 20_000 });
     await page.getByTestId('app-title').waitFor({ state: 'visible' });
 
-    // Start new game
-    await page.getByTestId('create-game-btn').click();
+    const createBtn2 = (await page.$('[data-testid="create-game-btn"]')) ?? (await page.$('[data-testid="create-game-btn-secondary"]'));
+    if (!createBtn2) throw new Error('create game button not found');
+    await createBtn2.click();
 
     // AI should make an opening move as X without user input
     const firstMark = page.locator('[role="gridcell"] >> text=/x/i');
@@ -97,7 +100,9 @@ test.describe('E2E gameplay (S126a)', () => {
     await page.getByTestId('app-title').waitFor({ state: 'visible' });
 
     // Game 1: should be human-first by default
-    await page.getByTestId('create-game-btn').click();
+    const createBtn3 = (await page.$('[data-testid="create-game-btn"]')) ?? (await page.$('[data-testid="create-game-btn-secondary"]'));
+    if (!createBtn3) throw new Error('create game button not found');
+    await createBtn3.click();
     const beforeMoveMarks1 = page.locator('[role="gridcell"] >> text=/x|o/i');
     await expect(beforeMoveMarks1).toHaveCount(0);
     // Human makes opening move
@@ -106,7 +111,9 @@ test.describe('E2E gameplay (S126a)', () => {
 
     // Reset to create a second game scenario
     // Click New Game again to open a new room (alternation occurs on server create)
-    await page.getByTestId('create-game-btn').click();
+    const createBtn4 = (await page.$('[data-testid="create-game-btn"]')) ?? (await page.$('[data-testid="create-game-btn-secondary"]'));
+    if (!createBtn4) throw new Error('create game button not found');
+    await createBtn4.click();
 
     // Game 2: should be AI-first now; expect an X to appear without clicking
     const aiFirstMark = page.locator('[role="gridcell"] >> text=/x/i');

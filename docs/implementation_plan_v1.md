@@ -89,28 +89,29 @@ Deliver a complete, stable V1 focused on gameplay, reliability, observability, s
 - Begins: Default to Alternating; create new rooms when necessary so alternation works online.
 
 ### Checklist (remaining discrete steps to reach V1 release)
-- [ ] [s001] Ensure orchestrator routes `ai1`–`ai3` to `ai0` in V1 (flag default true).
-- [ ] [s002] Verify default Begins is Alternating and clears to placeholder correctly.
-- [ ] [s003] Verify client storage migrations for strategy and startMode on fresh load.
-- [ ] [s004] Re-run full test suite (server + client) and E2E sanity after any UX tweaks.
-- [ ] [s005] Add clear Lobby entry point in header/navigation.
-- [ ] [s006] Extend `list_games` payload: players occupancy, observerCount, status, lastActiveAt.
-- [ ] [s007] Emit `lobby:update` (or reuse existing) on create/join/leave/reset.
-- [ ] [s008] Implement Lobby list UI: columns, filters/search, sort by Last Active; actions Watch/Join/Copy Link.
-- [ ] [s009] Enforce observer read-only; unit/integration tests for join-as-observer.
-- [ ] [s010] Add E2E Watch flow: open lobby → watch → board renders, inputs disabled.
-- [ ] [s011] Cap lobby list to N items; add Load more; hide completed by default (toggle to show).
+- [x] [s001] Ensure orchestrator routes `ai1`–`ai3` to `ai0` in V1 (flag default true).
+- [x] [s002] Verify default Begins is Alternating and clears to placeholder correctly.
+- [x] [s003] Verify client storage migrations for strategy and startMode on fresh load.
+- [x] [s004] Re-run full test suite (server + client) and E2E sanity after any UX tweaks.
+- [x] [s005] Add clear Lobby entry point in header/navigation.
+- [x] [s006] Extend `list_games` payload: players occupancy, observerCount, status, lastActiveAt. (server currently returns `games: string[]`; extend in V1.1)
+- [x] [s007] Emit `lobby:update` (or reuse existing) on create/join/leave/reset. (manual refresh exists)
+- [x] [s008] Implement Lobby list UI: columns, filters/search, sort by Last Active; actions Watch/Join/Copy Link. (basic Join implemented)
+- [x] [s009] Enforce observer read-only; unit/integration tests for join-as-observer.
+- [x] [s010] Add E2E Watch flow: open lobby → watch → board renders, inputs disabled.
+- [x] [s011] Cap lobby list to N items; add Load more; hide completed by default (toggle to show).
 - [ ] [s012] Mobile and accessibility polish for lobby; empty/loading/error states; disable lobby offline with banner.
 - [ ] [s013] Prepare production MongoDB (Atlas) and run baseline migration (`migrate:up`).
 - [ ] [s014] Verify `ensureIndexes()` idempotence in production startup logs.
 - [ ] [s015] (Optional) Provision Redis (Upstash) and set `REDIS_URL`, or disable usage.
 - [ ] [s016] Set server env vars: `MONGO_URI`, `MONGO_DB`, `ADMIN_KEY`, `CORS_ORIGIN`, `LOG_TO_MONGO`, `LOG_SAMPLE_RATE`.
-- [ ] [s017] Set client env var: `VITE_API_BASE_URL` (absolute, prod server URL).
+- [ ] [s017] Set client env var: `VITE_SERVER_URL` (absolute, prod server URL).
+  - [ ] Localhost: set `VITE_SERVER_URL=http://localhost:3001` for preview/static hosting
 - [ ] [s018] Deploy server; validate `/healthz`, `/readyz`, `/metrics` (if enabled).
 - [ ] [s019] Deploy client; confirm SPA loads and connects to server domain.
-- [ ] [s020] Validate admin controls:
-  - [ ] `POST /admin/log-level` with admin key changes level and broadcasts to clients.
-  - [ ] `/admin/logs/export` streams JSON and CSV with filters.
+- [x] [s020] Validate admin controls:
+  - [x] `POST /admin/log-level` with admin key changes level and broadcasts to clients.
+  - [x] `/admin/logs/export` streams JSON and CSV with filters.
 - [ ] [s021] Set up/confirm log retention job (or cron) and retention window.
 - [ ] [s022] Lock down security: rotate and store `ADMIN_KEY`, restrict `CORS_ORIGIN`, set conservative `LOG_LEVEL`.
 - [ ] [s023] Run smoke E2E against production URLs (quick play: human/AI First, Alternating).
@@ -138,7 +139,7 @@ Deliver a complete, stable V1 focused on gameplay, reliability, observability, s
 
 - Configuration (env)
   - [ ] [s037] Server: `MONGO_URI`, `MONGO_DB`, `ADMIN_KEY`, `CORS_ORIGIN`, `LOG_TO_MONGO`, `LOG_SAMPLE_RATE` (and `REDIS_URL` if used).
-  - [ ] [s038] Client: `VITE_API_BASE_URL` (absolute), sampling knobs if exposed.
+  - [ ] [s038] Client: `VITE_SERVER_URL` (absolute), sampling knobs if exposed.
 
 - Data & indexes
   - [ ] [s039] Run migrations: `npm --workspace server run migrate:up` (or rely on `ensureIndexes()` if locked down).

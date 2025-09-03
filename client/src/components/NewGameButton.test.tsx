@@ -257,6 +257,117 @@ describe('NewGameButton', () => {
     await flush();
     expect(btn.disabled).toBe(false);
   });
+
+  it('updates readiness on storage event when values are added', async () => {
+    // start with not ready
+    try { window.localStorage.removeItem('ttt_start_mode'); } catch {}
+    try { window.localStorage.removeItem('ttt_strategy'); } catch {}
+    const container = await render();
+    const btn = container.querySelector('[data-testid="create-game-btn-secondary"]') as HTMLButtonElement;
+    expect(btn.disabled).toBe(true);
+    // fire storage events to simulate external change
+    try { window.localStorage.setItem('ttt_start_mode', 'human'); } catch {}
+    window.dispatchEvent(new StorageEvent('storage', { key: 'ttt_start_mode', newValue: 'human' }));
+    await flush();
+    // still disabled because strategy missing
+    expect(btn.disabled).toBe(true);
+    try { window.localStorage.setItem('ttt_strategy', 'ai0'); } catch {}
+    window.dispatchEvent(new StorageEvent('storage', { key: 'ttt_strategy', newValue: 'ai0' }));
+    await flush();
+    expect(btn.disabled).toBe(false);
+  });
+
+  it('disables again when one of the required values is cleared (storage event)', async () => {
+    try { window.localStorage.setItem('ttt_start_mode', 'ai'); } catch {}
+    try { window.localStorage.setItem('ttt_strategy', 'ai0'); } catch {}
+    const container = await render();
+    const btn = container.querySelector('[data-testid="create-game-btn-secondary"]') as HTMLButtonElement;
+    expect(btn.disabled).toBe(false);
+    // remove strategy and dispatch storage event
+    try { window.localStorage.removeItem('ttt_strategy'); } catch {}
+    window.dispatchEvent(new StorageEvent('storage', { key: 'ttt_strategy', newValue: null as any }));
+    await flush();
+    expect(btn.disabled).toBe(true);
+  });
+
+  it('dispatches the createOrResetGame thunk when ready and clicked', async () => {
+    try { window.localStorage.setItem('ttt_start_mode', 'human'); } catch {}
+    try { window.localStorage.setItem('ttt_strategy', 'ai0'); } catch {}
+    const spy = vi.spyOn(store, 'dispatch');
+    const container = await render();
+    const btn = container.querySelector('[data-testid="create-game-btn-secondary"]') as HTMLButtonElement;
+    btn?.click();
+    await flush();
+    expect(spy).toHaveBeenCalled();
+    const firstArg = (spy.mock.calls[0] || [])[0];
+    expect(typeof firstArg === 'function').toBe(true);
+    spy.mockRestore();
+  });
+
+  it('adds and removes event listeners on mount/unmount', async () => {
+    const addSpy = vi.spyOn(window, 'addEventListener');
+    const removeSpy = vi.spyOn(window, 'removeEventListener');
+    // Ensure ready so the button renders
+    try { window.localStorage.setItem('ttt_start_mode', 'human'); } catch {}
+    try { window.localStorage.setItem('ttt_strategy', 'ai0'); } catch {}
+    // Inline render to capture root and unmount
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    const { default: NewGameButton } = await import('./NewGameButton');
+    root.render(React.createElement(Provider as any, { store }, React.createElement(NewGameButton)));
+    await flush();
+    // Expect listeners added for custom and storage events
+    const addedTypes = addSpy.mock.calls.map((c) => c[0]);
+    expect(addedTypes).toContain('storage');
+    expect(addedTypes).toContain('ttt:session-change');
+    // Unmount triggers cleanup
+    root.unmount();
+    await flush();
+    const removedTypes = removeSpy.mock.calls.map((c) => c[0]);
+    expect(removedTypes).toContain('storage');
+    expect(removedTypes).toContain('ttt:session-change');
+    addSpy.mockRestore();
+    removeSpy.mockRestore();
+  });
+
+  it('has the expected aria-label when rendered', async () => {
+    try { window.localStorage.setItem('ttt_start_mode', 'human'); } catch {}
+    try { window.localStorage.setItem('ttt_strategy', 'ai0'); } catch {}
+    const container = await render();
+    const btn = container.querySelector('[data-testid="create-game-btn-secondary"]') as HTMLButtonElement;
+    expect(btn.getAttribute('aria-label')).toBe('Create new game');
+  });
+
+  it('does not dispatch when not ready (no selections)', async () => {
+    // ensure not ready
+    try { window.localStorage.removeItem('ttt_start_mode'); } catch {}
+    try { window.localStorage.removeItem('ttt_strategy'); } catch {}
+    const spy = vi.spyOn(store, 'dispatch');
+    const container = await render();
+    const btn = container.querySelector('[data-testid="create-game-btn-secondary"]') as HTMLButtonElement;
+    expect(btn.disabled).toBe(true);
+    btn?.click();
+    await flush();
+    expect(spy).not.toHaveBeenCalled();
+    spy.mockRestore();
+  });
+
+  it('NewGameButtonSecondary dispatches when ready and clicked', async () => {
+    try { window.localStorage.setItem('ttt_start_mode', 'human'); } catch {}
+    try { window.localStorage.setItem('ttt_strategy', 'ai0'); } catch {}
+    const spy = vi.spyOn(store, 'dispatch');
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    const { NewGameButtonSecondary } = await import('./NewGameButton');
+    root.render(React.createElement(Provider as any, { store }, React.createElement(NewGameButtonSecondary)));
+    await flush();
+    const btn = container.querySelector('[data-testid="create-game-btn-secondary"]') as HTMLButtonElement;
+    btn?.click();
+    await flush();
+    expect(spy).toHaveBeenCalled();
+    root.unmount();
+    spy.mockRestore();
+  });
 });
 
 

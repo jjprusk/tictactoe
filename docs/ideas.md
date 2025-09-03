@@ -33,20 +33,20 @@ Use this file to record ideas for future development
 - AKA "Genius" level to users
 - Extensive training and can never be beaten.
 
-### [ ] [2025-8-27]
+### [x] [2025-8-27]
 - Context: Update makeMove() interface
 - Idea: makeMove() should accept all levels of AI (0-3)
 - Implications: makeMove() only accepts the "Random" string at this point. It should accept AI0, AI1, AI2, and AI3 as strategies. THis is preparation for future implementing AI strategies beyond simple random play.
 - Links:
 
-### [ ] [2025-8-27]
+### [x] [2025-8-27]
 - Context: Allow AI to AI play.
 - Idea: Two AI's should be able to play games until either a time limit or number of games is reached. The goal would be for them to train and develop more knowledge / strategy.
 - Implications: First order is to create a master AI (Genius level) incapable of loosing a game. This becomes a master AI, which can then be used to train other AI's which become capped at a specific loss ratio.
 - Links:
 
-### [ ] [2025-8-27]
-- Context: 
-- Idea: 
-- Implications: 
+### [x] [2025-8-27]
+- Context: AI
+- Idea: Move AI to a separate project with implementation plan, etc. This project requires research (best baord game AI - MuZero). Also need to add detailed metrics, ability to freeze AI's, visualiztion, etc.
+- Implications: Have a complete working game properly hosted prior to incorporating AI into the system for game play.
 - Links:

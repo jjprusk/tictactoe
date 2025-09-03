@@ -5,11 +5,27 @@ import { selectGame } from '../store/gameSlice';
 
 export default function AIFirstBadge(): JSX.Element | null {
   const game = useSelector(selectGame);
+  const [h2h, setH2h] = React.useState<boolean>(false);
+  React.useEffect(() => {
+    function onMode(payload: any) {
+      if (payload && typeof payload.h2h === 'boolean') setH2h(!!payload.h2h);
+    }
+    // Lazy import to avoid cyclic dep
+    import('../socket/socketService').then((m) => {
+      m.socketService.on('room:mode', onMode as any);
+    });
+    return () => {
+      import('../socket/socketService').then((m) => {
+        m.socketService.off('room:mode', onMode as any);
+      });
+    };
+  }, []);
   // Show while AI is expected to make the opening move
   if (
     !game.gameId ||
     game.winner ||
     game.draw ||
+    h2h ||
     game.myPlayer !== 'O' ||
     game.currentPlayer !== 'X'
   ) {

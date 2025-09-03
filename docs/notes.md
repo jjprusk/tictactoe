@@ -1,3 +1,24 @@
+# Notes
+
+## Localhost client/server configuration
+
+- For local development with Vite preview/static hosting, configure the client to point at the local API/server.
+- Set the following environment variable for the client build/preview:
+
+  - `VITE_SERVER_URL=http://localhost:3001`
+
+- Ensure the server allows the client origin:
+
+  - `CORS_ORIGIN=http://localhost:5173`
+
+This allows all browser windows to connect to Socket.IO without relying on per-window localStorage overrides.
+
+## Deployment follow-up
+
+- On deployment, update envs to proper domains:
+  - Client: `VITE_SERVER_URL=https://api.yourdomain.com`
+  - Server: `CORS_ORIGIN=https://app.yourdomain.com`
+
 # Implementation Notes
 
 Use this file to record decisions, rationale, and important changes as the project evolves.

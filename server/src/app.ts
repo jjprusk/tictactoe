@@ -51,6 +51,31 @@ app.use(recordHttpMetricsMiddleware());
 app.use(
   pinoHttp({
     logger,
+    // Log policy:
+    // - Errors (5xx) => error
+    // - Client errors (4xx) => warn
+    // - Success (2xx/3xx) => 5% sample at info, otherwise silent
+    customLogLevel: (req, res, err) => {
+      if (err) return 'error';
+      const status = res.statusCode;
+      if (status >= 500) return 'error';
+      if (status >= 400) return 'warn';
+      // success path: sample at 5%
+      return Math.random() < 0.05 ? 'info' : 'silent';
+    },
+    customSuccessMessage: (req, res) => `request completed ${req.method} ${req.url} ${res.statusCode}`,
+    customErrorMessage: (req, res, err) => `request errored ${req.method} ${req.url} ${res.statusCode}: ${(err as Error | undefined)?.message ?? 'error'}`,
+    serializers: {
+      req(req) {
+        return { id: (req as unknown as { id?: string })?.id, method: req.method, url: req.url };
+      },
+      res(res) {
+        return { statusCode: res.statusCode };
+      },
+      err(err) {
+        return { type: (err as any)?.name, message: (err as any)?.message };
+      },
+    },
   })
 );
 
