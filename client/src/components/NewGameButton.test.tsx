@@ -268,11 +268,14 @@ describe('NewGameButton', () => {
     // fire storage events to simulate external change
     try { window.localStorage.setItem('ttt_start_mode', 'human'); } catch {}
     window.dispatchEvent(new StorageEvent('storage', { key: 'ttt_start_mode', newValue: 'human' }));
+    // In some environments (e.g., same-document), also emit our custom signal
+    window.dispatchEvent(new Event('ttt:session-change' as any));
     await flush();
     // still disabled because strategy missing
     expect(btn.disabled).toBe(true);
     try { window.localStorage.setItem('ttt_strategy', 'ai0'); } catch {}
     window.dispatchEvent(new StorageEvent('storage', { key: 'ttt_strategy', newValue: 'ai0' }));
+    window.dispatchEvent(new Event('ttt:session-change' as any));
     await flush();
     expect(btn.disabled).toBe(false);
   });
