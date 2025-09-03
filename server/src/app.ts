@@ -73,7 +73,8 @@ app.use(
         return { statusCode: res.statusCode };
       },
       err(err) {
-        return { type: (err as any)?.name, message: (err as any)?.message };
+        const e = err as unknown as { name?: string; message?: string };
+        return { type: e?.name, message: e?.message };
       },
     },
   })

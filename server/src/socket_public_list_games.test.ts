@@ -58,6 +58,9 @@ describe('public list_games', () => {
     }
     expect(Array.isArray(nowList.games)).toBe(true);
     expect(nowList.games.length).toBeGreaterThan(0);
+    // avoid unused var and assert presence of the created id
+    const ids = (nowList.games as Array<{ gameId: string }>).map((g) => g.gameId);
+    expect(ids).toContain(gameId);
 
     c1.disconnect();
     c2.disconnect();

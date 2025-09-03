@@ -183,7 +183,7 @@ export function attachSocketHandlers(io: IOServer) {
 			activeGameIds.add(gameId);
 			touchRoom(gameId);
 			ack?.(okCreateAck({ gameId, player: hostPlayer, sessionToken: token, currentPlayer: state.currentPlayer! }));
-			try { io.emit('lobby:update'); } catch {}
+			try { io.emit('lobby:update'); } catch (_e) { /* noop: broadcast best-effort */ }
       // If AI starts, trigger immediate AI opening move
       if (effectiveAiStarts) {
         (async () => {
@@ -254,8 +254,8 @@ export function attachSocketHandlers(io: IOServer) {
 					io.to(gameId).emit('room:notice', { message: 'A player joined. Game reset to head-to-head.' });
 					io.to(gameId).emit('room:mode', { h2h: true });
 				}
-			} catch {}
-			try { io.emit('lobby:update'); } catch {}
+			} catch (_e) { /* noop */ }
+			try { io.emit('lobby:update'); } catch (_e) { /* noop */ }
 		});
 
 		socket.on('leave_game', (rawPayload: unknown, ack?: Ack) => {
@@ -270,7 +270,7 @@ export function attachSocketHandlers(io: IOServer) {
 			state.playerIds.delete(socket.id);
 			state.playersBySocket.delete(socket.id);
 			ack?.(okAck());
-			try { io.emit('lobby:update'); } catch {}
+			try { io.emit('lobby:update'); } catch (_e) { /* noop */ }
 			// If room is now empty, prune it from active list
 			pruneInactiveRooms();
 		});
@@ -351,7 +351,7 @@ export function attachSocketHandlers(io: IOServer) {
 			roomIdToState.delete(gameId);
 			activeGameIds.delete(gameId);
 			ack?.(okAck());
-			try { io.emit('lobby:update'); } catch {}
+			try { io.emit('lobby:update'); } catch (_e) { /* noop */ }
 		});
 
 		// Admin: room info (membership and roles)
@@ -440,7 +440,7 @@ export function attachSocketHandlers(io: IOServer) {
 			ack?.(okAck());
 			// Emit cleared state first
 			io.to(gameId).emit('game_state', { gameId, board: state.board, currentPlayer: state.currentPlayer! });
-			try { io.emit('lobby:update'); } catch {}
+			try { io.emit('lobby:update'); } catch (_e) { /* noop */ }
 			touchRoom(gameId);
 			// If AI should start, make an immediate move (using current configured strategy)
 			try {

@@ -2030,3 +2030,89 @@
 {"level":30,"time":1756864095842,"pid":40671,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
 {"level":30,"time":1756864096274,"pid":40671,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
 {"level":30,"time":1756864096657,"pid":40671,"hostname":"Joe-MBP21.local","req":{"id":"2b881664-55ed-4a67-ac95-c11fcf4e06f3","method":"POST","url":"/logs"},"res":{"statusCode":204},"responseTime":0,"msg":"request completed POST /logs 204"}
+{"level":30,"time":1756866247163,"pid":52953,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866247292,"pid":52953,"hostname":"Joe-MBP21.local","req":{"id":"3e3a07ef-c4a5-44c6-b94a-8a7acd89330c","method":"POST","url":"/logs"},"res":{"statusCode":204},"responseTime":6,"msg":"request completed POST /logs 204"}
+{"level":30,"time":1756866247297,"pid":52953,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
+{"level":30,"time":1756866247373,"pid":52953,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866247373,"pid":52953,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
+{"level":30,"time":1756866247398,"pid":52953,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866247415,"pid":52953,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
+{"level":30,"time":1756866247434,"pid":52953,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866247451,"pid":52953,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
+{"level":30,"time":1756866247457,"pid":52953,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
+{"level":30,"time":1756866247537,"pid":52953,"hostname":"Joe-MBP21.local","payload":{"gameId":"mount-cook","board":["X",null,null,null,null,null,null,null,"O"],"currentPlayer":"X","lastMove":8},"before":{"gameId":"mount-cook","lastMove":0},"msg":"client:recv game_state"}
+{"level":30,"time":1756866247772,"pid":52953,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866248095,"pid":52953,"hostname":"Joe-MBP21.local","event":"create_game","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866248096,"pid":52953,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
+{"level":30,"time":1756866248097,"pid":52953,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
+{"level":30,"time":1756866248729,"pid":52953,"hostname":"Joe-MBP21.local","payload":{"gameId":"everest","board":["X",null,null,null,null,null,null,null,null],"currentPlayer":"O","lastMove":0},"before":{"gameId":"everest","lastMove":0},"msg":"client:recv game_state"}
+{"level":30,"time":1756866656864,"pid":57220,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866656880,"pid":57220,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
+{"level":30,"time":1756866656942,"pid":57220,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866657014,"pid":57220,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866657046,"pid":57220,"hostname":"Joe-MBP21.local","index":0,"gameId":"mont-blanc-de-courmayeur","player":"X","msg":"client:click"}
+{"level":30,"time":1756866657069,"pid":57220,"hostname":"Joe-MBP21.local","event":"make_move","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866657127,"pid":57220,"hostname":"Joe-MBP21.local","after":{"gameId":"cerro-torre","lastMove":4,"board":[null,null,null,null,"X",null,null,null,null]},"msg":"client:applied game_state"}
+{"level":30,"time":1756866657358,"pid":57220,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
+{"level":30,"time":1756866657362,"pid":57220,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866657662,"pid":57220,"hostname":"Joe-MBP21.local","after":{"gameId":"lhotse","lastMove":0,"board":["X",null,null,null,null,null,null,null,null]},"msg":"client:applied game_state"}
+{"level":30,"time":1756866663408,"pid":57220,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
+{"level":30,"time":1756866663787,"pid":57220,"hostname":"Joe-MBP21.local","payload":{"gameId":"mount-cook","board":["X",null,null,null,null,null,null,null,null],"currentPlayer":"O","lastMove":0},"before":{"gameId":"mount-cook"},"msg":"client:recv game_state"}
+{"level":30,"time":1756866674697,"pid":57490,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
+{"level":30,"time":1756866674791,"pid":57490,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
+{"level":30,"time":1756866674856,"pid":57490,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866674896,"pid":57490,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
+{"level":30,"time":1756866674898,"pid":57490,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866674904,"pid":57490,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
+{"level":30,"time":1756866674964,"pid":57490,"hostname":"Joe-MBP21.local","req":{"id":"28903a4c-21a5-4fc1-b312-aa38a55fb74c","method":"POST","url":"/logs"},"res":{"statusCode":204},"responseTime":0,"msg":"request completed POST /logs 204"}
+{"level":30,"time":1756866674967,"pid":57490,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
+{"level":30,"time":1756866675049,"pid":57490,"hostname":"Joe-MBP21.local","payload":{"gameId":"mont-everest","board":[null,null,null,null,"X",null,null,"O",null],"currentPlayer":"X","lastMove":7},"before":{"gameId":"mont-everest","lastMove":7},"msg":"client:recv game_state"}
+{"level":30,"time":1756866675273,"pid":57490,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866675327,"pid":57490,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
+{"level":30,"time":1756866675577,"pid":57490,"hostname":"Joe-MBP21.local","event":"create_game","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866675578,"pid":57490,"hostname":"Joe-MBP21.local","payload":{"gameId":"scafell-pike","board":[null,null,null,null,"X",null,null,null,null],"currentPlayer":"O","lastMove":4},"before":{"gameId":"scafell-pike","lastMove":4},"msg":"client:recv game_state"}
+{"level":30,"time":1756866675623,"pid":57490,"hostname":"Joe-MBP21.local","event":"make_move","req":{"gameId":"scafell-pike","position":0,"player":"O","nonce":"n-mf3d22sk-ud3e98947j5n"},"msg":"client:emit"}
+{"level":30,"time":1756866676073,"pid":57490,"hostname":"Joe-MBP21.local","index":0,"gameId":"mont-pelee","player":"X","msg":"client:click"}
+{"level":30,"time":1756866676089,"pid":57490,"hostname":"Joe-MBP21.local","event":"make_move","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866763582,"pid":58088,"hostname":"Joe-MBP21.local","err":"Command createIndexes requires authentication","msg":"ensureIndexes failed"}
+{"level":30,"time":1756866766171,"pid":58088,"hostname":"Joe-MBP21.local","ts":1756866766065,"msg":"client:boot"}
+{"level":30,"time":1756866766307,"pid":58088,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866766322,"pid":58088,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866766322,"pid":58088,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
+{"level":30,"time":1756866766326,"pid":58088,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
+{"level":30,"time":1756866766356,"pid":58088,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866766357,"pid":58088,"hostname":"Joe-MBP21.local","req":{"id":"66f41447-cb37-4c88-bec9-2322f3210715","method":"POST","url":"/logs"},"res":{"statusCode":204},"responseTime":0,"msg":"request completed POST /logs 204"}
+{"level":30,"time":1756866766361,"pid":58088,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866766361,"pid":58088,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866766462,"pid":58088,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866766496,"pid":58088,"hostname":"Joe-MBP21.local","after":{"gameId":"lhotse","lastMove":7,"board":["X",null,null,null,null,null,null,"O",null]},"msg":"client:applied game_state"}
+{"level":30,"time":1756866767083,"pid":58088,"hostname":"Joe-MBP21.local","event":"create_game","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866767087,"pid":58088,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
+{"level":30,"time":1756866767088,"pid":58088,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866767220,"pid":58088,"hostname":"Joe-MBP21.local","index":0,"gameId":"cerro-torre","player":"O","msg":"client:click"}
+{"level":30,"time":1756866767703,"pid":58088,"hostname":"Joe-MBP21.local","payload":{"gameId":"damavand","board":["X",null,null,null,null,"O",null,null,null],"currentPlayer":"X","lastMove":5},"before":{"gameId":"damavand","lastMove":0},"msg":"client:recv game_state"}
+{"level":30,"time":1756866767740,"pid":58088,"hostname":"Joe-MBP21.local","payload":{"gameId":"popocatepetl","board":[null,"X",null,null,null,null,null,null,null],"currentPlayer":"O","lastMove":1},"before":{"gameId":"popocatepetl","lastMove":1},"msg":"client:recv game_state"}
+{"level":30,"time":1756866767742,"pid":58088,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866849486,"pid":58684,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
+{"level":30,"time":1756866849637,"pid":58684,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
+{"level":30,"time":1756866849647,"pid":58684,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
+{"level":30,"time":1756866849657,"pid":58684,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866849676,"pid":58684,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866849688,"pid":58684,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
+{"level":30,"time":1756866849703,"pid":58684,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
+{"level":30,"time":1756866849709,"pid":58684,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
+{"level":30,"time":1756866849736,"pid":58684,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866849737,"pid":58684,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866849749,"pid":58684,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
+{"level":30,"time":1756866849750,"pid":58684,"hostname":"Joe-MBP21.local","event":"list_games","req":{},"msg":"client:emit"}
+{"level":30,"time":1756866849772,"pid":58684,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866849875,"pid":58684,"hostname":"Joe-MBP21.local","event":"make_move","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866849907,"pid":58684,"hostname":"Joe-MBP21.local","after":{"gameId":"aconcagua","lastMove":0,"board":["X",null,null,null,null,null,null,null,null]},"msg":"client:applied game_state"}
+{"level":30,"time":1756866849909,"pid":58684,"hostname":"Joe-MBP21.local","event":"make_move","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866850119,"pid":58684,"hostname":"Joe-MBP21.local","ts":1756866850108,"msg":"client:boot"}
+{"level":30,"time":1756866850136,"pid":58684,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866850439,"pid":58684,"hostname":"Joe-MBP21.local","event":"create_game","req":{"strategy":"ai0","aiStarts":true,"startMode":"ai"},"msg":"client:emit"}
+{"level":30,"time":1756866850454,"pid":58684,"hostname":"Joe-MBP21.local","event":"create_game","ok":true,"msg":"client:ack"}
+{"level":30,"time":1756866850456,"pid":58684,"hostname":"Joe-MBP21.local","after":{"gameId":"lhotse","lastMove":5,"board":[null,null,null,null,null,"X",null,null,null]},"msg":"client:applied game_state"}
+{"level":30,"time":1756866850456,"pid":58684,"hostname":"Joe-MBP21.local","after":{"gameId":"lhotse","lastMove":5,"board":[null,null,null,null,null,"X",null,null,null]},"msg":"client:applied game_state"}
+{"level":30,"time":1756866850478,"pid":58684,"hostname":"Joe-MBP21.local","event":"list_games","ok":true,"msg":"client:ack"}
