@@ -33,7 +33,7 @@ jobs:
           npm -v
 
       - name: Install dependencies (root + workspaces)
-        run: npm ci --omit=optional
+        run: npm install --no-audit --no-fund
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
