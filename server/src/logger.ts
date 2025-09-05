@@ -56,13 +56,14 @@ export const logger = pino(
     hooks:
       appConfig.LOG_SAMPLE_RATE < 1
         ? {
-            logMethod(this: pino.Logger, args: [msg: string], method: pino.LogFn, level: number) {
+            logMethod(this: pino.Logger, args: unknown[], method: pino.LogFn, level: number) {
               try {
                 if (level === 30 && Math.random() > appConfig.LOG_SAMPLE_RATE) return;
               } catch {
                 // ignore
               }
-              method.apply(this, args);
+              const invoke = method as unknown as (this: pino.Logger, ...a: unknown[]) => void;
+              invoke.apply(this, args);
             },
           }
         : undefined,
